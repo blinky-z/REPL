@@ -11,8 +11,8 @@
           | <term> / <factor>
           | <factor>
 
-<factor> ::= ( <expr> ) - произвольная формула (expr)
-          | Num            или число
+<factor> ::= ( <expr> )
+          | Num
 ```
 
 ---
