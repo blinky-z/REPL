@@ -1,28 +1,31 @@
 #include <iostream>
 #include "Lexer.h"
 
-AnalysisContainer Lexer::tokenize(char* src) {
-    while (*src != EOF) {
+AnalysisContainer Lexer::tokenize(const string& src) {
+    currentChar = src.begin();
+
+    while (*currentChar != EOF) {
         Token token;
 
-        while (*src == ' ') {
-            src++;
+        while (*currentChar == ' ') {
+            currentChar++;
         }
-        while (*src == '\n') {
+        while (*currentChar == '\n') {
             line++;
-            src++;
+            currentChar++;
         }
 
-        if ((*src >= 'a' && *src <= 'z') || (*src >= 'A' && *src <= 'Z') || (*src == '_')) {
-            token = tokenizeIdentifier(&src);
-        } else if (*src >= '0' && *src <= '9') {
-            token = tokenizeNumber(&src);
-        } else if (*src == '=') {
+        if ((*currentChar >= 'a' && *currentChar <= 'z') || (*currentChar >= 'A' && *currentChar <= 'Z') ||
+            (*currentChar == '_')) {
+            token = tokenizeIdentifier();
+        } else if (*currentChar >= '0' && *currentChar <= '9') {
+            token = tokenizeNumber();
+        } else if (*currentChar == '=') {
             token.type = data.Assign;
             token.value = "=";
-        } else if (*src == '+') {
-            if (*(src + 1) == '+') {
-                src++;
+        } else if (*currentChar == '+') {
+            if (*(currentChar + 1) == '+') {
+                currentChar++;
 
                 token.type = data.Inc;
                 token.value = "++";
@@ -30,9 +33,9 @@ AnalysisContainer Lexer::tokenize(char* src) {
                 token.type = data.Add;
                 token.value = "+";
             }
-        } else if (*src == '-') {
-            if (*(src + 1) == '-') {
-                src++;
+        } else if (*currentChar == '-') {
+            if (*(currentChar + 1) == '-') {
+                currentChar++;
 
                 token.type = data.Dec;
                 token.value = "--";
@@ -40,34 +43,34 @@ AnalysisContainer Lexer::tokenize(char* src) {
                 token.type = data.Sub;
                 token.value = "-";
             }
-        } else if (*src == '*') {
+        } else if (*currentChar == '*') {
             token.type = data.Mul;
             token.value = "*";
-        } else if (*src == '/') {
+        } else if (*currentChar == '/') {
             token.type = data.Div;
             token.value = "/";
-        } else if (*src == '%') {
+        } else if (*currentChar == '%') {
             token.type = data.Mod;
             token.value = "%";
-        } else if (*src == '(') {
+        } else if (*currentChar == '(') {
             token.type = data.ROUND_BRACKET_START;
             token.value = "(";
-        } else if (*src == ')') {
+        } else if (*currentChar == ')') {
             token.type = data.ROUND_BRACKET_END;
             token.value = ")";
-        } else if (*src == '[') {
+        } else if (*currentChar == '[') {
             token.type = data.SQUARE_BRACKET_START;
             token.value = "[";
-        } else if (*src == ']') {
+        } else if (*currentChar == ']') {
             token.type = data.SQUARE_BRACKET_END;
             token.value = "]";
-        } else if (*src == ';') {
+        } else if (*currentChar == ';') {
             token.type = data.SEMICOLON;
             token.value = ";";
         }
 
         data.AddNewToken(token);
-        src++;
+        currentChar++;
     }
 
     data.AddNewToken({data.eof, "EOF"});
@@ -75,16 +78,17 @@ AnalysisContainer Lexer::tokenize(char* src) {
     return data;
 }
 
-Token Lexer::tokenizeIdentifier(char** src) {
+Token Lexer::tokenizeIdentifier() {
     Token token;
 
     string id_name;
-    id_name += *src;
+    id_name += *currentChar;
 
-    while ((**(src + 1) >= 'a' && **(src + 1) <= 'z') || (**(src + 1) >= 'A' && **(src + 1) <= 'Z') ||
-           (**(src + 1) >= '0' && **(src + 1) <= '9') || (**(src + 1) == '_')) {
-        src++;
-        id_name += *src;
+    while ((*(currentChar + 1) >= 'a' && *(currentChar + 1) <= 'z') ||
+           (*(currentChar + 1) >= 'A' && *(currentChar + 1) <= 'Z') ||
+           (*(currentChar + 1) >= '0' && *(currentChar + 1) <= '9') || (*(currentChar + 1) == '_')) {
+        currentChar++;
+        id_name += *currentChar;
     }
 
     // объявление переменной
@@ -104,14 +108,14 @@ Token Lexer::tokenizeIdentifier(char** src) {
     return token;
 }
 
-Token Lexer::tokenizeNumber(char** src) {
+Token Lexer::tokenizeNumber() {
     Token token;
 
-    int token_val = **src - '0';
+    int token_val = *currentChar - '0';
 
-    while (*(*src + 1) >= '0' && *(*src + 1) <= '9') {
-        (*src)++;
-        token_val = token_val * 10 + **src - '0';
+    while (*(currentChar + 1) >= '0' && *(currentChar + 1) <= '9') {
+        currentChar++;
+        token_val = token_val * 10 + *currentChar - '0';
     }
 
     token.type = data.Num;

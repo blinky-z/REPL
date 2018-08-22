@@ -10,8 +10,6 @@
 #include <unordered_map>
 
 int main() {
-    char* src, * src_start;
-
     while (true) {
         string input;
         getline(cin, input);
@@ -22,20 +20,14 @@ int main() {
 
         Lexer lexer;
 
-        src = new char[input.size() + 1];
-        src_start = src;
+        input.push_back(EOF);
 
-        std::copy(input.begin(), input.end(), src);
-        src[input.size()] = EOF;
-
-        AnalysisContainer data = lexer.tokenize(src);
+        AnalysisContainer data = lexer.tokenize(input);
 
         Parser parser(data);
 
         int result = parser.parse();
 
         cout << result << endl;
-
-        delete src_start;
     }
 }

@@ -14,13 +14,15 @@ class Lexer {
 private:
     int line = 1;
 
+    std::string::const_iterator currentChar;
+
     AnalysisContainer data;
 
-    Token tokenizeIdentifier(char** src);
+    Token tokenizeIdentifier();
 
-    Token tokenizeNumber(char** src);
+    Token tokenizeNumber();
 public:
-    AnalysisContainer tokenize(char* src);
+    AnalysisContainer tokenize(const string& src);
 };
 
 #endif //BASHCOMPILER_LEXER_H
