@@ -1,13 +1,20 @@
 #ifndef REPL_ANALYSISCONTAINER_H
 #define REPL_ANALYSISCONTAINER_H
 
-#include <vector>
-#include <unordered_map>
 #include "Token.h"
 #include "Identifier.h"
+#include <vector>
+#include <unordered_map>
+#include <string>
 
 class AnalysisContainer {
 private:
+    std::vector<Token> tokens;
+
+    unsigned long currentTokenNum = 0;
+
+    std::unordered_map<std::string, Identifier> symbol_table;
+public:
     enum types {
         eof,
         Num,
@@ -31,15 +38,15 @@ private:
         Dec
     };
 
-    std::vector<Token> tokens;
+    Token GetNextToken();
 
-    std::vector<Token>::iterator currentToken;
+    void ReturnToken();
 
-    std::unordered_map<std::string, Identifier> symbol_table;
-public:
-    Token getNextToken();
+    bool IsIdExist(std::string identifierName);
 
-    void returnToken();
+    void AddNewIdentifier(std::string identifierName, const Identifier& identifier);
+
+    void AddNewToken(Token token);
 };
 
 #endif //REPL_ANALYSISCONTAINER_H
