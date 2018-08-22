@@ -21,3 +21,7 @@ void AnalysisContainer::AddNewIdentifier(std::string identifierName, const Ident
 void AnalysisContainer::AddNewToken(Token token) {
     tokens.emplace_back(token);
 }
+
+const std::vector<Token>& AnalysisContainer::GetTokens() {
+    return tokens;
+}

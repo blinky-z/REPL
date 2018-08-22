@@ -38,6 +38,8 @@ public:
         Dec
     };
 
+    const std::vector<Token>& GetTokens();
+
     Token GetNextToken();
 
     void ReturnToken();
