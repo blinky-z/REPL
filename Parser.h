@@ -3,6 +3,7 @@
 
 #include "Token.h"
 #include "Identifier.h"
+#include "AnalysisContainer.h"
 #include <iostream>
 #include <utility>
 #include <string>
@@ -17,46 +18,12 @@ private:
 
     int factor();
 
-    enum types {
-        eof,
-        Num,
-        String,
-        Keyword,
-        DeclareId,
-        DeclareFunc,
-        Id,
-        ROUND_BRACKET_START,
-        ROUND_BRACKET_END,
-        SQUARE_BRACKET_START,
-        SQUARE_BRACKET_END,
-        SEMICOLON,
-        Assign,
-        Add,
-        Sub,
-        Mul,
-        Div,
-        Mod,
-        Inc,
-        Dec
-    };
-
-    std::vector<Token> tokens;
-
-    std::vector<Token>::iterator currentToken;
-
-    std::unordered_map<std::string, Identifier> symbol_table;
-
-    Token getNextToken();
-
-    void returnToken();
-
     int parseMath();
 
+    AnalysisContainer data;
+
 public:
-    Parser(std::vector<Token> tokens_list, std::unordered_map<std::string, Identifier> symbol_table) :
-            tokens(std::move(tokens_list)), symbol_table(std::move(symbol_table)) {
-        currentToken = tokens.begin();
-    };
+    Parser(AnalysisContainer data) : data(std::move(data)) {};
 
     int parse();
 };
