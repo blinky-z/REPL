@@ -10,4 +10,8 @@ add_executable(REPL
         Lexer.cpp Lexer.h
         Parser.cpp Parser.h
         AnalysisContainer.h AnalysisContainer.cpp
+#        ------------------------
+#        tests
+#        tests/provide_catch_main.cpp
+#        tests/LexerTests.cpp
         )
