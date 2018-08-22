@@ -9,9 +9,8 @@
 #include <cstring>
 #include <unordered_map>
 
-int main(int argc, char* argv[]) {
+int main() {
     char* src, * src_start;
-    Lexer lexer;
 
     while (true) {
         string input;
@@ -21,8 +20,7 @@ int main(int argc, char* argv[]) {
             exit(EXIT_SUCCESS);
         }
 
-        unordered_map<string, Identifier> symbol_table;
-        vector<Token> tokens;
+        Lexer lexer;
 
         src = new char[input.size() + 1];
         src_start = src;
@@ -30,9 +28,9 @@ int main(int argc, char* argv[]) {
         std::copy(input.begin(), input.end(), src);
         src[input.size()] = EOF;
 
-        lexer.tokenize(src, tokens, symbol_table);
+        AnalysisContainer data = lexer.tokenize(src);
 
-        Parser parser(tokens, symbol_table);
+        Parser parser(data);
 
         int result = parser.parse();
 
