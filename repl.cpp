@@ -17,15 +17,12 @@ int main() {
         if (input == "exit") {
             exit(EXIT_SUCCESS);
         }
-
-        Lexer lexer;
-
         input.push_back(EOF);
 
+        Lexer lexer;
         AnalysisContainer data = lexer.tokenize(input);
 
         Parser parser(data);
-
         int result = parser.parse();
 
         cout << result << endl;
