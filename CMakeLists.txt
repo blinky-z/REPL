@@ -11,4 +11,5 @@ add_executable(REPL
         Lexer.cpp Lexer.h
         Parser.cpp Parser.h
         AnalysisContainer.h AnalysisContainer.cpp
+        ASTNode.h
         )
