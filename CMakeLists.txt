@@ -4,6 +4,7 @@ project(REPL)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
 
+add_subdirectory(tests)
 add_executable(REPL
         repl.cpp
         Token.h Identifier.h
@@ -11,5 +12,3 @@ add_executable(REPL
         Parser.cpp Parser.h
         AnalysisContainer.h AnalysisContainer.cpp
         )
-
-add_subdirectory(tests)
