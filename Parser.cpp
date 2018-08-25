@@ -4,7 +4,7 @@ ASTNode* Parser::expression() {
     ASTNode* tnode = term();
     ASTNode* e1node = expression1();
 
-    if (e1node->Type == NumberValue && e1node->Value == 0) {
+    if (e1node->Type == Empty) {
         return tnode;
     }
     return createNode(OperatorPlus, tnode, e1node);
@@ -37,14 +37,14 @@ ASTNode* Parser::expression1() {
         data.ReturnToken();
     }
 
-    return createNodeNumber(0);
+    return createEmptyNode();
 }
 
 ASTNode* Parser::term() {
     ASTNode* fnode = factor();
     ASTNode* t1node = term1();
 
-    if (t1node->Type == NumberValue && t1node->Value == 1) {
+    if (t1node->Type == Empty) {
         return fnode;
     }
     return createNode(OperatorMul, fnode, t1node);
