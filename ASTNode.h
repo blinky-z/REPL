@@ -8,7 +8,6 @@ enum ASTNodeType {
     OperatorMinus,
     OperatorMul,
     OperatorDiv,
-    UnaryMinus,
     NumberValue
 };
 
