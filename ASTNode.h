@@ -3,6 +3,7 @@
 
 enum ASTNodeType {
     Undefined,
+    Empty,
     OperatorPlus,
     OperatorMinus,
     OperatorMul,
@@ -13,7 +14,7 @@ enum ASTNodeType {
 
 struct ASTNode {
     ASTNodeType Type;
-    int Value;
+    double Value;
     ASTNode* Left;
     ASTNode* Right;
 
