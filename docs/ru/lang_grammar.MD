@@ -130,3 +130,28 @@ int expr() {
                                                 => <factor>
                                                   => Num (2)
 ```
+
+---
+
+## UPD 24.08.18:
+Такой рекурсивный подход с бэктрекингом немного сложен в расширении кода и построении AST дерева, поэтому было решено переделать грамматику языка
+в нелеворекурсивную (non left-recursive) грамматику. Каждая грамматика может быть переделена в non left-recursive грамматику.
+
+Итак, тогда наша грамматика будет выглядеть так:
+
+```
+<expr> ::= <term> <expr_tail>
+
+<expr_tail> ::= + <term> <expr_tail>
+              | - <term> <expr_tail>
+              | <empty>
+
+<term> ::= <factor> <term_tail>
+
+<term_tail> ::= * <factor> <term_tail>
+              | / <factor> <term_tail>
+              | <empty>
+
+<factor> ::= ( <expr> )
+           | Num
+```
