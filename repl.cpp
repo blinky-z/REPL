@@ -2,6 +2,8 @@
 #include "Parser.h"
 #include "Identifier.h"
 #include "Token.h"
+#include "ASTNode.h"
+#include "Evaluator.h"
 #include <vector>
 #include <unistd.h>
 #include <fcntl.h>
@@ -10,6 +12,8 @@
 #include <unordered_map>
 
 int main() {
+    Evaluator evaluator;
+
     while (true) {
         string input;
         getline(cin, input);
@@ -23,8 +27,11 @@ int main() {
         AnalysisContainer data = lexer.tokenize(input);
 
         Parser parser(data);
-        int result = parser.parse();
+        ASTNode* root = parser.parse();
 
+        double result = evaluator.Evaluate(root);
         cout << result << endl;
+
+        delete root;
     }
 }
