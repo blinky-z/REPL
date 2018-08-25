@@ -4,6 +4,7 @@
 #include "Token.h"
 #include "Identifier.h"
 #include "AnalysisContainer.h"
+#include "ASTNode.h"
 #include <iostream>
 #include <utility>
 #include <string>
@@ -12,20 +13,29 @@
 
 class Parser {
 private:
-    int expression(int lvalue);
+    ASTNode* createNode(ASTNodeType type, ASTNode* left, ASTNode* right);
 
-    int term(int lvalue);
+    ASTNode* createNodeNumber(int value);
 
-    int factor();
+    ASTNode* createEmptyNode();
 
-    int parseMath();
+    ASTNode* expression();
+
+    ASTNode* expression1();
+
+    ASTNode* term();
+
+    ASTNode* term1();
+
+    ASTNode* factor();
+
+    ASTNode* parseMath();
 
     AnalysisContainer data;
-
 public:
     Parser(AnalysisContainer data) : data(std::move(data)) {};
 
-    int parse();
+    ASTNode* parse();
 };
 
 
