@@ -12,6 +12,8 @@
 #include <unordered_map>
 
 int main() {
+    Lexer lexer;
+    Parser parser;
     Evaluator evaluator;
 
     while (true) {
@@ -23,11 +25,9 @@ int main() {
         }
         input.push_back(EOF);
 
-        Lexer lexer;
-        AnalysisContainer data = lexer.tokenize(input);
+        const AnalysisContainer& data = lexer.tokenize(input);
 
-        Parser parser(data);
-        ASTNode* root = parser.parse();
+        ASTNode* root = parser.parse(data);
 
         double result = evaluator.Evaluate(root);
         input.pop_back();
