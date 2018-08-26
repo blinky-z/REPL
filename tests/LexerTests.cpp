@@ -4,12 +4,13 @@
 #include "../Token.h"
 #include "../Identifier.h"
 
+Lexer LexerTestsLexer;
+
 TEST_CASE("Addition Tokenizing", "[Lexer][Math operations tokenizing]") {
     string expr = "313 + 425 + 1131";
     expr.push_back(EOF);
-
-    Lexer lexer;
-    AnalysisContainer data = lexer.tokenize(expr);
+    
+    AnalysisContainer data = LexerTestsLexer.tokenize(expr);
     const vector<Token>& tokens = data.GetTokens();
 
     vector<Token> properTokens;
@@ -33,9 +34,8 @@ TEST_CASE("Addition Tokenizing", "[Lexer][Math operations tokenizing]") {
 TEST_CASE("Subtraction Tokenizing", "[Lexer][Math operations tokenizing]") {
     string expr = "1000 - 100 - 255";
     expr.push_back(EOF);
-
-    Lexer lexer;
-    AnalysisContainer data = lexer.tokenize(expr);
+    
+    AnalysisContainer data = LexerTestsLexer.tokenize(expr);
 
     const vector<Token>& tokens = data.GetTokens();
 
@@ -61,8 +61,7 @@ TEST_CASE("Multiplication Tokenizing", "[Lexer][Math operations tokenizing]") {
     string expr = "5 * 123 * 3464";
     expr.push_back(EOF);
 
-    Lexer lexer;
-    AnalysisContainer data = lexer.tokenize(expr);
+    AnalysisContainer data = LexerTestsLexer.tokenize(expr);
 
     const vector<Token>& tokens = data.GetTokens();
 
@@ -87,9 +86,8 @@ TEST_CASE("Multiplication Tokenizing", "[Lexer][Math operations tokenizing]") {
 TEST_CASE("Division Tokenizing", "[Lexer][Math operations tokenizing]") {
     string expr = "2500 / 5 / 10";
     expr.push_back(EOF);
-
-    Lexer lexer;
-    AnalysisContainer data = lexer.tokenize(expr);
+    
+    AnalysisContainer data = LexerTestsLexer.tokenize(expr);
 
     const vector<Token>& tokens = data.GetTokens();
 
@@ -115,8 +113,7 @@ TEST_CASE("Multiple operations", "[Lexer][Math operations tokenizing]") {
     string expr = "2500 * 5 / 10 + 1000";
     expr.push_back(EOF);
 
-    Lexer lexer;
-    AnalysisContainer data = lexer.tokenize(expr);
+    AnalysisContainer data = LexerTestsLexer.tokenize(expr);
 
     const vector<Token>& tokens = data.GetTokens();
 
@@ -144,8 +141,7 @@ TEST_CASE("Operations with using of round brackets", "[Lexer][Math operations to
     string expr = "2500 * 5 / (1500 + 1000)";
     expr.push_back(EOF);
 
-    Lexer lexer;
-    AnalysisContainer data = lexer.tokenize(expr);
+    AnalysisContainer data = LexerTestsLexer.tokenize(expr);
 
     const vector<Token>& tokens = data.GetTokens();
 
