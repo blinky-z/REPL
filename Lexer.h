@@ -12,15 +12,18 @@ using namespace std;
 
 class Lexer {
 private:
-    int line = 1;
+    int line;
 
     std::string::const_iterator currentChar;
 
     AnalysisContainer data;
 
+    void initLexer(const string& src);
+
     Token tokenizeIdentifier();
 
     Token tokenizeNumber();
+
 public:
     AnalysisContainer tokenize(const string& src);
 };

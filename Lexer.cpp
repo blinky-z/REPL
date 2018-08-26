@@ -2,7 +2,7 @@
 #include "Lexer.h"
 
 AnalysisContainer Lexer::tokenize(const string& src) {
-    currentChar = src.begin();
+    initLexer(src);
 
     while (*currentChar != EOF) {
         Token token;
@@ -72,7 +72,6 @@ AnalysisContainer Lexer::tokenize(const string& src) {
         data.AddNewToken(token);
         currentChar++;
     }
-
     data.AddNewToken({data.eof, "EOF"});
 
     return data;
@@ -122,4 +121,10 @@ Token Lexer::tokenizeNumber() {
     token.value = to_string(token_val);
 
     return token;
+}
+
+void Lexer::initLexer(const string& src) {
+    line = 1;
+    currentChar = src.begin();
+    data.resetData();
 }
