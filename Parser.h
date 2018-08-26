@@ -17,15 +17,21 @@ private:
 
     ASTNode* createNodeNumber(int value);
 
+    ASTNode* createLeafMinusOpNode();
+
+    ASTNode* createLeafDivOpNode();
+
     ASTNode* createEmptyNode();
+
+    int getNumTokenValue(const Token& numToken);
 
     ASTNode* expression();
 
-    ASTNode* expression1();
+    ASTNode* expressionTail();
 
     ASTNode* term();
 
-    ASTNode* term1();
+    ASTNode* termTail();
 
     ASTNode* factor();
 

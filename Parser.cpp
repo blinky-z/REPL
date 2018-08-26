@@ -1,38 +1,37 @@
 #include "Parser.h"
 
 ASTNode* Parser::expression() {
-    ASTNode* tnode = term();
-    ASTNode* e1node = expression1();
+    ASTNode* termNode = term();
+    ASTNode* expressionTailNode = expressionTail();
 
-    if (e1node->Type == Empty) {
-        return tnode;
+    if (expressionTailNode->Type == Empty) {
+        return termNode;
     }
-    return createNode(OperatorPlus, tnode, e1node);
+    return createNode(OperatorPlus, termNode, expressionTailNode);
 }
 
-ASTNode* Parser::expression1() {
-    ASTNode* tnode;
-    ASTNode* e1node;
+ASTNode* Parser::expressionTail() {
+    ASTNode* termNode;
+    ASTNode* expressionTailNode;
 
     const Token& token = data.GetNextToken();
 
     if (token.type == data.Add) {
-        tnode = term();
-        e1node = expression1();
+        termNode = term();
+        expressionTailNode = expressionTail();
 
-        if (e1node->Type == Empty) {
-            return tnode;
+        if (expressionTailNode->Type == Empty) {
+            return termNode;
         }
-        return createNode(OperatorPlus, e1node, tnode);
+        return createNode(OperatorPlus, expressionTailNode, termNode);
     } else if (token.type == data.Sub) {
-        tnode = term();
-        e1node = expression1();
+        termNode = term();
+        expressionTailNode = expressionTail();
 
-        if (e1node->Type == Empty) {
-            tnode->Value = tnode->Value * -1;
-            return tnode;
+        if (expressionTailNode->Type == Empty) {
+            return createNode(OperatorMinus, createLeafMinusOpNode(), termNode);
         }
-        return createNode(OperatorMinus, e1node, tnode);
+        return createNode(OperatorMinus, expressionTailNode, termNode);
     } else {
         data.ReturnToken();
     }
@@ -41,38 +40,37 @@ ASTNode* Parser::expression1() {
 }
 
 ASTNode* Parser::term() {
-    ASTNode* fnode = factor();
-    ASTNode* t1node = term1();
+    ASTNode* factorNode = factor();
+    ASTNode* termTailNode = termTail();
 
-    if (t1node->Type == Empty) {
-        return fnode;
+    if (termTailNode->Type == Empty) {
+        return factorNode;
     }
-    return createNode(OperatorMul, fnode, t1node);
+    return createNode(OperatorMul, factorNode, termTailNode);
 }
 
-ASTNode* Parser::term1() {
-    ASTNode* fnode;
-    ASTNode* t1node;
+ASTNode* Parser::termTail() {
+    ASTNode* factorNode;
+    ASTNode* termTailNode;
 
     const Token& token = data.GetNextToken();
 
     if (token.type == data.Mul) {
-        fnode = factor();
-        t1node = term1();
+        factorNode = factor();
+        termTailNode = termTail();
 
-        if (t1node->Type == Empty) {
-            return fnode;
+        if (termTailNode->Type == Empty) {
+            return factorNode;
         }
-        return createNode(OperatorMul, t1node, fnode);
+        return createNode(OperatorMul, termTailNode, factorNode);
     } else if (token.type == data.Div) {
-        fnode = factor();
-        t1node = term1();
+        factorNode = factor();
+        termTailNode = termTail();
 
-        if (t1node->Type == Empty) {
-            fnode->Value = 1 / fnode->Value;
-            return fnode;
+        if (termTailNode->Type == Empty) {
+            return createNode(OperatorDiv, createLeafDivOpNode(), factorNode);
         }
-        return createNode(OperatorDiv, t1node, fnode);
+        return createNode(OperatorDiv, termTailNode, factorNode);
     } else {
         data.ReturnToken();
     }
@@ -84,7 +82,7 @@ ASTNode* Parser::factor() {
     const Token& token = data.GetNextToken();
 
     if (token.type == data.Num) {
-        int value = std::stoi(token.value);
+        int value = getNumTokenValue(token);
 
         return createNodeNumber(value);
     } else if (token.type == data.ROUND_BRACKET_START) {
@@ -102,15 +100,11 @@ ASTNode* Parser::factor() {
     }
 }
 
-
 ASTNode* Parser::parseMath() {
     return expression();
 }
 
 ASTNode* Parser::parse() {
-    // нужно будет определять по контексту какая операция
-    // пока будут только математические формулы
-
     return parseMath();
 }
 
@@ -136,4 +130,24 @@ ASTNode* Parser::createEmptyNode() {
     node->Type = Empty;
 
     return node;
+}
+
+ASTNode* Parser::createLeafMinusOpNode() {
+    ASTNode* leafNode = new ASTNode;
+    leafNode->Type = NumberValue;
+    leafNode->Value = 0;
+
+    return leafNode;
+}
+
+ASTNode* Parser::createLeafDivOpNode() {
+    ASTNode* leafNode = new ASTNode;
+    leafNode->Type = NumberValue;
+    leafNode->Value = 1;
+
+    return leafNode;
+}
+
+int Parser::getNumTokenValue(const Token& numToken) {
+    return std::stoi(numToken.value);
 }
