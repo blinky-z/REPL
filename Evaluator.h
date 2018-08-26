@@ -10,5 +10,4 @@ public:
     double Evaluate(ASTNode* root);
 };
 
-
 #endif //REPL_EVALUATOR_H
