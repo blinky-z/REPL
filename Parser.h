@@ -39,10 +39,7 @@ private:
 
     AnalysisContainer data;
 public:
-    Parser(AnalysisContainer data) : data(std::move(data)) {};
-
-    ASTNode* parse();
+    ASTNode* parse(const AnalysisContainer& tokenizingStepData);
 };
-
 
 #endif //BASHCOMPILER_PARSER_H

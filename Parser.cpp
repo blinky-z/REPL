@@ -104,7 +104,9 @@ ASTNode* Parser::parseMath() {
     return expression();
 }
 
-ASTNode* Parser::parse() {
+ASTNode* Parser::parse(const AnalysisContainer& tokenizingStepData) {
+    data = tokenizingStepData;
+
     return parseMath();
 }
 
