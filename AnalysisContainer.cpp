@@ -25,3 +25,9 @@ void AnalysisContainer::AddNewToken(Token token) {
 const std::vector<Token>& AnalysisContainer::GetTokens() {
     return tokens;
 }
+
+void AnalysisContainer::resetData() {
+    tokens.clear();
+    currentTokenNum = 0;
+    symbol_table.clear();
+}

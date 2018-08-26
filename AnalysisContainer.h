@@ -49,6 +49,8 @@ public:
     void AddNewIdentifier(std::string identifierName, const Identifier& identifier);
 
     void AddNewToken(Token token);
+
+    void resetData();
 };
 
 #endif //REPL_ANALYSISCONTAINER_H
