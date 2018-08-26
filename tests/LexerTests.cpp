@@ -4,7 +4,7 @@
 #include "../Token.h"
 #include "../Identifier.h"
 
-TEST_CASE("Addition", "[Lexer][Math operations tokenizing]") {
+TEST_CASE("Addition Tokenizing", "[Lexer][Math operations tokenizing]") {
     string expr = "313 + 425 + 1131";
     expr.push_back(EOF);
 
@@ -30,7 +30,7 @@ TEST_CASE("Addition", "[Lexer][Math operations tokenizing]") {
     }
 }
 
-TEST_CASE("Subtraction", "[Lexer][Math operations tokenizing]") {
+TEST_CASE("Subtraction Tokenizing", "[Lexer][Math operations tokenizing]") {
     string expr = "1000 - 100 - 255";
     expr.push_back(EOF);
 
@@ -57,7 +57,7 @@ TEST_CASE("Subtraction", "[Lexer][Math operations tokenizing]") {
     }
 }
 
-TEST_CASE("Multiplication", "[Lexer][Math operations tokenizing]") {
+TEST_CASE("Multiplication Tokenizing", "[Lexer][Math operations tokenizing]") {
     string expr = "5 * 123 * 3464";
     expr.push_back(EOF);
 
@@ -84,7 +84,7 @@ TEST_CASE("Multiplication", "[Lexer][Math operations tokenizing]") {
     }
 }
 
-TEST_CASE("Division", "[Lexer][Math operations tokenizing]") {
+TEST_CASE("Division Tokenizing", "[Lexer][Math operations tokenizing]") {
     string expr = "2500 / 5 / 10";
     expr.push_back(EOF);
 
