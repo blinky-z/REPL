@@ -30,7 +30,8 @@ int main() {
         ASTNode* root = parser.parse();
 
         double result = evaluator.Evaluate(root);
-        cout << result << endl;
+        input.pop_back();
+        cout << input << " = " << result << endl;
 
         delete root;
     }
