@@ -17,10 +17,6 @@ private:
 
     ASTNode* createNodeNumber(int value);
 
-    ASTNode* createLeafMinusOpNode();
-
-    ASTNode* createLeafDivOpNode();
-
     ASTNode* createEmptyNode();
 
     int getNumTokenValue(const Token& numToken);

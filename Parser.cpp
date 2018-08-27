@@ -29,7 +29,11 @@ ASTNode* Parser::expressionTail() {
         expressionTailNode = expressionTail();
 
         if (expressionTailNode->Type == Empty) {
-            return createNode(OperatorMinus, createLeafMinusOpNode(), termNode);
+            ASTNode* leafNode = new ASTNode;
+            leafNode->Type = NumberValue;
+            leafNode->Value = 0;
+            
+            return createNode(OperatorMinus, leafNode, termNode);
         }
         return createNode(OperatorMinus, expressionTailNode, termNode);
     } else {
@@ -68,7 +72,11 @@ ASTNode* Parser::termTail() {
         termTailNode = termTail();
 
         if (termTailNode->Type == Empty) {
-            return createNode(OperatorDiv, createLeafDivOpNode(), factorNode);
+            ASTNode* leafNode = new ASTNode;
+            leafNode->Type = NumberValue;
+            leafNode->Value = 1;
+
+            return createNode(OperatorDiv, leafNode, factorNode);
         }
         return createNode(OperatorDiv, termTailNode, factorNode);
     } else {
@@ -132,22 +140,6 @@ ASTNode* Parser::createEmptyNode() {
     node->Type = Empty;
 
     return node;
-}
-
-ASTNode* Parser::createLeafMinusOpNode() {
-    ASTNode* leafNode = new ASTNode;
-    leafNode->Type = NumberValue;
-    leafNode->Value = 0;
-
-    return leafNode;
-}
-
-ASTNode* Parser::createLeafDivOpNode() {
-    ASTNode* leafNode = new ASTNode;
-    leafNode->Type = NumberValue;
-    leafNode->Value = 1;
-
-    return leafNode;
 }
 
 int Parser::getNumTokenValue(const Token& numToken) {
