@@ -16,7 +16,7 @@ ASTNode* Parser::expressionTail() {
 
     const Token& token = data.GetNextToken();
 
-    if (token.type == data.Add) {
+    if (token.Type == data.Add) {
         termNode = term();
         expressionTailNode = expressionTail();
 
@@ -24,7 +24,7 @@ ASTNode* Parser::expressionTail() {
             return termNode;
         }
         return createNode(OperatorPlus, expressionTailNode, termNode);
-    } else if (token.type == data.Sub) {
+    } else if (token.Type == data.Sub) {
         termNode = term();
         expressionTailNode = expressionTail();
 
@@ -55,7 +55,7 @@ ASTNode* Parser::termTail() {
 
     const Token& token = data.GetNextToken();
 
-    if (token.type == data.Mul) {
+    if (token.Type == data.Mul) {
         factorNode = factor();
         termTailNode = termTail();
 
@@ -63,7 +63,7 @@ ASTNode* Parser::termTail() {
             return factorNode;
         }
         return createNode(OperatorMul, termTailNode, factorNode);
-    } else if (token.type == data.Div) {
+    } else if (token.Type == data.Div) {
         factorNode = factor();
         termTailNode = termTail();
 
@@ -81,14 +81,14 @@ ASTNode* Parser::termTail() {
 ASTNode* Parser::factor() {
     const Token& token = data.GetNextToken();
 
-    if (token.type == data.Num) {
+    if (token.Type == data.Num) {
         int value = getNumTokenValue(token);
 
         return createNodeNumber(value);
-    } else if (token.type == data.ROUND_BRACKET_START) {
+    } else if (token.Type == data.ROUND_BRACKET_START) {
         ASTNode* result = expression();
 
-        if (data.GetNextToken().type == data.ROUND_BRACKET_END) {
+        if (data.GetNextToken().Type == data.ROUND_BRACKET_END) {
             return result;
         } else {
             std::cerr << "Invalid syntax" << std::endl;
@@ -151,5 +151,5 @@ ASTNode* Parser::createLeafDivOpNode() {
 }
 
 int Parser::getNumTokenValue(const Token& numToken) {
-    return std::stoi(numToken.value);
+    return std::stoi(numToken.Value);
 }

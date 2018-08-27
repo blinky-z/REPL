@@ -4,8 +4,8 @@
 #include <string>
 
 struct Token {
-    int type;
-    std::string value;
+    int Type;
+    std::string Value;
 };
 
 #endif //BASHCOMPILER_TOKEN_H

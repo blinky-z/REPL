@@ -13,7 +13,7 @@ private:
 
     unsigned long currentTokenNum = 0;
 
-    std::unordered_map<std::string, Identifier> symbol_table;
+    std::unordered_map<std::string, Identifier> symbolTable;
 public:
     enum types {
         eof,
@@ -50,7 +50,7 @@ public:
 
     void AddNewToken(Token token);
 
-    void resetData();
+    void ResetData();
 };
 
 #endif //REPL_ANALYSISCONTAINER_H

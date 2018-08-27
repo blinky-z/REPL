@@ -8,8 +8,6 @@
 #include <string>
 #include <unordered_map>
 
-using namespace std;
-
 class Lexer {
 private:
     int line;
@@ -18,14 +16,14 @@ private:
 
     AnalysisContainer data;
 
-    void initLexer(const string& src);
+    void initLexer(const std::string& src);
 
     Token tokenizeIdentifier();
 
     Token tokenizeNumber();
 
 public:
-    AnalysisContainer tokenize(const string& src);
+    AnalysisContainer tokenize(const std::string& src);
 };
 
 #endif //BASHCOMPILER_LEXER_H

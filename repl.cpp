@@ -17,8 +17,8 @@ int main() {
     Evaluator evaluator;
 
     while (true) {
-        string input;
-        getline(cin, input);
+        std::string input;
+        getline(std::cin, input);
 
         if (input == "exit") {
             exit(EXIT_SUCCESS);
@@ -31,7 +31,7 @@ int main() {
 
         double result = evaluator.Evaluate(root);
         input.pop_back();
-        cout << input << " = " << result << endl;
+        std::cout << input << " = " << result << std::endl;
 
         delete root;
     }

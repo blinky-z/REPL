@@ -4,9 +4,9 @@
 #include <string>
 
 struct Identifier {
-    int type; // тип контента (string, int в bash)
-    std::string valueString; // в bash есть только int и string
-    int valueInt;
+    int Type; // тип контента (string, int в bash)
+    std::string StringValue; // в bash есть только int и string
+    double NumValue;
 };
 
 #endif //BASHCOMPILER_IDENTIFIER_H

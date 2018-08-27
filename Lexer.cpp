@@ -1,7 +1,7 @@
 #include <iostream>
 #include "Lexer.h"
 
-AnalysisContainer Lexer::tokenize(const string& src) {
+AnalysisContainer Lexer::tokenize(const std::string& src) {
     initLexer(src);
 
     while (*currentChar != EOF) {
@@ -21,52 +21,52 @@ AnalysisContainer Lexer::tokenize(const string& src) {
         } else if (*currentChar >= '0' && *currentChar <= '9') {
             token = tokenizeNumber();
         } else if (*currentChar == '=') {
-            token.type = data.Assign;
-            token.value = "=";
+            token.Type = data.Assign;
+            token.Value = "=";
         } else if (*currentChar == '+') {
             if (*(currentChar + 1) == '+') {
                 currentChar++;
 
-                token.type = data.Inc;
-                token.value = "++";
+                token.Type = data.Inc;
+                token.Value = "++";
             } else {
-                token.type = data.Add;
-                token.value = "+";
+                token.Type = data.Add;
+                token.Value = "+";
             }
         } else if (*currentChar == '-') {
             if (*(currentChar + 1) == '-') {
                 currentChar++;
 
-                token.type = data.Dec;
-                token.value = "--";
+                token.Type = data.Dec;
+                token.Value = "--";
             } else {
-                token.type = data.Sub;
-                token.value = "-";
+                token.Type = data.Sub;
+                token.Value = "-";
             }
         } else if (*currentChar == '*') {
-            token.type = data.Mul;
-            token.value = "*";
+            token.Type = data.Mul;
+            token.Value = "*";
         } else if (*currentChar == '/') {
-            token.type = data.Div;
-            token.value = "/";
+            token.Type = data.Div;
+            token.Value = "/";
         } else if (*currentChar == '%') {
-            token.type = data.Mod;
-            token.value = "%";
+            token.Type = data.Mod;
+            token.Value = "%";
         } else if (*currentChar == '(') {
-            token.type = data.ROUND_BRACKET_START;
-            token.value = "(";
+            token.Type = data.ROUND_BRACKET_START;
+            token.Value = "(";
         } else if (*currentChar == ')') {
-            token.type = data.ROUND_BRACKET_END;
-            token.value = ")";
+            token.Type = data.ROUND_BRACKET_END;
+            token.Value = ")";
         } else if (*currentChar == '[') {
-            token.type = data.SQUARE_BRACKET_START;
-            token.value = "[";
+            token.Type = data.SQUARE_BRACKET_START;
+            token.Value = "[";
         } else if (*currentChar == ']') {
-            token.type = data.SQUARE_BRACKET_END;
-            token.value = "]";
+            token.Type = data.SQUARE_BRACKET_END;
+            token.Value = "]";
         } else if (*currentChar == ';') {
-            token.type = data.SEMICOLON;
-            token.value = ";";
+            token.Type = data.SEMICOLON;
+            token.Value = ";";
         }
 
         data.AddNewToken(token);
@@ -80,7 +80,7 @@ AnalysisContainer Lexer::tokenize(const string& src) {
 Token Lexer::tokenizeIdentifier() {
     Token token;
 
-    string id_name;
+    std::string id_name;
     id_name += *currentChar;
 
     while ((*(currentChar + 1) >= 'a' && *(currentChar + 1) <= 'z') ||
@@ -92,11 +92,11 @@ Token Lexer::tokenizeIdentifier() {
 
     // объявление переменной
     if (id_name == "var") {
-        token.type = data.DeclareId;
-        token.value = "var";
+        token.Type = data.DeclareId;
+        token.Value = "var";
     } else {
-        token.type = data.Id;
-        token.value = id_name;
+        token.Type = data.Id;
+        token.Value = id_name;
 
         // если такого Identifier в таблице символов ещё нет, внести данные о нем
         if (!data.IsIdExist(id_name)) {
@@ -117,14 +117,14 @@ Token Lexer::tokenizeNumber() {
         token_val = token_val * 10 + *currentChar - '0';
     }
 
-    token.type = data.Num;
-    token.value = to_string(token_val);
+    token.Type = data.Num;
+    token.Value = std::to_string(token_val);
 
     return token;
 }
 
-void Lexer::initLexer(const string& src) {
+void Lexer::initLexer(const std::string& src) {
     line = 1;
     currentChar = src.begin();
-    data.resetData();
+    data.ResetData();
 }

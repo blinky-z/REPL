@@ -7,13 +7,13 @@
 Lexer LexerTestsLexer;
 
 TEST_CASE("Addition Tokenizing", "[Lexer][Math operations tokenizing]") {
-    string expr = "313 + 425 + 1131";
+    std::string expr = "313 + 425 + 1131";
     expr.push_back(EOF);
     
     AnalysisContainer data = LexerTestsLexer.tokenize(expr);
-    const vector<Token>& tokens = data.GetTokens();
+    const std::vector<Token>& tokens = data.GetTokens();
 
-    vector<Token> properTokens;
+    std::vector<Token> properTokens;
     properTokens.emplace_back(Token{data.Num, "313"});
     properTokens.emplace_back(Token{data.Add, "+"});
     properTokens.emplace_back(Token{data.Num, "425"});
@@ -25,21 +25,21 @@ TEST_CASE("Addition Tokenizing", "[Lexer][Math operations tokenizing]") {
     if (tokens.size() == properTokens.size()) {
         unsigned long currentTokenNum = 0;
         for (; currentTokenNum < tokens.size(); currentTokenNum++) {
-            REQUIRE(tokens[currentTokenNum].type == properTokens[currentTokenNum].type);
-            REQUIRE(tokens[currentTokenNum].value == properTokens[currentTokenNum].value);
+            REQUIRE(tokens[currentTokenNum].Type == properTokens[currentTokenNum].Type);
+            REQUIRE(tokens[currentTokenNum].Value == properTokens[currentTokenNum].Value);
         }
     }
 }
 
 TEST_CASE("Subtraction Tokenizing", "[Lexer][Math operations tokenizing]") {
-    string expr = "1000 - 100 - 255";
+    std::string expr = "1000 - 100 - 255";
     expr.push_back(EOF);
     
     AnalysisContainer data = LexerTestsLexer.tokenize(expr);
 
-    const vector<Token>& tokens = data.GetTokens();
+    const std::vector<Token>& tokens = data.GetTokens();
 
-    vector<Token> properTokens;
+    std::vector<Token> properTokens;
     properTokens.emplace_back(Token{data.Num, "1000"});
     properTokens.emplace_back(Token{data.Sub, "-"});
     properTokens.emplace_back(Token{data.Num, "100"});
@@ -51,21 +51,21 @@ TEST_CASE("Subtraction Tokenizing", "[Lexer][Math operations tokenizing]") {
     if (tokens.size() == properTokens.size()) {
         unsigned long currentTokenNum = 0;
         for (; currentTokenNum < tokens.size(); currentTokenNum++) {
-            REQUIRE(tokens[currentTokenNum].type == properTokens[currentTokenNum].type);
-            REQUIRE(tokens[currentTokenNum].value == properTokens[currentTokenNum].value);
+            REQUIRE(tokens[currentTokenNum].Type == properTokens[currentTokenNum].Type);
+            REQUIRE(tokens[currentTokenNum].Value == properTokens[currentTokenNum].Value);
         }
     }
 }
 
 TEST_CASE("Multiplication Tokenizing", "[Lexer][Math operations tokenizing]") {
-    string expr = "5 * 123 * 3464";
+    std::string expr = "5 * 123 * 3464";
     expr.push_back(EOF);
 
     AnalysisContainer data = LexerTestsLexer.tokenize(expr);
 
-    const vector<Token>& tokens = data.GetTokens();
+    const std::vector<Token>& tokens = data.GetTokens();
 
-    vector<Token> properTokens;
+    std::vector<Token> properTokens;
     properTokens.emplace_back(Token{data.Num, "5"});
     properTokens.emplace_back(Token{data.Mul, "*"});
     properTokens.emplace_back(Token{data.Num, "123"});
@@ -77,21 +77,21 @@ TEST_CASE("Multiplication Tokenizing", "[Lexer][Math operations tokenizing]") {
     if (tokens.size() == properTokens.size()) {
         unsigned long currentTokenNum = 0;
         for (; currentTokenNum < tokens.size(); currentTokenNum++) {
-            REQUIRE(tokens[currentTokenNum].type == properTokens[currentTokenNum].type);
-            REQUIRE(tokens[currentTokenNum].value == properTokens[currentTokenNum].value);
+            REQUIRE(tokens[currentTokenNum].Type == properTokens[currentTokenNum].Type);
+            REQUIRE(tokens[currentTokenNum].Value == properTokens[currentTokenNum].Value);
         }
     }
 }
 
 TEST_CASE("Division Tokenizing", "[Lexer][Math operations tokenizing]") {
-    string expr = "2500 / 5 / 10";
+    std::string expr = "2500 / 5 / 10";
     expr.push_back(EOF);
     
     AnalysisContainer data = LexerTestsLexer.tokenize(expr);
 
-    const vector<Token>& tokens = data.GetTokens();
+    const std::vector<Token>& tokens = data.GetTokens();
 
-    vector<Token> properTokens;
+    std::vector<Token> properTokens;
     properTokens.emplace_back(Token{data.Num, "2500"});
     properTokens.emplace_back(Token{data.Div, "/"});
     properTokens.emplace_back(Token{data.Num, "5"});
@@ -103,21 +103,21 @@ TEST_CASE("Division Tokenizing", "[Lexer][Math operations tokenizing]") {
     if (tokens.size() == properTokens.size()) {
         unsigned long currentTokenNum = 0;
         for (; currentTokenNum < tokens.size(); currentTokenNum++) {
-            REQUIRE(tokens[currentTokenNum].type == properTokens[currentTokenNum].type);
-            REQUIRE(tokens[currentTokenNum].value == properTokens[currentTokenNum].value);
+            REQUIRE(tokens[currentTokenNum].Type == properTokens[currentTokenNum].Type);
+            REQUIRE(tokens[currentTokenNum].Value == properTokens[currentTokenNum].Value);
         }
     }
 }
 
 TEST_CASE("Multiple operations", "[Lexer][Math operations tokenizing]") {
-    string expr = "2500 * 5 / 10 + 1000";
+    std::string expr = "2500 * 5 / 10 + 1000";
     expr.push_back(EOF);
 
     AnalysisContainer data = LexerTestsLexer.tokenize(expr);
 
-    const vector<Token>& tokens = data.GetTokens();
+    const std::vector<Token>& tokens = data.GetTokens();
 
-    vector<Token> properTokens;
+    std::vector<Token> properTokens;
     properTokens.emplace_back(Token{data.Num, "2500"});
     properTokens.emplace_back(Token{data.Mul, "*"});
     properTokens.emplace_back(Token{data.Num, "5"});
@@ -131,21 +131,21 @@ TEST_CASE("Multiple operations", "[Lexer][Math operations tokenizing]") {
     if (tokens.size() == properTokens.size()) {
         unsigned long currentTokenNum = 0;
         for (; currentTokenNum < tokens.size(); currentTokenNum++) {
-            REQUIRE(tokens[currentTokenNum].type == properTokens[currentTokenNum].type);
-            REQUIRE(tokens[currentTokenNum].value == properTokens[currentTokenNum].value);
+            REQUIRE(tokens[currentTokenNum].Type == properTokens[currentTokenNum].Type);
+            REQUIRE(tokens[currentTokenNum].Value == properTokens[currentTokenNum].Value);
         }
     }
 }
 
 TEST_CASE("Operations with using of round brackets", "[Lexer][Math operations tokenizing]") {
-    string expr = "2500 * 5 / (1500 + 1000)";
+    std::string expr = "2500 * 5 / (1500 + 1000)";
     expr.push_back(EOF);
 
     AnalysisContainer data = LexerTestsLexer.tokenize(expr);
 
-    const vector<Token>& tokens = data.GetTokens();
+    const std::vector<Token>& tokens = data.GetTokens();
 
-    vector<Token> properTokens;
+    std::vector<Token> properTokens;
     properTokens.emplace_back(Token{data.Num, "2500"});
     properTokens.emplace_back(Token{data.Mul, "*"});
     properTokens.emplace_back(Token{data.Num, "5"});
@@ -161,8 +161,8 @@ TEST_CASE("Operations with using of round brackets", "[Lexer][Math operations to
     if (tokens.size() == properTokens.size()) {
         unsigned long currentTokenNum = 0;
         for (; currentTokenNum < tokens.size(); currentTokenNum++) {
-            REQUIRE(tokens[currentTokenNum].type == properTokens[currentTokenNum].type);
-            REQUIRE(tokens[currentTokenNum].value == properTokens[currentTokenNum].value);
+            REQUIRE(tokens[currentTokenNum].Type == properTokens[currentTokenNum].Type);
+            REQUIRE(tokens[currentTokenNum].Value == properTokens[currentTokenNum].Value);
         }
     }
 }

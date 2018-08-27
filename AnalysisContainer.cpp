@@ -11,11 +11,11 @@ void AnalysisContainer::ReturnToken() {
 }
 
 bool AnalysisContainer::IsIdExist(std::string identifierName) {
-    return symbol_table.find(identifierName) != symbol_table.end();
+    return symbolTable.find(identifierName) != symbolTable.end();
 }
 
 void AnalysisContainer::AddNewIdentifier(std::string identifierName, const Identifier& identifier) {
-    symbol_table.emplace(identifierName, identifier);
+    symbolTable.emplace(identifierName, identifier);
 }
 
 void AnalysisContainer::AddNewToken(Token token) {
@@ -26,8 +26,8 @@ const std::vector<Token>& AnalysisContainer::GetTokens() {
     return tokens;
 }
 
-void AnalysisContainer::resetData() {
+void AnalysisContainer::ResetData() {
     tokens.clear();
     currentTokenNum = 0;
-    symbol_table.clear();
+    symbolTable.clear();
 }

@@ -13,7 +13,7 @@ Parser EvaluatorTestsParser;
 Evaluator EvaluatorTestsEvaluator;
 
 TEST_CASE("Addition Evaluation", "[Evaluator][Math operations evaluating]") {
-    string expr = "200 + 2 + 4 + 5";
+    std::string expr = "200 + 2 + 4 + 5";
     expr.push_back(EOF);
     
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(expr);
@@ -28,7 +28,7 @@ TEST_CASE("Addition Evaluation", "[Evaluator][Math operations evaluating]") {
 }
 
 TEST_CASE("Subtraction Evaluation", "[Evaluator][Math operations evaluating]") {
-    string expr = "200 - 2 - 4 - 5";
+    std::string expr = "200 - 2 - 4 - 5";
     expr.push_back(EOF);
     
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(expr);
@@ -43,7 +43,7 @@ TEST_CASE("Subtraction Evaluation", "[Evaluator][Math operations evaluating]") {
 }
 
 TEST_CASE("Multiplication Evaluation", "[Evaluator][Math operations evaluating]") {
-    string expr = "200 * 2 * 4 * 5";
+    std::string expr = "200 * 2 * 4 * 5";
     expr.push_back(EOF);
 
     
@@ -59,7 +59,7 @@ TEST_CASE("Multiplication Evaluation", "[Evaluator][Math operations evaluating]"
 }
 
 TEST_CASE("Division Evaluation", "[Evaluator][Math operations evaluating]") {
-    string expr = "200 / 2 / 4 / 5";
+    std::string expr = "200 / 2 / 4 / 5";
     expr.push_back(EOF);
 
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(expr);
@@ -74,7 +74,7 @@ TEST_CASE("Division Evaluation", "[Evaluator][Math operations evaluating]") {
 }
 
 TEST_CASE("Multiplication with Sum Parentheses Evaluation", "[Evaluator][Math operations evaluating]") {
-    string expr = "(200 + 2) * (4 + 5)";
+    std::string expr = "(200 + 2) * (4 + 5)";
     expr.push_back(EOF);
 
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(expr);
@@ -89,7 +89,7 @@ TEST_CASE("Multiplication with Sum Parentheses Evaluation", "[Evaluator][Math op
 }
 
 TEST_CASE("Multiplication with Difference Parentheses Evaluation", "[Evaluator][Math operations evaluating]") {
-    string expr = "(200 - 2) * (4 - 5)";
+    std::string expr = "(200 - 2) * (4 - 5)";
     expr.push_back(EOF);
 
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(expr);
@@ -104,7 +104,7 @@ TEST_CASE("Multiplication with Difference Parentheses Evaluation", "[Evaluator][
 }
 
 TEST_CASE("Division with Sum Parentheses Evaluation", "[Evaluator][Math operations evaluating]") {
-    string expr = "(200 + 2) / (4 + 5)";
+    std::string expr = "(200 + 2) / (4 + 5)";
     expr.push_back(EOF);
     
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(expr);
@@ -119,7 +119,7 @@ TEST_CASE("Division with Sum Parentheses Evaluation", "[Evaluator][Math operatio
 }
 
 TEST_CASE("Division with Difference Parentheses Evaluation", "[Evaluator][Math operations evaluating]") {
-    string expr = "(200 - 2) / (4 - 5)";
+    std::string expr = "(200 - 2) / (4 - 5)";
     expr.push_back(EOF);
 
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(expr);
@@ -134,7 +134,7 @@ TEST_CASE("Division with Difference Parentheses Evaluation", "[Evaluator][Math o
 }
 
 TEST_CASE("Multiple operations: Sum, Mul, Sub", "[Evaluator][Math operations evaluating]") {
-    string expr = "200 + 2 * 4 - 5";
+    std::string expr = "200 + 2 * 4 - 5";
     expr.push_back(EOF);
     
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(expr);
@@ -149,7 +149,7 @@ TEST_CASE("Multiple operations: Sum, Mul, Sub", "[Evaluator][Math operations eva
 }
 
 TEST_CASE("Multiple operations: Sum, Div, Sub", "[Evaluator][Math operations evaluating]") {
-    string expr = "200 + 2 / 4 - 5";
+    std::string expr = "200 + 2 / 4 - 5";
     expr.push_back(EOF);
 
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(expr);
@@ -164,7 +164,7 @@ TEST_CASE("Multiple operations: Sum, Div, Sub", "[Evaluator][Math operations eva
 }
 
 TEST_CASE("Multiple operations: Mul, Div, Sub", "[Evaluator][Math operations evaluating]") {
-    string expr = "200 * 2 / 4 - 5";
+    std::string expr = "200 * 2 / 4 - 5";
     expr.push_back(EOF);
 
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(expr);
@@ -179,7 +179,7 @@ TEST_CASE("Multiple operations: Mul, Div, Sub", "[Evaluator][Math operations eva
 }
 
 TEST_CASE("Multiple operations: Mul, Div, Sum", "[Evaluator][Math operations evaluating]") {
-    string expr = "200 * 2 / 4 + 5";
+    std::string expr = "200 * 2 / 4 + 5";
     expr.push_back(EOF);
 
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(expr);
@@ -194,7 +194,7 @@ TEST_CASE("Multiple operations: Mul, Div, Sum", "[Evaluator][Math operations eva
 }
 
 TEST_CASE("Multiple operations with single parentheses: Mul, Sub, Add", "[Evaluator][Math operations evaluating]") {
-    string expr = "200 * (2 - 4) + 5";
+    std::string expr = "200 * (2 - 4) + 5";
     expr.push_back(EOF);
 
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(expr);
@@ -209,7 +209,7 @@ TEST_CASE("Multiple operations with single parentheses: Mul, Sub, Add", "[Evalua
 }
 
 TEST_CASE("Multiple operations with single parentheses: Div, Add, Mul", "[Evaluator][Math operations evaluating]") {
-    string expr = "200 / (2 + 4) * 5";
+    std::string expr = "200 / (2 + 4) * 5";
     expr.push_back(EOF);
     
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(expr);
@@ -224,7 +224,7 @@ TEST_CASE("Multiple operations with single parentheses: Div, Add, Mul", "[Evalua
 }
 
 TEST_CASE("Multiple operations with multiple parentheses", "[Evaluator][Math operations evaluating]") {
-    string expr = "((200 + 2) / (2 - 4)) * 5 + 5";
+    std::string expr = "((200 + 2) / (2 - 4)) * 5 + 5";
     expr.push_back(EOF);
 
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(expr);
