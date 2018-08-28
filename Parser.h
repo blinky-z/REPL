@@ -13,7 +13,7 @@
 
 class Parser {
 private:
-    ASTNode* createBinOpNode(ASTNodeType type, ASTNode* left, ASTNode* right);
+    ASTNode* createBinOpNode(ASTNodeBinOpType type, ASTNode* left, ASTNode* right);
 
     ASTNode* createNumberNode(int value);
 

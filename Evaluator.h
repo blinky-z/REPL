@@ -2,6 +2,7 @@
 #define REPL_EVALUATOR_H
 
 #include "ASTNode.h"
+#include <iostream>
 
 class Evaluator {
 private:

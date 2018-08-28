@@ -107,12 +107,10 @@ ASTNode* Parser::factor() {
         if (data.GetNextToken().Type == data.ROUND_BRACKET_END) {
             return result;
         } else {
-            std::cerr << "Invalid syntax" << std::endl;
-            exit(EXIT_FAILURE);
+            throw std::runtime_error("Invalid syntax");
         }
     } else {
-        std::cerr << "Invalid syntax" << std::endl;
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("Invalid syntax");
     }
 }
 
@@ -126,9 +124,9 @@ ASTNode* Parser::parse(const AnalysisContainer& tokenizingStepData) {
     return parseMath();
 }
 
-ASTNode* Parser::createBinOpNode(ASTNodeType type, ASTNode* left, ASTNode* right) {
+ASTNode* Parser::createBinOpNode(ASTNodeBinOpType type, ASTNode* left, ASTNode* right) {
     BinOpNode* node = new BinOpNode;
-    node->type = type;
+    node->binOpType = type;
     node->left = left;
     node->right = right;
 

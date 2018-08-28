@@ -9,11 +9,11 @@ double Evaluator::EvaluateSubtree(ASTNode* subtree) {
         double leftValue = EvaluateSubtree(node->left);
         double rightValue = EvaluateSubtree(node->right);
 
-        if (subtree->type == OperatorPlus) {
+        if (node->binOpType == OperatorPlus) {
             return leftValue + rightValue;
-        } else if (subtree->type == OperatorMinus) {
+        } else if (node->binOpType == OperatorMinus) {
             return leftValue - rightValue;
-        } else if (subtree->type == OperatorMul) {
+        } else if (node->binOpType == OperatorMul) {
             return leftValue * rightValue;
         } else {
             return leftValue / rightValue;
