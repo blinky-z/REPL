@@ -17,7 +17,7 @@ TEST_CASE("Addition Evaluation", "[Evaluator][Math operations evaluating]") {
 
     std::string parseExpr = expr;
     parseExpr.push_back(EOF);
-    
+
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(parseExpr);
 
     ASTNode* root = EvaluatorTestsParser.parse(data);
@@ -37,9 +37,9 @@ TEST_CASE("Subtraction Evaluation", "[Evaluator][Math operations evaluating]") {
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(parseExpr);
 
     ASTNode* root = EvaluatorTestsParser.parse(data);
-    
+
     double result = EvaluatorTestsEvaluator.Evaluate(root);
-    
+
     double properResult = te_interp(expr.c_str(), nullptr);
 
     REQUIRE(result == properResult);
@@ -54,9 +54,9 @@ TEST_CASE("Multiplication Evaluation", "[Evaluator][Math operations evaluating]"
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(parseExpr);
 
     ASTNode* root = EvaluatorTestsParser.parse(data);
-    
+
     double result = EvaluatorTestsEvaluator.Evaluate(root);
-    
+
     double properResult = te_interp(expr.c_str(), nullptr);
 
     REQUIRE(result == properResult);
@@ -73,7 +73,7 @@ TEST_CASE("Division Evaluation", "[Evaluator][Math operations evaluating]") {
     ASTNode* root = EvaluatorTestsParser.parse(data);
 
     double result = EvaluatorTestsEvaluator.Evaluate(root);
-    
+
     double properResult = te_interp(expr.c_str(), nullptr);
 
     REQUIRE(result == properResult);
@@ -90,7 +90,7 @@ TEST_CASE("Multiplication with Sum Parentheses Evaluation", "[Evaluator][Math op
     ASTNode* root = EvaluatorTestsParser.parse(data);
 
     double result = EvaluatorTestsEvaluator.Evaluate(root);
-    
+
     double properResult = te_interp(expr.c_str(), nullptr);
 
     REQUIRE(result == properResult);
@@ -105,9 +105,9 @@ TEST_CASE("Multiplication with Difference Parentheses Evaluation", "[Evaluator][
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(parseExpr);
 
     ASTNode* root = EvaluatorTestsParser.parse(data);
-    
+
     double result = EvaluatorTestsEvaluator.Evaluate(root);
-    
+
     double properResult = te_interp(expr.c_str(), nullptr);
 
     REQUIRE(result == properResult);
@@ -124,7 +124,7 @@ TEST_CASE("Division with Sum Parentheses Evaluation", "[Evaluator][Math operatio
     ASTNode* root = EvaluatorTestsParser.parse(data);
 
     double result = EvaluatorTestsEvaluator.Evaluate(root);
-    
+
     double properResult = te_interp(expr.c_str(), nullptr);
 
     REQUIRE(result == properResult);
@@ -139,9 +139,9 @@ TEST_CASE("Division with Difference Parentheses Evaluation", "[Evaluator][Math o
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(parseExpr);
 
     ASTNode* root = EvaluatorTestsParser.parse(data);
-    
+
     double result = EvaluatorTestsEvaluator.Evaluate(root);
-    
+
     double properResult = te_interp(expr.c_str(), nullptr);
 
     REQUIRE(result == properResult);
@@ -158,7 +158,7 @@ TEST_CASE("Multiple operations: Sum, Mul, Sub", "[Evaluator][Math operations eva
     ASTNode* root = EvaluatorTestsParser.parse(data);
 
     double result = EvaluatorTestsEvaluator.Evaluate(root);
-    
+
     double properResult = te_interp(expr.c_str(), nullptr);
 
     REQUIRE(result == properResult);
@@ -175,7 +175,7 @@ TEST_CASE("Multiple operations: Sum, Div, Sub", "[Evaluator][Math operations eva
     ASTNode* root = EvaluatorTestsParser.parse(data);
 
     double result = EvaluatorTestsEvaluator.Evaluate(root);
-    
+
     double properResult = te_interp(expr.c_str(), nullptr);
 
     REQUIRE(result == properResult);
@@ -192,7 +192,7 @@ TEST_CASE("Multiple operations: Mul, Div, Sub", "[Evaluator][Math operations eva
     ASTNode* root = EvaluatorTestsParser.parse(data);
 
     double result = EvaluatorTestsEvaluator.Evaluate(root);
-    
+
     double properResult = te_interp(expr.c_str(), nullptr);
 
     REQUIRE(result == properResult);
@@ -209,7 +209,7 @@ TEST_CASE("Multiple operations: Mul, Div, Sum", "[Evaluator][Math operations eva
     ASTNode* root = EvaluatorTestsParser.parse(data);
 
     double result = EvaluatorTestsEvaluator.Evaluate(root);
-    
+
     double properResult = te_interp(expr.c_str(), nullptr);
 
     REQUIRE(result == properResult);
@@ -226,7 +226,7 @@ TEST_CASE("Multiple operations with single parentheses: Mul, Sub, Add", "[Evalua
     ASTNode* root = EvaluatorTestsParser.parse(data);
 
     double result = EvaluatorTestsEvaluator.Evaluate(root);
-    
+
     double properResult = te_interp(expr.c_str(), nullptr);
 
     REQUIRE(result == properResult);
@@ -241,9 +241,9 @@ TEST_CASE("Multiple operations with single parentheses: Div, Add, Mul", "[Evalua
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(parseExpr);
 
     ASTNode* root = EvaluatorTestsParser.parse(data);
-    
+
     double result = EvaluatorTestsEvaluator.Evaluate(root);
-    
+
     double properResult = te_interp(expr.c_str(), nullptr);
 
     REQUIRE(result == properResult);
@@ -256,7 +256,7 @@ TEST_CASE("Multiple operations with multiple parentheses", "[Evaluator][Math ope
     parseExpr.push_back(EOF);
 
     AnalysisContainer data = EvaluatorTestsLexer.tokenize(parseExpr);
-    
+
     ASTNode* root = EvaluatorTestsParser.parse(data);
 
     double result = EvaluatorTestsEvaluator.Evaluate(root);
