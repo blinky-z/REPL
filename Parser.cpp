@@ -21,10 +21,10 @@ ASTNode* Parser::expressionTail(ASTNode* lvalue) {
     if (token.Type == data.Add) {
         rvalue = term();
 
-        ASTNode* prevBinOpNode = createNode(OperatorPlus, lvalue, rvalue);
+        ASTNode* prevBinOpNode = createBinOpNode(OperatorPlus, lvalue, rvalue);
         expressionTailNode = expressionTail(prevBinOpNode);
 
-        if (expressionTailNode->Type == Empty) {
+        if (expressionTailNode->type == Empty) {
             return prevBinOpNode;
         } else {
             return expressionTailNode;
@@ -32,10 +32,10 @@ ASTNode* Parser::expressionTail(ASTNode* lvalue) {
     } else if (token.Type == data.Sub) {
         rvalue = term();
 
-        ASTNode* prevBinOpNode = createNode(OperatorMinus, lvalue, rvalue);
+        ASTNode* prevBinOpNode = createBinOpNode(OperatorMinus, lvalue, rvalue);
         expressionTailNode = expressionTail(prevBinOpNode);
 
-        if (expressionTailNode->Type == Empty) {
+        if (expressionTailNode->type == Empty) {
             return prevBinOpNode;
         } else {
             return expressionTailNode;
@@ -68,10 +68,10 @@ ASTNode* Parser::termTail(ASTNode* lvalue) {
     if (token.Type == data.Mul) {
         rvalue = factor();
 
-        ASTNode* prevBinOpNode = createNode(OperatorMul, lvalue, rvalue);
+        ASTNode* prevBinOpNode = createBinOpNode(OperatorMul, lvalue, rvalue);
         termTailNode = termTail(prevBinOpNode);
 
-        if (termTailNode->Type == Empty) {
+        if (termTailNode->type == Empty) {
             return prevBinOpNode;
         } else {
             return termTailNode;
@@ -79,10 +79,10 @@ ASTNode* Parser::termTail(ASTNode* lvalue) {
     } else if (token.Type == data.Div) {
         rvalue = factor();
 
-        ASTNode* prevBinOpNode = createNode(OperatorDiv, lvalue, rvalue);
+        ASTNode* prevBinOpNode = createBinOpNode(OperatorDiv, lvalue, rvalue);
         termTailNode = termTail(prevBinOpNode);
 
-        if (termTailNode->Type == Empty) {
+        if (termTailNode->type == Empty) {
             return prevBinOpNode;
         } else {
             return termTailNode;
@@ -126,26 +126,32 @@ ASTNode* Parser::parse(const AnalysisContainer& tokenizingStepData) {
     return parseMath();
 }
 
-ASTNode* Parser::createNode(ASTNodeType type, ASTNode* left, ASTNode* right) {
-    ASTNode* node = new ASTNode;
-    node->Type = type;
-    node->Left = left;
-    node->Right = right;
+ASTNode* Parser::createBinOpNode(ASTNodeType type, ASTNode* left, ASTNode* right) {
+    BinOpNode* node = new BinOpNode;
+    node->type = type;
+    node->left = left;
+    node->right = right;
 
     return node;
 }
 
 ASTNode* Parser::createNumberNode(int value) {
-    ASTNode* node = new ASTNode;
-    node->Type = NumberValue;
-    node->Value = value;
+    NumberNode* node = new NumberNode;
+    node->value = value;
+
+    return node;
+}
+
+ASTNode* Parser::createIdentifierNode(std::string name) {
+    IdentifierNode* node = new IdentifierNode;
+    node->name = name;
 
     return node;
 }
 
 ASTNode* Parser::createEmptyNode() {
     ASTNode* node = new ASTNode;
-    node->Type = Empty;
+    node->type = Empty;
 
     return node;
 }

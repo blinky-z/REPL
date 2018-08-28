@@ -1,17 +1,19 @@
 #include "Evaluator.h"
 
 double Evaluator::EvaluateSubtree(ASTNode* subtree) {
-    if (subtree->Type == NumberValue) {
-        return subtree->Value;
+    if (subtree->type == NumberValue) {
+        NumberNode* node = static_cast<NumberNode*>(subtree);
+        return node->value;
     } else {
-        double leftValue = EvaluateSubtree(subtree->Left);
-        double rightValue = EvaluateSubtree(subtree->Right);
+        BinOpNode* node = static_cast<BinOpNode*>(subtree);
+        double leftValue = EvaluateSubtree(node->left);
+        double rightValue = EvaluateSubtree(node->right);
 
-        if (subtree->Type == OperatorPlus) {
+        if (subtree->type == OperatorPlus) {
             return leftValue + rightValue;
-        } else if (subtree->Type == OperatorMinus) {
+        } else if (subtree->type == OperatorMinus) {
             return leftValue - rightValue;
-        } else if (subtree->Type == OperatorMul) {
+        } else if (subtree->type == OperatorMul) {
             return leftValue * rightValue;
         } else {
             return leftValue / rightValue;

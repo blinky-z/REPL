@@ -13,9 +13,11 @@
 
 class Parser {
 private:
-    ASTNode* createNode(ASTNodeType type, ASTNode* left, ASTNode* right);
+    ASTNode* createBinOpNode(ASTNodeType type, ASTNode* left, ASTNode* right);
 
     ASTNode* createNumberNode(int value);
+
+    ASTNode* createIdentifierNode(std::string name);
 
     ASTNode* createEmptyNode();
 
