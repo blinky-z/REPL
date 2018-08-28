@@ -7,7 +7,11 @@ enum ASTNodeType {
     Undefined,
     Empty,
     Id,
+    BinOp,
     NumberValue,
+};
+
+enum ASTNodeBinOpType {
     OperatorPlus,
     OperatorMinus,
     OperatorMul,
@@ -16,13 +20,20 @@ enum ASTNodeType {
 
 struct ASTNode {
     ASTNodeType type;
+
+    ASTNode() {
+        type = Undefined;
+    }
 };
 
 struct BinOpNode : ASTNode {
+    ASTNodeType type;
+    ASTNodeBinOpType binOpType;
     ASTNode* left;
     ASTNode* right;
 
     BinOpNode() {
+        type = BinOp;
         left = nullptr;
         right = nullptr;
     }
