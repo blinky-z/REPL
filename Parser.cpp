@@ -2,40 +2,44 @@
 
 ASTNode* Parser::expression() {
     ASTNode* termNode = term();
-    ASTNode* expressionTailNode = expressionTail();
 
-    if (expressionTailNode->Type == Empty) {
+    const Token& nextOp = data.GetNextToken();
+    data.ReturnToken();
+    if (nextOp.Type == data.Add || nextOp.Type == data.Sub) {
+        return expressionTail(termNode);
+    } else {
         return termNode;
     }
-    return createNode(OperatorPlus, termNode, expressionTailNode);
 }
 
-ASTNode* Parser::expressionTail() {
-    ASTNode* termNode;
+ASTNode* Parser::expressionTail(ASTNode* lvalue) {
+    ASTNode* rvalue;
     ASTNode* expressionTailNode;
 
     const Token& token = data.GetNextToken();
 
     if (token.Type == data.Add) {
-        termNode = term();
-        expressionTailNode = expressionTail();
+        rvalue = term();
+
+        ASTNode* prevBinOpNode = createNode(OperatorPlus, lvalue, rvalue);
+        expressionTailNode = expressionTail(prevBinOpNode);
 
         if (expressionTailNode->Type == Empty) {
-            return termNode;
+            return prevBinOpNode;
+        } else {
+            return expressionTailNode;
         }
-        return createNode(OperatorPlus, expressionTailNode, termNode);
     } else if (token.Type == data.Sub) {
-        termNode = term();
-        expressionTailNode = expressionTail();
+        rvalue = term();
+
+        ASTNode* prevBinOpNode = createNode(OperatorMinus, lvalue, rvalue);
+        expressionTailNode = expressionTail(prevBinOpNode);
 
         if (expressionTailNode->Type == Empty) {
-            ASTNode* leafNode = new ASTNode;
-            leafNode->Type = NumberValue;
-            leafNode->Value = 0;
-            
-            return createNode(OperatorMinus, leafNode, termNode);
+            return prevBinOpNode;
+        } else {
+            return expressionTailNode;
         }
-        return createNode(OperatorMinus, expressionTailNode, termNode);
     } else {
         data.ReturnToken();
     }
@@ -45,40 +49,44 @@ ASTNode* Parser::expressionTail() {
 
 ASTNode* Parser::term() {
     ASTNode* factorNode = factor();
-    ASTNode* termTailNode = termTail();
 
-    if (termTailNode->Type == Empty) {
+    const Token& nextOp = data.GetNextToken();
+    data.ReturnToken();
+    if (nextOp.Type == data.Mul || nextOp.Type == data.Div) {
+        return termTail(factorNode);
+    } else {
         return factorNode;
     }
-    return createNode(OperatorMul, factorNode, termTailNode);
 }
 
-ASTNode* Parser::termTail() {
-    ASTNode* factorNode;
+ASTNode* Parser::termTail(ASTNode* lvalue) {
+    ASTNode* rvalue;
     ASTNode* termTailNode;
 
     const Token& token = data.GetNextToken();
 
     if (token.Type == data.Mul) {
-        factorNode = factor();
-        termTailNode = termTail();
+        rvalue = factor();
+
+        ASTNode* prevBinOpNode = createNode(OperatorMul, lvalue, rvalue);
+        termTailNode = termTail(prevBinOpNode);
 
         if (termTailNode->Type == Empty) {
-            return factorNode;
+            return prevBinOpNode;
+        } else {
+            return termTailNode;
         }
-        return createNode(OperatorMul, termTailNode, factorNode);
     } else if (token.Type == data.Div) {
-        factorNode = factor();
-        termTailNode = termTail();
+        rvalue = factor();
+
+        ASTNode* prevBinOpNode = createNode(OperatorDiv, lvalue, rvalue);
+        termTailNode = termTail(prevBinOpNode);
 
         if (termTailNode->Type == Empty) {
-            ASTNode* leafNode = new ASTNode;
-            leafNode->Type = NumberValue;
-            leafNode->Value = 1;
-
-            return createNode(OperatorDiv, leafNode, factorNode);
+            return prevBinOpNode;
+        } else {
+            return termTailNode;
         }
-        return createNode(OperatorDiv, termTailNode, factorNode);
     } else {
         data.ReturnToken();
     }
@@ -92,7 +100,7 @@ ASTNode* Parser::factor() {
     if (token.Type == data.Num) {
         int value = getNumTokenValue(token);
 
-        return createNodeNumber(value);
+        return createNumberNode(value);
     } else if (token.Type == data.ROUND_BRACKET_START) {
         ASTNode* result = expression();
 
@@ -127,7 +135,7 @@ ASTNode* Parser::createNode(ASTNodeType type, ASTNode* left, ASTNode* right) {
     return node;
 }
 
-ASTNode* Parser::createNodeNumber(int value) {
+ASTNode* Parser::createNumberNode(int value) {
     ASTNode* node = new ASTNode;
     node->Type = NumberValue;
     node->Value = value;

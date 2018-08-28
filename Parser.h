@@ -15,7 +15,7 @@ class Parser {
 private:
     ASTNode* createNode(ASTNodeType type, ASTNode* left, ASTNode* right);
 
-    ASTNode* createNodeNumber(int value);
+    ASTNode* createNumberNode(int value);
 
     ASTNode* createEmptyNode();
 
@@ -23,15 +23,17 @@ private:
 
     ASTNode* expression();
 
-    ASTNode* expressionTail();
+    ASTNode* expressionTail(ASTNode* lvalue);
 
     ASTNode* term();
 
-    ASTNode* termTail();
+    ASTNode* termTail(ASTNode* lvalue);
 
     ASTNode* factor();
 
     ASTNode* parseMath();
+
+    ASTNode* parseAssign();
 
     AnalysisContainer data;
 public:
