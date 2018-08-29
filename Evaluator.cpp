@@ -81,7 +81,12 @@ std::string Evaluator::Evaluate(ASTNode* root) {
     } else if (root->type == Id) {
         IdentifierNode* node = static_cast<IdentifierNode*>(root);
 
-        return std::to_string(EvaluateId(node));
+        if (symbolTable.isIdExist(node->name)) {
+            return std::to_string(EvaluateId(node));
+        } else {
+            throw std::runtime_error("Use of undeclared identifier '" + node->name + "'");
+        }
+
     } else {
         throw std::runtime_error("Invalid AST");
     }
