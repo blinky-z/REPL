@@ -21,22 +21,22 @@ ASTNode* Parser::expressionTail(ASTNode* lvalue) {
     if (token.Type == data.Add) {
         rvalue = term();
 
-        ASTNode* prevBinOpNode = createBinOpNode(OperatorPlus, lvalue, rvalue);
-        expressionTailNode = expressionTail(prevBinOpNode);
+        ASTNode* currentBinOpNode = createBinOpNode(OperatorPlus, lvalue, rvalue);
+        expressionTailNode = expressionTail(currentBinOpNode);
 
         if (expressionTailNode->type == Empty) {
-            return prevBinOpNode;
+            return currentBinOpNode;
         } else {
             return expressionTailNode;
         }
     } else if (token.Type == data.Sub) {
         rvalue = term();
 
-        ASTNode* prevBinOpNode = createBinOpNode(OperatorMinus, lvalue, rvalue);
-        expressionTailNode = expressionTail(prevBinOpNode);
+        ASTNode* currentBinOpNode = createBinOpNode(OperatorMinus, lvalue, rvalue);
+        expressionTailNode = expressionTail(currentBinOpNode);
 
         if (expressionTailNode->type == Empty) {
-            return prevBinOpNode;
+            return currentBinOpNode;
         } else {
             return expressionTailNode;
         }
@@ -68,22 +68,22 @@ ASTNode* Parser::termTail(ASTNode* lvalue) {
     if (token.Type == data.Mul) {
         rvalue = factor();
 
-        ASTNode* prevBinOpNode = createBinOpNode(OperatorMul, lvalue, rvalue);
-        termTailNode = termTail(prevBinOpNode);
+        ASTNode* currentBinOpNode = createBinOpNode(OperatorMul, lvalue, rvalue);
+        termTailNode = termTail(currentBinOpNode);
 
         if (termTailNode->type == Empty) {
-            return prevBinOpNode;
+            return currentBinOpNode;
         } else {
             return termTailNode;
         }
     } else if (token.Type == data.Div) {
         rvalue = factor();
 
-        ASTNode* prevBinOpNode = createBinOpNode(OperatorDiv, lvalue, rvalue);
-        termTailNode = termTail(prevBinOpNode);
+        ASTNode* currentBinOpNode = createBinOpNode(OperatorDiv, lvalue, rvalue);
+        termTailNode = termTail(currentBinOpNode);
 
         if (termTailNode->type == Empty) {
-            return prevBinOpNode;
+            return currentBinOpNode;
         } else {
             return termTailNode;
         }
