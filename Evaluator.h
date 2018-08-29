@@ -2,13 +2,26 @@
 #define REPL_EVALUATOR_H
 
 #include "ASTNode.h"
+#include "SymbolTable.h"
+#include "TokenTypes.h"
 #include <iostream>
 
 class Evaluator {
 private:
-    double EvaluateSubtree(ASTNode* subtree);
+    SymbolTable symbolTable;
+
+    double EvaluateMathExpr(ASTNode* subtree);
+
+    void EvaluateAssignValue(BinOpNode* subtree);
+
+    void EvaluateDeclVar(DeclVarNode* subtree);
+
+    double EvaluateId(IdentifierNode* subtree);
+
+    double EvaluateNumberValue(NumberNode* subtree);
+
 public:
-    double Evaluate(ASTNode* root);
+    std::string Evaluate(ASTNode* root);
 };
 
 #endif //REPL_EVALUATOR_H
