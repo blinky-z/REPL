@@ -393,3 +393,34 @@ TEST_CASE("Addition operations with using of variables: Declare & Assign variabl
 
     REQUIRE(result == properResult);
 }
+
+TEST_CASE("Assign variable to the other variable", "[Evaluator]") {
+    Evaluator EvaluatorTestsEvaluator;
+
+    double a = 200;
+    double b = a;
+
+    std::string expr1 = "var a = 200";
+    std::string expr2 = "var b = a";
+    std::string expr3 = "b";
+
+    expr1.push_back(EOF);
+    expr2.push_back(EOF);
+
+    const TokenContainer& tokensExpr1 = EvaluatorTestsLexer.tokenize(expr1);
+    const TokenContainer& tokensExpr2 = EvaluatorTestsLexer.tokenize(expr2);
+    const TokenContainer& tokensExpr3 = EvaluatorTestsLexer.tokenize(expr3);
+
+    // declare var a evaluate
+    EvaluatorTestsEvaluator.Evaluate(EvaluatorTestsParser.parse(tokensExpr1));
+
+    // declare var b and assign to var a evaluate
+    EvaluatorTestsEvaluator.Evaluate(EvaluatorTestsParser.parse(tokensExpr2));
+
+    ASTNode* root = EvaluatorTestsParser.parse(tokensExpr3);
+
+    std::string result = EvaluatorTestsEvaluator.Evaluate(root);
+    std::string properResult = std::to_string(b);
+
+    REQUIRE(result == properResult);
+}
