@@ -3,7 +3,8 @@
 
 #include "Token.h"
 #include "Identifier.h"
-#include "AnalysisContainer.h"
+#include "TokenTypes.h"
+#include "TokenContainer.h"
 #include "ASTNode.h"
 #include <iostream>
 #include <utility>
@@ -13,11 +14,13 @@
 
 class Parser {
 private:
-    ASTNode* createBinOpNode(ASTNodeBinOpType type, ASTNode* left, ASTNode* right);
+    BinOpNode* createBinOpNode(ASTNodeBinOpType type, ASTNode* left, ASTNode* right);
 
-    ASTNode* createNumberNode(int value);
+    NumberNode* createNumberNode(int value);
 
-    ASTNode* createIdentifierNode(std::string name);
+    IdentifierNode* createIdentifierNode(std::string name);
+
+    DeclVarNode* createDeclVarNode(IdentifierNode* id, ASTNode* expr);
 
     ASTNode* createEmptyNode();
 
@@ -37,9 +40,11 @@ private:
 
     ASTNode* parseAssign();
 
-    AnalysisContainer data;
+    ASTNode* parseDeclVar();
+
+    TokenContainer tokens;
 public:
-    ASTNode* parse(const AnalysisContainer& tokenizingStepData);
+    ASTNode* parse(const TokenContainer& tokenizedSourceData);
 };
 
 #endif //BASHCOMPILER_PARSER_H
