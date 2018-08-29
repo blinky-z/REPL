@@ -24,6 +24,7 @@ int main() {
         std::string result = evaluator.Evaluate(root);
         input.pop_back();
 
+        // check if result is number
         if (result.find_first_not_of(".-0123456789") == std::string::npos) {
             std::cout << std::stod(result) << std::endl;
         } else {
