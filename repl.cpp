@@ -1,16 +1,7 @@
 #include "Lexer.h"
 #include "Parser.h"
-#include "Identifier.h"
-#include "Token.h"
-#include "ASTNode.h"
 #include "Evaluator.h"
-#include <vector>
-#include <unistd.h>
-#include <fcntl.h>
 #include <iostream>
-#include <cstring>
-#include <unordered_map>
-#include <sstream>
 
 int main() {
     Lexer lexer;
