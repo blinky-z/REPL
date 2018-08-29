@@ -84,6 +84,34 @@ TEST_CASE("Multiplication Tokenizing", "[Lexer][Math operations tokenizing]") {
     }
 }
 
+TEST_CASE("Negative numbers multiplication Tokenizing", "[Lexer][Math operations tokenizing]") {
+    std::string expr = "5 * -123 * -3464";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::Num, "5"});
+    properTokens.emplace_back(Token{TokenTypes::Mul, "*"});
+    properTokens.emplace_back(Token{TokenTypes::Sub, "-"});
+    properTokens.emplace_back(Token{TokenTypes::Num, "123"});
+    properTokens.emplace_back(Token{TokenTypes::Mul, "*"});
+    properTokens.emplace_back(Token{TokenTypes::Sub, "-"});
+    properTokens.emplace_back(Token{TokenTypes::Num, "3464"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    REQUIRE(tokens.size() == properTokens.size());
+    if (tokens.size() == properTokens.size()) {
+        unsigned long currentTokenNum = 0;
+        for (; currentTokenNum < tokens.size(); currentTokenNum++) {
+            REQUIRE(tokens[currentTokenNum].Type == properTokens[currentTokenNum].Type);
+            REQUIRE(tokens[currentTokenNum].Value == properTokens[currentTokenNum].Value);
+        }
+    }
+}
+
 TEST_CASE("Division Tokenizing", "[Lexer][Math operations tokenizing]") {
     std::string expr = "2500 / 5 / 10";
     expr.push_back(EOF);
