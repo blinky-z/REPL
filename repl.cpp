@@ -12,7 +12,7 @@ int main() {
         std::string input;
         getline(std::cin, input);
 
-        if (input == "exit") {
+        if (std::cin.eof()) {
             exit(EXIT_SUCCESS);
         }
         input.push_back(EOF);
