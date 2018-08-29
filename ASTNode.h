@@ -5,6 +5,7 @@
 
 enum ASTNodeType {
     Undefined,
+    DeclVar,
     Empty,
     Id,
     BinOp,
@@ -12,6 +13,7 @@ enum ASTNodeType {
 };
 
 enum ASTNodeBinOpType {
+    OperatorAssign,
     OperatorPlus,
     OperatorMinus,
     OperatorMul,
@@ -57,6 +59,21 @@ struct IdentifierNode : ASTNode {
     IdentifierNode() {
         type = Id;
     }
+};
+
+struct DeclVarNode : ASTNode {
+    IdentifierNode* id;
+    ASTNode* expr;
+
+    DeclVarNode() {
+        type = DeclVar;
+        expr = nullptr;
+    }
+
+    ~DeclVarNode() {
+        delete expr;
+    }
+
 };
 
 #endif //REPL_ASTNODE_H
