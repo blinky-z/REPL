@@ -27,7 +27,6 @@ struct ASTNode {
 };
 
 struct BinOpNode : ASTNode {
-    ASTNodeType type;
     ASTNodeBinOpType binOpType;
     ASTNode* left;
     ASTNode* right;
