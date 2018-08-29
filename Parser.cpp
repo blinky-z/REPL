@@ -101,6 +101,11 @@ ASTNode* Parser::factor() {
         int value = getNumTokenValue(token);
 
         return createNumberNode(value);
+    } else if (token.Type == TokenTypes::Sub) {
+        ASTNode* value = factor();
+        ASTNode* leafMinusNode = createNumberNode(0);
+
+        return createBinOpNode(OperatorMinus, leafMinusNode, value);
     } else if (token.Type == TokenTypes::Id) {
         const std::string& idName = token.Value;
 
