@@ -10,6 +10,7 @@
 #include <iostream>
 #include <cstring>
 #include <unordered_map>
+#include <sstream>
 
 int main() {
     Lexer lexer;
@@ -25,13 +26,18 @@ int main() {
         }
         input.push_back(EOF);
 
-        const AnalysisContainer& data = lexer.tokenize(input);
+        const TokenContainer& tokens = lexer.tokenize(input);
 
-        ASTNode* root = parser.parse(data);
+        ASTNode* root = parser.parse(tokens);
 
-        double result = evaluator.Evaluate(root);
+        std::string result = evaluator.Evaluate(root);
         input.pop_back();
-        std::cout << input << " = " << result << std::endl;
+
+        if (result.find_first_not_of(".0123456789") == std::string::npos) {
+            std::cout << std::stod(result) << std::endl;
+        } else {
+            std::cout << result << std::endl;
+        }
 
         delete root;
     }
