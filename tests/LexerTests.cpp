@@ -297,3 +297,35 @@ TEST_CASE("Expressions with using of variables", "[Lexer][Math operations tokeni
         }
     }
 }
+
+TEST_CASE("Expressions with using of variables and negative numbers", "[Lexer][Math operations tokenizing]") {
+    std::string expr = "a * -5 / -(1500 + b)";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::Id, "a"});
+    properTokens.emplace_back(Token{TokenTypes::Mul, "*"});
+    properTokens.emplace_back(Token{TokenTypes::Sub, "-"});
+    properTokens.emplace_back(Token{TokenTypes::Num, "5"});
+    properTokens.emplace_back(Token{TokenTypes::Div, "/"});
+    properTokens.emplace_back(Token{TokenTypes::Sub, "-"});
+    properTokens.emplace_back(Token{TokenTypes::ROUND_BRACKET_START, "("});
+    properTokens.emplace_back(Token{TokenTypes::Num, "1500"});
+    properTokens.emplace_back(Token{TokenTypes::Add, "+"});
+    properTokens.emplace_back(Token{TokenTypes::Id, "b"});
+    properTokens.emplace_back(Token{TokenTypes::ROUND_BRACKET_END, ")"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    REQUIRE(tokens.size() == properTokens.size());
+    if (tokens.size() == properTokens.size()) {
+        unsigned long currentTokenNum = 0;
+        for (; currentTokenNum < tokens.size(); currentTokenNum++) {
+            REQUIRE(tokens[currentTokenNum].Type == properTokens[currentTokenNum].Type);
+            REQUIRE(tokens[currentTokenNum].Value == properTokens[currentTokenNum].Value);
+        }
+    }
+}
