@@ -8,7 +8,7 @@ void Evaluator::EvaluateAssignValue(BinOpNode* subtree) {
 
         symbolTable.setIdValueDouble(id->name, value);
     } else {
-        throw std::runtime_error("Unknown variable. Can't assign value to identifier '" + id->name + "'");
+        throw std::runtime_error("Can't assign value to undeclared identifier '" + id->name + "'");
     }
 }
 
