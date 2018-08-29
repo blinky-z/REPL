@@ -3,7 +3,8 @@
 
 #include "Token.h"
 #include "Identifier.h"
-#include "AnalysisContainer.h"
+#include "TokenContainer.h"
+#include "TokenTypes.h"
 #include <vector>
 #include <string>
 #include <unordered_map>
@@ -14,16 +15,12 @@ private:
 
     std::string::const_iterator currentChar;
 
-    AnalysisContainer data;
-
-    void initLexer(const std::string& src);
-
     Token tokenizeIdentifier();
 
     Token tokenizeNumber();
 
 public:
-    AnalysisContainer tokenize(const std::string& src);
+    TokenContainer tokenize(const std::string& src);
 };
 
 #endif //BASHCOMPILER_LEXER_H

@@ -1,8 +1,11 @@
 #include <iostream>
 #include "Lexer.h"
 
-AnalysisContainer Lexer::tokenize(const std::string& src) {
-    initLexer(src);
+TokenContainer Lexer::tokenize(const std::string& src) {
+    line = 1;
+    currentChar = src.begin();
+
+    TokenContainer tokens;
 
     while (*currentChar != EOF) {
         Token token;
@@ -21,60 +24,60 @@ AnalysisContainer Lexer::tokenize(const std::string& src) {
         } else if (*currentChar >= '0' && *currentChar <= '9') {
             token = tokenizeNumber();
         } else if (*currentChar == '=') {
-            token.Type = data.Assign;
+            token.Type = TokenTypes::Assign;
             token.Value = "=";
         } else if (*currentChar == '+') {
             if (*(currentChar + 1) == '+') {
                 currentChar++;
 
-                token.Type = data.Inc;
+                token.Type = TokenTypes::Inc;
                 token.Value = "++";
             } else {
-                token.Type = data.Add;
+                token.Type = TokenTypes::Add;
                 token.Value = "+";
             }
         } else if (*currentChar == '-') {
             if (*(currentChar + 1) == '-') {
                 currentChar++;
 
-                token.Type = data.Dec;
+                token.Type = TokenTypes::Dec;
                 token.Value = "--";
             } else {
-                token.Type = data.Sub;
+                token.Type = TokenTypes::Sub;
                 token.Value = "-";
             }
         } else if (*currentChar == '*') {
-            token.Type = data.Mul;
+            token.Type = TokenTypes::Mul;
             token.Value = "*";
         } else if (*currentChar == '/') {
-            token.Type = data.Div;
+            token.Type = TokenTypes::Div;
             token.Value = "/";
         } else if (*currentChar == '%') {
-            token.Type = data.Mod;
+            token.Type = TokenTypes::Mod;
             token.Value = "%";
         } else if (*currentChar == '(') {
-            token.Type = data.ROUND_BRACKET_START;
+            token.Type = TokenTypes::ROUND_BRACKET_START;
             token.Value = "(";
         } else if (*currentChar == ')') {
-            token.Type = data.ROUND_BRACKET_END;
+            token.Type = TokenTypes::ROUND_BRACKET_END;
             token.Value = ")";
         } else if (*currentChar == '[') {
-            token.Type = data.SQUARE_BRACKET_START;
+            token.Type = TokenTypes::SQUARE_BRACKET_START;
             token.Value = "[";
         } else if (*currentChar == ']') {
-            token.Type = data.SQUARE_BRACKET_END;
+            token.Type = TokenTypes::SQUARE_BRACKET_END;
             token.Value = "]";
         } else if (*currentChar == ';') {
-            token.Type = data.SEMICOLON;
+            token.Type = TokenTypes::SEMICOLON;
             token.Value = ";";
         }
 
-        data.AddNewToken(token);
+        tokens.addNewToken(token);
         currentChar++;
     }
-    data.AddNewToken({data.eof, "EOF"});
+    tokens.addNewToken(Token{TokenTypes::eof, "EOF"});
 
-    return data;
+    return tokens;
 }
 
 Token Lexer::tokenizeIdentifier() {
@@ -92,16 +95,11 @@ Token Lexer::tokenizeIdentifier() {
 
     // объявление переменной
     if (id_name == "var") {
-        token.Type = data.DeclareId;
+        token.Type = TokenTypes::DeclareId;
         token.Value = "var";
     } else {
-        token.Type = data.Id;
+        token.Type = TokenTypes::Id;
         token.Value = id_name;
-
-        // если такого Identifier в таблице символов ещё нет, внести данные о нем
-        if (!data.IsIdExist(id_name)) {
-            data.AddNewIdentifier(id_name, Identifier{});
-        }
     }
 
     return token;
@@ -117,14 +115,8 @@ Token Lexer::tokenizeNumber() {
         token_val = token_val * 10 + *currentChar - '0';
     }
 
-    token.Type = data.Num;
+    token.Type = TokenTypes::Num;
     token.Value = std::to_string(token_val);
 
     return token;
-}
-
-void Lexer::initLexer(const std::string& src) {
-    line = 1;
-    currentChar = src.begin();
-    data.ResetData();
 }
