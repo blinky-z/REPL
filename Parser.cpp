@@ -162,10 +162,13 @@ ASTNode* Parser::parseDeclVar() {
     return createDeclVarNode(idNode, expr);
 }
 
+
 ASTNode* Parser::parse(const TokenContainer& tokenizedSourceData) {
     tokens = tokenizedSourceData;
 
     const Token& currentToken = tokens.getNextToken();
+
+    ASTNode* parseResult;
 
     if (currentToken.Type == TokenTypes::Id) {
         const Token& nextToken = tokens.getNextToken();
@@ -173,22 +176,28 @@ ASTNode* Parser::parse(const TokenContainer& tokenizedSourceData) {
         tokens.returnToken();
 
         if (nextToken.Type == TokenTypes::Assign) {
-            return parseAssign();
+            parseResult = parseAssign();
         } else {
-            return parseMath();
+            parseResult = parseMath();
         }
     } else if (currentToken.Type == TokenTypes::ROUND_BRACKET_START) {
         tokens.returnToken();
-        return parseMath();
+        parseResult = parseMath();
     } else if (currentToken.Type == TokenTypes::Num) {
         tokens.returnToken();
-        return parseMath();
+        parseResult = parseMath();
     } else if (currentToken.Type == TokenTypes::Sub) {
         tokens.returnToken();
-        return parseMath();
+        parseResult = parseMath();
     } else if (currentToken.Type == TokenTypes::DeclareId) {
         tokens.returnToken();
-        return parseDeclVar();
+        parseResult = parseDeclVar();
+    } else {
+        throw std::runtime_error("Invalid syntax");
+    }
+
+    if (matchParseComplete()) {
+        return parseResult;
     } else {
         throw std::runtime_error("Invalid syntax");
     }
@@ -234,4 +243,8 @@ ASTNode* Parser::createEmptyNode() {
 
 double Parser::getNumTokenValue(const Token& numToken) {
     return std::stod(numToken.Value);
+}
+
+bool Parser::matchParseComplete() {
+    return tokens.getNextToken().Type == TokenTypes::eof;
 }

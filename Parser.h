@@ -42,6 +42,8 @@ private:
 
     ASTNode* parseDeclVar();
 
+    bool matchParseComplete();
+
     TokenContainer tokens;
 public:
     ASTNode* parse(const TokenContainer& tokenizedSourceData);
