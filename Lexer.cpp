@@ -108,15 +108,16 @@ Token Lexer::tokenizeIdentifier() {
 Token Lexer::tokenizeNumber() {
     Token token;
 
-    int token_val = *currentChar - '0';
+    std::string token_val;
+    token_val += *currentChar;
 
-    while (*(currentChar + 1) >= '0' && *(currentChar + 1) <= '9') {
+    while ((*(currentChar + 1) >= '0' && *(currentChar + 1) <= '9') || *(currentChar + 1) == '.') {
         currentChar++;
-        token_val = token_val * 10 + *currentChar - '0';
+        token_val += *currentChar;
     }
 
     token.Type = TokenTypes::Num;
-    token.Value = std::to_string(token_val);
+    token.Value = token_val;
 
     return token;
 }
