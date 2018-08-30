@@ -487,3 +487,37 @@ TEST_CASE("Make variable negative by assigning on other negative variable using 
 
     REQUIRE(result == properResult);
 }
+
+TEST_CASE("Get throw on using of undeclared variable", "[Evaluator]") {
+    Evaluator EvaluatorTestsEvaluator;
+
+    std::string expr = "a";
+
+    const TokenContainer& tokens = EvaluatorTestsLexer.tokenize(expr);
+    ASTNode* root = EvaluatorTestsParser.parse(tokens);
+
+    REQUIRE_THROWS(EvaluatorTestsEvaluator.Evaluate(root));
+}
+
+TEST_CASE("Get throw on using of undeclared variable in math bin operation", "[Evaluator]") {
+    Evaluator EvaluatorTestsEvaluator;
+
+    std::string expr = "a + 4";
+
+    const TokenContainer& tokens = EvaluatorTestsLexer.tokenize(expr);
+    ASTNode* root = EvaluatorTestsParser.parse(tokens);
+
+    REQUIRE_THROWS(EvaluatorTestsEvaluator.Evaluate(root));
+}
+
+TEST_CASE("Get throw on assigning undeclared variable to variable", "[Evaluator]") {
+    Evaluator EvaluatorTestsEvaluator;
+
+    std::string expr = "var a = b";
+
+    const TokenContainer& tokens = EvaluatorTestsLexer.tokenize(expr);
+    ASTNode* root = EvaluatorTestsParser.parse(tokens);
+
+    REQUIRE_THROWS(EvaluatorTestsEvaluator.Evaluate(root));
+
+}
