@@ -183,6 +183,9 @@ ASTNode* Parser::parse(const TokenContainer& tokenizedSourceData) {
     } else if (currentToken.Type == TokenTypes::Num) {
         tokens.returnToken();
         return parseMath();
+    } else if (currentToken.Type == TokenTypes::Sub) {
+        tokens.returnToken();
+        return parseMath();
     } else if (currentToken.Type == TokenTypes::DeclareId) {
         tokens.returnToken();
         return parseDeclVar();
