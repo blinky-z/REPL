@@ -519,5 +519,91 @@ TEST_CASE("Get throw on assigning undeclared variable to variable", "[Evaluator]
     ASTNode* root = EvaluatorTestsParser.parse(tokens);
 
     REQUIRE_THROWS(EvaluatorTestsEvaluator.Evaluate(root));
+}
 
+TEST_CASE("Multiplication with using of float point numbers Evaluation", "[Evaluator][Math operations evaluating]") {
+    Evaluator EvaluatorTestsEvaluator;
+
+    std::string expr = "200.5 * 2.25 * 4.1 * 5.6";
+
+    std::string parseExpr = expr;
+    parseExpr.push_back(EOF);
+
+    const TokenContainer& tokens = EvaluatorTestsLexer.tokenize(parseExpr);
+
+    ASTNode* root = EvaluatorTestsParser.parse(tokens);
+
+    std::string result = EvaluatorTestsEvaluator.Evaluate(root);
+    std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
+
+    REQUIRE(result == properResult);
+}
+
+TEST_CASE("Multiplication with using of negative float point numbers Evaluation",
+          "[Evaluator][Math operations evaluating]") {
+    Evaluator EvaluatorTestsEvaluator;
+
+    std::string expr = "-200.5 * 2.25 * -4.1 * -5.6";
+
+    std::string parseExpr = expr;
+    parseExpr.push_back(EOF);
+
+    const TokenContainer& tokens = EvaluatorTestsLexer.tokenize(parseExpr);
+
+    ASTNode* root = EvaluatorTestsParser.parse(tokens);
+
+    std::string result = EvaluatorTestsEvaluator.Evaluate(root);
+    std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
+
+    REQUIRE(result == properResult);
+}
+
+TEST_CASE("Declare & assign float point number value to variable", "[Evaluator]") {
+    Evaluator EvaluatorTestsEvaluator;
+
+    double a = 200.25;
+
+    std::string expr1 = "var a = 200.25";
+    std::string expr2 = "a";
+
+    expr1.push_back(EOF);
+    expr2.push_back(EOF);
+
+    const TokenContainer& tokensExpr1 = EvaluatorTestsLexer.tokenize(expr1);
+    const TokenContainer& tokensExpr2 = EvaluatorTestsLexer.tokenize(expr2);
+
+    // declare and assign var evaluate
+    EvaluatorTestsEvaluator.Evaluate(EvaluatorTestsParser.parse(tokensExpr1));
+
+    ASTNode* root = EvaluatorTestsParser.parse(tokensExpr2);
+
+    std::string result = EvaluatorTestsEvaluator.Evaluate(root);
+    std::string properResult = std::to_string(a);
+
+    REQUIRE(result == properResult);
+}
+
+TEST_CASE("Declare & assign negative float point number value to variable", "[Evaluator]") {
+    Evaluator EvaluatorTestsEvaluator;
+
+    double a = -200.25;
+
+    std::string expr1 = "var a = -200.25";
+    std::string expr2 = "a";
+
+    expr1.push_back(EOF);
+    expr2.push_back(EOF);
+
+    const TokenContainer& tokensExpr1 = EvaluatorTestsLexer.tokenize(expr1);
+    const TokenContainer& tokensExpr2 = EvaluatorTestsLexer.tokenize(expr2);
+
+    // declare and assign var evaluate
+    EvaluatorTestsEvaluator.Evaluate(EvaluatorTestsParser.parse(tokensExpr1));
+
+    ASTNode* root = EvaluatorTestsParser.parse(tokensExpr2);
+
+    std::string result = EvaluatorTestsEvaluator.Evaluate(root);
+    std::string properResult = std::to_string(a);
+
+    REQUIRE(result == properResult);
 }
