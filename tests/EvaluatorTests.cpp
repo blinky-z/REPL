@@ -26,6 +26,8 @@ TEST_CASE("Addition Evaluation", "[Evaluator][Math operations evaluating]") {
     std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
 
     REQUIRE(result == properResult);
+
+    delete root;
 }
 
 TEST_CASE("Subtraction Evaluation", "[Evaluator][Math operations evaluating]") {
@@ -44,6 +46,8 @@ TEST_CASE("Subtraction Evaluation", "[Evaluator][Math operations evaluating]") {
     std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
 
     REQUIRE(result == properResult);
+
+    delete root;
 }
 
 TEST_CASE("Multiplication Evaluation", "[Evaluator][Math operations evaluating]") {
@@ -62,6 +66,8 @@ TEST_CASE("Multiplication Evaluation", "[Evaluator][Math operations evaluating]"
     std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
 
     REQUIRE(result == properResult);
+
+    delete root;
 }
 
 TEST_CASE("Division Evaluation", "[Evaluator][Math operations evaluating]") {
@@ -80,6 +86,8 @@ TEST_CASE("Division Evaluation", "[Evaluator][Math operations evaluating]") {
     std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
 
     REQUIRE(result == properResult);
+
+    delete root;
 }
 
 TEST_CASE("Multiplication with Sum Parentheses Evaluation", "[Evaluator][Math operations evaluating]") {
@@ -98,6 +106,8 @@ TEST_CASE("Multiplication with Sum Parentheses Evaluation", "[Evaluator][Math op
     std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
 
     REQUIRE(result == properResult);
+
+    delete root;
 }
 
 TEST_CASE("Multiplication with Difference Parentheses Evaluation", "[Evaluator][Math operations evaluating]") {
@@ -116,6 +126,8 @@ TEST_CASE("Multiplication with Difference Parentheses Evaluation", "[Evaluator][
     std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
 
     REQUIRE(result == properResult);
+
+    delete root;
 }
 
 TEST_CASE("Division with Sum Parentheses Evaluation", "[Evaluator][Math operations evaluating]") {
@@ -134,6 +146,8 @@ TEST_CASE("Division with Sum Parentheses Evaluation", "[Evaluator][Math operatio
     std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
 
     REQUIRE(result == properResult);
+
+    delete root;
 }
 
 TEST_CASE("Division with Difference Parentheses Evaluation", "[Evaluator][Math operations evaluating]") {
@@ -152,6 +166,8 @@ TEST_CASE("Division with Difference Parentheses Evaluation", "[Evaluator][Math o
     std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
 
     REQUIRE(result == properResult);
+
+    delete root;
 }
 
 TEST_CASE("Multiple operations: Sum, Mul, Sub", "[Evaluator][Math operations evaluating]") {
@@ -170,6 +186,8 @@ TEST_CASE("Multiple operations: Sum, Mul, Sub", "[Evaluator][Math operations eva
     std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
 
     REQUIRE(result == properResult);
+
+    delete root;
 }
 
 TEST_CASE("Multiple operations: Sum, Div, Sub", "[Evaluator][Math operations evaluating]") {
@@ -188,6 +206,8 @@ TEST_CASE("Multiple operations: Sum, Div, Sub", "[Evaluator][Math operations eva
     std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
 
     REQUIRE(result == properResult);
+
+    delete root;
 }
 
 TEST_CASE("Multiple operations: Mul, Div, Sub", "[Evaluator][Math operations evaluating]") {
@@ -206,6 +226,8 @@ TEST_CASE("Multiple operations: Mul, Div, Sub", "[Evaluator][Math operations eva
     std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
 
     REQUIRE(result == properResult);
+
+    delete root;
 }
 
 TEST_CASE("Multiple operations: Mul, Div, Sum", "[Evaluator][Math operations evaluating]") {
@@ -224,6 +246,8 @@ TEST_CASE("Multiple operations: Mul, Div, Sum", "[Evaluator][Math operations eva
     std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
 
     REQUIRE(result == properResult);
+
+    delete root;
 }
 
 TEST_CASE("Multiple operations with single parentheses: Mul, Sub, Add", "[Evaluator][Math operations evaluating]") {
@@ -242,6 +266,8 @@ TEST_CASE("Multiple operations with single parentheses: Mul, Sub, Add", "[Evalua
     std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
 
     REQUIRE(result == properResult);
+
+    delete root;
 }
 
 TEST_CASE("Multiple operations with single parentheses: Div, Add, Mul", "[Evaluator][Math operations evaluating]") {
@@ -260,6 +286,8 @@ TEST_CASE("Multiple operations with single parentheses: Div, Add, Mul", "[Evalua
     std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
 
     REQUIRE(result == properResult);
+
+    delete root;
 }
 
 TEST_CASE("Multiple operations with multiple parentheses", "[Evaluator][Math operations evaluating]") {
@@ -278,6 +306,8 @@ TEST_CASE("Multiple operations with multiple parentheses", "[Evaluator][Math ope
     std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
 
     REQUIRE(result == properResult);
+
+    delete root;
 }
 
 TEST_CASE("Addition with using of variables: Declare & Assign variable in single expr", "[Evaluator]") {
@@ -297,14 +327,18 @@ TEST_CASE("Addition with using of variables: Declare & Assign variable in single
     const TokenContainer& tokensExpr2 = EvaluatorTestsLexer.tokenize(parseExpr2);
 
     // declare var evaluate
-    EvaluatorTestsEvaluator.Evaluate(EvaluatorTestsParser.parse(tokensExpr1));
+    ASTNode* root1 = EvaluatorTestsParser.parse(tokensExpr1);
+    EvaluatorTestsEvaluator.Evaluate(root1);
 
-    ASTNode* root = EvaluatorTestsParser.parse(tokensExpr2);
+    ASTNode* root2 = EvaluatorTestsParser.parse(tokensExpr2);
 
-    std::string result = EvaluatorTestsEvaluator.Evaluate(root);
+    std::string result = EvaluatorTestsEvaluator.Evaluate(root2);
     std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
 
     REQUIRE(result == properResult);
+
+    delete root1;
+    delete root2;
 }
 
 TEST_CASE("Declare & assign variable in single expr", "[Evaluator]") {
@@ -322,14 +356,18 @@ TEST_CASE("Declare & assign variable in single expr", "[Evaluator]") {
     const TokenContainer& tokensExpr2 = EvaluatorTestsLexer.tokenize(expr2);
 
     // declare and assign var evaluate
-    EvaluatorTestsEvaluator.Evaluate(EvaluatorTestsParser.parse(tokensExpr1));
+    ASTNode* root1 = EvaluatorTestsParser.parse(tokensExpr1);
+    EvaluatorTestsEvaluator.Evaluate(root1);
 
-    ASTNode* root = EvaluatorTestsParser.parse(tokensExpr2);
+    ASTNode* root2 = EvaluatorTestsParser.parse(tokensExpr2);
 
-    std::string result = EvaluatorTestsEvaluator.Evaluate(root);
+    std::string result = EvaluatorTestsEvaluator.Evaluate(root2);
     std::string properResult = std::to_string(a);
 
     REQUIRE(result == properResult);
+
+    delete root1;
+    delete root2;
 }
 
 TEST_CASE("Declare & assign variable in separate expr", "[Evaluator]") {
@@ -350,17 +388,23 @@ TEST_CASE("Declare & assign variable in separate expr", "[Evaluator]") {
     const TokenContainer& tokensExpr3 = EvaluatorTestsLexer.tokenize(expr3);
 
     // declare var evaluate
-    EvaluatorTestsEvaluator.Evaluate(EvaluatorTestsParser.parse(tokensExpr1));
+    ASTNode* root1 = EvaluatorTestsParser.parse(tokensExpr1);
+    EvaluatorTestsEvaluator.Evaluate(root1);
 
     // assign var evaluate
-    EvaluatorTestsEvaluator.Evaluate(EvaluatorTestsParser.parse(tokensExpr2));
+    ASTNode* root2 = EvaluatorTestsParser.parse(tokensExpr2);
+    EvaluatorTestsEvaluator.Evaluate(root2);
 
-    ASTNode* root = EvaluatorTestsParser.parse(tokensExpr3);
+    ASTNode* root3 = EvaluatorTestsParser.parse(tokensExpr3);
 
-    std::string result = EvaluatorTestsEvaluator.Evaluate(root);
+    std::string result = EvaluatorTestsEvaluator.Evaluate(root3);
     std::string properResult = std::to_string(a);
 
     REQUIRE(result == properResult);
+
+    delete root1;
+    delete root2;
+    delete root3;
 }
 
 TEST_CASE("Addition operations with using of variables: Declare & Assign variable in separate expr", "[Evaluator]") {
@@ -381,17 +425,23 @@ TEST_CASE("Addition operations with using of variables: Declare & Assign variabl
     const TokenContainer& tokensExpr3 = EvaluatorTestsLexer.tokenize(expr3);
 
     // declare var evaluate
-    EvaluatorTestsEvaluator.Evaluate(EvaluatorTestsParser.parse(tokensExpr1));
+    ASTNode* root1 = EvaluatorTestsParser.parse(tokensExpr1);
+    EvaluatorTestsEvaluator.Evaluate(root1);
 
     // assign var evaluate
-    EvaluatorTestsEvaluator.Evaluate(EvaluatorTestsParser.parse(tokensExpr2));
+    ASTNode* root2 = EvaluatorTestsParser.parse(tokensExpr2);
+    EvaluatorTestsEvaluator.Evaluate(root2);
 
-    ASTNode* root = EvaluatorTestsParser.parse(tokensExpr3);
+    ASTNode* root3 = EvaluatorTestsParser.parse(tokensExpr3);
 
-    std::string result = EvaluatorTestsEvaluator.Evaluate(root);
+    std::string result = EvaluatorTestsEvaluator.Evaluate(root3);
     std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
 
     REQUIRE(result == properResult);
+
+    delete root1;
+    delete root2;
+    delete root3;
 }
 
 TEST_CASE("Assign variable to the other variable", "[Evaluator]") {
@@ -413,17 +463,23 @@ TEST_CASE("Assign variable to the other variable", "[Evaluator]") {
     const TokenContainer& tokensExpr3 = EvaluatorTestsLexer.tokenize(expr3);
 
     // declare var a evaluate
-    EvaluatorTestsEvaluator.Evaluate(EvaluatorTestsParser.parse(tokensExpr1));
+    ASTNode* root1 = EvaluatorTestsParser.parse(tokensExpr1);
+    EvaluatorTestsEvaluator.Evaluate(root1);
 
     // declare var b and assign to var a evaluate
-    EvaluatorTestsEvaluator.Evaluate(EvaluatorTestsParser.parse(tokensExpr2));
+    ASTNode* root2 = EvaluatorTestsParser.parse(tokensExpr2);
+    EvaluatorTestsEvaluator.Evaluate(root2);
 
-    ASTNode* root = EvaluatorTestsParser.parse(tokensExpr3);
+    ASTNode* root3 = EvaluatorTestsParser.parse(tokensExpr3);
 
-    std::string result = EvaluatorTestsEvaluator.Evaluate(root);
+    std::string result = EvaluatorTestsEvaluator.Evaluate(root3);
     std::string properResult = std::to_string(b);
 
     REQUIRE(result == properResult);
+
+    delete root1;
+    delete root2;
+    delete root3;
 }
 
 TEST_CASE("Make variable negative by multiplication on -1 using unary minus", "[Evaluator]") {
@@ -444,17 +500,23 @@ TEST_CASE("Make variable negative by multiplication on -1 using unary minus", "[
     const TokenContainer& tokensExpr3 = EvaluatorTestsLexer.tokenize(expr3);
 
     // declare and assign var evaluate
-    EvaluatorTestsEvaluator.Evaluate(EvaluatorTestsParser.parse(tokensExpr1));
+    ASTNode* root1 = EvaluatorTestsParser.parse(tokensExpr1);
+    EvaluatorTestsEvaluator.Evaluate(root1);
 
     // multiplication on -1
-    EvaluatorTestsEvaluator.Evaluate(EvaluatorTestsParser.parse(tokensExpr2));
+    ASTNode* root2 = EvaluatorTestsParser.parse(tokensExpr2);
+    EvaluatorTestsEvaluator.Evaluate(root2);
 
-    ASTNode* root = EvaluatorTestsParser.parse(tokensExpr3);
+    ASTNode* root3 = EvaluatorTestsParser.parse(tokensExpr3);
 
-    std::string result = EvaluatorTestsEvaluator.Evaluate(root);
+    std::string result = EvaluatorTestsEvaluator.Evaluate(root3);
     std::string properResult = std::to_string(a);
 
     REQUIRE(result == properResult);
+
+    delete root1;
+    delete root2;
+    delete root3;
 }
 
 TEST_CASE("Make variable negative by assigning on other negative variable using unary minus", "[Evaluator]") {
@@ -476,17 +538,23 @@ TEST_CASE("Make variable negative by assigning on other negative variable using 
     const TokenContainer& tokensExpr3 = EvaluatorTestsLexer.tokenize(expr3);
 
     // declare and assign var a evaluate
-    EvaluatorTestsEvaluator.Evaluate(EvaluatorTestsParser.parse(tokensExpr1));
+    ASTNode* root1 = EvaluatorTestsParser.parse(tokensExpr1);
+    EvaluatorTestsEvaluator.Evaluate(root1);
 
     // declare and assign var b evaluate
-    EvaluatorTestsEvaluator.Evaluate(EvaluatorTestsParser.parse(tokensExpr2));
+    ASTNode* root2 = EvaluatorTestsParser.parse(tokensExpr2);
+    EvaluatorTestsEvaluator.Evaluate(root2);
 
-    ASTNode* root = EvaluatorTestsParser.parse(tokensExpr3);
+    ASTNode* root3 = EvaluatorTestsParser.parse(tokensExpr3);
 
-    std::string result = EvaluatorTestsEvaluator.Evaluate(root);
+    std::string result = EvaluatorTestsEvaluator.Evaluate(root3);
     std::string properResult = std::to_string(b);
 
     REQUIRE(result == properResult);
+
+    delete root1;
+    delete root2;
+    delete root3;
 }
 
 TEST_CASE("Get throw on using of undeclared variable", "[Evaluator]") {
@@ -499,6 +567,8 @@ TEST_CASE("Get throw on using of undeclared variable", "[Evaluator]") {
     ASTNode* root = EvaluatorTestsParser.parse(tokens);
 
     REQUIRE_THROWS(EvaluatorTestsEvaluator.Evaluate(root));
+
+    delete root;
 }
 
 TEST_CASE("Get throw on using of undeclared variable in math bin operation", "[Evaluator]") {
@@ -511,6 +581,8 @@ TEST_CASE("Get throw on using of undeclared variable in math bin operation", "[E
     ASTNode* root = EvaluatorTestsParser.parse(tokens);
 
     REQUIRE_THROWS(EvaluatorTestsEvaluator.Evaluate(root));
+
+    delete root;
 }
 
 TEST_CASE("Get throw on assigning undeclared variable to variable", "[Evaluator]") {
@@ -523,6 +595,8 @@ TEST_CASE("Get throw on assigning undeclared variable to variable", "[Evaluator]
     ASTNode* root = EvaluatorTestsParser.parse(tokens);
 
     REQUIRE_THROWS(EvaluatorTestsEvaluator.Evaluate(root));
+
+    delete root;
 }
 
 TEST_CASE("Multiplication with using of float point numbers Evaluation", "[Evaluator][Math operations evaluating]") {
@@ -541,6 +615,8 @@ TEST_CASE("Multiplication with using of float point numbers Evaluation", "[Evalu
     std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
 
     REQUIRE(result == properResult);
+
+    delete root;
 }
 
 TEST_CASE("Multiplication with using of negative float point numbers Evaluation",
@@ -560,6 +636,8 @@ TEST_CASE("Multiplication with using of negative float point numbers Evaluation"
     std::string properResult = std::to_string(te_interp(expr.c_str(), nullptr));
 
     REQUIRE(result == properResult);
+
+    delete root;
 }
 
 TEST_CASE("Declare & assign float point number value to variable", "[Evaluator]") {
@@ -577,14 +655,18 @@ TEST_CASE("Declare & assign float point number value to variable", "[Evaluator]"
     const TokenContainer& tokensExpr2 = EvaluatorTestsLexer.tokenize(expr2);
 
     // declare and assign var evaluate
-    EvaluatorTestsEvaluator.Evaluate(EvaluatorTestsParser.parse(tokensExpr1));
+    ASTNode* root1 = EvaluatorTestsParser.parse(tokensExpr1);
+    EvaluatorTestsEvaluator.Evaluate(root1);
 
-    ASTNode* root = EvaluatorTestsParser.parse(tokensExpr2);
+    ASTNode* root2 = EvaluatorTestsParser.parse(tokensExpr2);
 
-    std::string result = EvaluatorTestsEvaluator.Evaluate(root);
+    std::string result = EvaluatorTestsEvaluator.Evaluate(root2);
     std::string properResult = std::to_string(a);
 
     REQUIRE(result == properResult);
+
+    delete root1;
+    delete root2;
 }
 
 TEST_CASE("Declare & assign negative float point number value to variable", "[Evaluator]") {
@@ -602,12 +684,16 @@ TEST_CASE("Declare & assign negative float point number value to variable", "[Ev
     const TokenContainer& tokensExpr2 = EvaluatorTestsLexer.tokenize(expr2);
 
     // declare and assign var evaluate
-    EvaluatorTestsEvaluator.Evaluate(EvaluatorTestsParser.parse(tokensExpr1));
+    ASTNode* root1 = EvaluatorTestsParser.parse(tokensExpr1);
+    EvaluatorTestsEvaluator.Evaluate(root1);
 
-    ASTNode* root = EvaluatorTestsParser.parse(tokensExpr2);
+    ASTNode* root2 = EvaluatorTestsParser.parse(tokensExpr2);
 
-    std::string result = EvaluatorTestsEvaluator.Evaluate(root);
+    std::string result = EvaluatorTestsEvaluator.Evaluate(root2);
     std::string properResult = std::to_string(a);
 
     REQUIRE(result == properResult);
+
+    delete root1;
+    delete root2;
 }

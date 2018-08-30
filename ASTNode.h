@@ -134,6 +134,7 @@ struct DeclVarNode : ASTNode {
     }
 
     ~DeclVarNode() {
+        delete id;
         delete expr;
     }
 

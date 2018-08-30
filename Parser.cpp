@@ -25,6 +25,8 @@ ASTNode* Parser::expressionTail(ASTNode* lvalue) {
         expressionTailNode = expressionTail(currentBinOpNode);
 
         if (expressionTailNode->type == Empty) {
+            delete expressionTailNode;
+
             return currentBinOpNode;
         } else {
             return expressionTailNode;
@@ -36,6 +38,8 @@ ASTNode* Parser::expressionTail(ASTNode* lvalue) {
         expressionTailNode = expressionTail(currentBinOpNode);
 
         if (expressionTailNode->type == Empty) {
+            delete expressionTailNode;
+
             return currentBinOpNode;
         } else {
             return expressionTailNode;
@@ -72,6 +76,8 @@ ASTNode* Parser::termTail(ASTNode* lvalue) {
         termTailNode = termTail(currentBinOpNode);
 
         if (termTailNode->type == Empty) {
+            delete termTailNode;
+
             return currentBinOpNode;
         } else {
             return termTailNode;
@@ -83,6 +89,8 @@ ASTNode* Parser::termTail(ASTNode* lvalue) {
         termTailNode = termTail(currentBinOpNode);
 
         if (termTailNode->type == Empty) {
+            delete termTailNode;
+
             return currentBinOpNode;
         } else {
             return termTailNode;
