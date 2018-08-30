@@ -406,6 +406,7 @@ TEST_CASE("Assign variable to the other variable", "[Evaluator]") {
 
     expr1.push_back(EOF);
     expr2.push_back(EOF);
+    expr3.push_back(EOF);
 
     const TokenContainer& tokensExpr1 = EvaluatorTestsLexer.tokenize(expr1);
     const TokenContainer& tokensExpr2 = EvaluatorTestsLexer.tokenize(expr2);
@@ -492,6 +493,7 @@ TEST_CASE("Get throw on using of undeclared variable", "[Evaluator]") {
     Evaluator EvaluatorTestsEvaluator;
 
     std::string expr = "a";
+    expr.push_back(EOF);
 
     const TokenContainer& tokens = EvaluatorTestsLexer.tokenize(expr);
     ASTNode* root = EvaluatorTestsParser.parse(tokens);
@@ -503,6 +505,7 @@ TEST_CASE("Get throw on using of undeclared variable in math bin operation", "[E
     Evaluator EvaluatorTestsEvaluator;
 
     std::string expr = "a + 4";
+    expr.push_back(EOF);
 
     const TokenContainer& tokens = EvaluatorTestsLexer.tokenize(expr);
     ASTNode* root = EvaluatorTestsParser.parse(tokens);
@@ -514,6 +517,7 @@ TEST_CASE("Get throw on assigning undeclared variable to variable", "[Evaluator]
     Evaluator EvaluatorTestsEvaluator;
 
     std::string expr = "var a = b";
+    expr.push_back(EOF);
 
     const TokenContainer& tokens = EvaluatorTestsLexer.tokenize(expr);
     ASTNode* root = EvaluatorTestsParser.parse(tokens);
