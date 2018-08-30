@@ -329,3 +329,126 @@ TEST_CASE("Expressions with using of variables and negative numbers", "[Lexer][M
         }
     }
 }
+
+TEST_CASE("Tokenize float point number", "[Lexer][Math operations tokenizing]") {
+    std::string expr = "2.2";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::Num, "2.2"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    REQUIRE(tokens.size() == properTokens.size());
+    if (tokens.size() == properTokens.size()) {
+        unsigned long currentTokenNum = 0;
+        for (; currentTokenNum < tokens.size(); currentTokenNum++) {
+            REQUIRE(tokens[currentTokenNum].Type == properTokens[currentTokenNum].Type);
+            REQUIRE(tokens[currentTokenNum].Value == properTokens[currentTokenNum].Value);
+        }
+    }
+}
+
+TEST_CASE("Tokenize negative float point number", "[Lexer][Math operations tokenizing]") {
+    std::string expr = "-2.2";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::Sub, "-"});
+    properTokens.emplace_back(Token{TokenTypes::Num, "2.2"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    REQUIRE(tokens.size() == properTokens.size());
+    if (tokens.size() == properTokens.size()) {
+        unsigned long currentTokenNum = 0;
+        for (; currentTokenNum < tokens.size(); currentTokenNum++) {
+            REQUIRE(tokens[currentTokenNum].Type == properTokens[currentTokenNum].Type);
+            REQUIRE(tokens[currentTokenNum].Value == properTokens[currentTokenNum].Value);
+        }
+    }
+}
+
+TEST_CASE("Expressions with using of float point numbers", "[Lexer][Math operations tokenizing]") {
+    std::string expr = "a * -5.2 / 3.1";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::Id, "a"});
+    properTokens.emplace_back(Token{TokenTypes::Mul, "*"});
+    properTokens.emplace_back(Token{TokenTypes::Sub, "-"});
+    properTokens.emplace_back(Token{TokenTypes::Num, "5.2"});
+    properTokens.emplace_back(Token{TokenTypes::Div, "/"});
+    properTokens.emplace_back(Token{TokenTypes::Num, "3.1"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    REQUIRE(tokens.size() == properTokens.size());
+    if (tokens.size() == properTokens.size()) {
+        unsigned long currentTokenNum = 0;
+        for (; currentTokenNum < tokens.size(); currentTokenNum++) {
+            REQUIRE(tokens[currentTokenNum].Type == properTokens[currentTokenNum].Type);
+            REQUIRE(tokens[currentTokenNum].Value == properTokens[currentTokenNum].Value);
+        }
+    }
+}
+
+TEST_CASE("Id declare & assign float point number tokenizing", "[Lexer]") {
+    std::string expr = "var a = 3.2";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::DeclareId, "var"});
+    properTokens.emplace_back(Token{TokenTypes::Id, "a"});
+    properTokens.emplace_back(Token{TokenTypes::Assign, "="});
+    properTokens.emplace_back(Token{TokenTypes::Num, "3.2"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    REQUIRE(tokens.size() == properTokens.size());
+    if (tokens.size() == properTokens.size()) {
+        unsigned long currentTokenNum = 0;
+        for (; currentTokenNum < tokens.size(); currentTokenNum++) {
+            REQUIRE(tokens[currentTokenNum].Type == properTokens[currentTokenNum].Type);
+            REQUIRE(tokens[currentTokenNum].Value == properTokens[currentTokenNum].Value);
+        }
+    }
+}
+
+TEST_CASE("Id declare & assign negative float point number tokenizing", "[Lexer]") {
+    std::string expr = "var a = -3.2";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::DeclareId, "var"});
+    properTokens.emplace_back(Token{TokenTypes::Id, "a"});
+    properTokens.emplace_back(Token{TokenTypes::Assign, "="});
+    properTokens.emplace_back(Token{TokenTypes::Sub, "-"});
+    properTokens.emplace_back(Token{TokenTypes::Num, "3.2"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    REQUIRE(tokens.size() == properTokens.size());
+    if (tokens.size() == properTokens.size()) {
+        unsigned long currentTokenNum = 0;
+        for (; currentTokenNum < tokens.size(); currentTokenNum++) {
+            REQUIRE(tokens[currentTokenNum].Type == properTokens[currentTokenNum].Type);
+            REQUIRE(tokens[currentTokenNum].Value == properTokens[currentTokenNum].Value);
+        }
+    }
+}
