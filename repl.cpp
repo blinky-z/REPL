@@ -15,22 +15,25 @@ int main() {
         if (std::cin.eof()) {
             exit(EXIT_SUCCESS);
         }
-        input.push_back(EOF);
 
-        const TokenContainer& tokens = lexer.tokenize(input);
+        if (input.size() != 0) {
+            input.push_back(EOF);
 
-        ASTNode* root = parser.parse(tokens);
+            const TokenContainer& tokens = lexer.tokenize(input);
 
-        std::string result = evaluator.Evaluate(root);
-        input.pop_back();
+            ASTNode* root = parser.parse(tokens);
 
-        // check if result is number
-        if (result.find_first_not_of(".-0123456789") == std::string::npos) {
-            std::cout << std::stod(result) << std::endl;
-        } else {
-            std::cout << result << std::endl;
+            std::string result = evaluator.Evaluate(root);
+            input.pop_back();
+
+            // check if result is number
+            if (result.find_first_not_of(".-0123456789") == std::string::npos) {
+                std::cout << std::stod(result) << std::endl;
+            } else {
+                std::cout << result << std::endl;
+            }
+
+            delete root;
         }
-
-        delete root;
     }
 }
