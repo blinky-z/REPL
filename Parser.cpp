@@ -98,7 +98,7 @@ ASTNode* Parser::factor() {
     const Token& token = tokens.getNextToken();
 
     if (token.Type == TokenTypes::Num) {
-        int value = getNumTokenValue(token);
+        double value = getNumTokenValue(token);
 
         return createNumberNode(value);
     } else if (token.Type == TokenTypes::Sub) {
@@ -203,7 +203,7 @@ BinOpNode* Parser::createBinOpNode(ASTNodeBinOpType type, ASTNode* left, ASTNode
     return node;
 }
 
-NumberNode* Parser::createNumberNode(int value) {
+NumberNode* Parser::createNumberNode(double value) {
     NumberNode* node = new NumberNode;
     node->value = value;
 
@@ -232,6 +232,6 @@ ASTNode* Parser::createEmptyNode() {
     return node;
 }
 
-int Parser::getNumTokenValue(const Token& numToken) {
-    return std::stoi(numToken.Value);
+double Parser::getNumTokenValue(const Token& numToken) {
+    return std::stod(numToken.Value);
 }

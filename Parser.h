@@ -16,7 +16,7 @@ class Parser {
 private:
     BinOpNode* createBinOpNode(ASTNodeBinOpType type, ASTNode* left, ASTNode* right);
 
-    NumberNode* createNumberNode(int value);
+    NumberNode* createNumberNode(double value);
 
     IdentifierNode* createIdentifierNode(std::string name);
 
@@ -24,7 +24,7 @@ private:
 
     ASTNode* createEmptyNode();
 
-    int getNumTokenValue(const Token& numToken);
+    double getNumTokenValue(const Token& numToken);
 
     ASTNode* expression();
 
