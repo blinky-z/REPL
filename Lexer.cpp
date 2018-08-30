@@ -74,7 +74,7 @@ TokenContainer Lexer::tokenize(const std::string& src) {
             tokens.addNewToken(Token{TokenTypes::eof, "EOF"});
             break;
         } else {
-            throw std::runtime_error(std::string("Invalid char: ") + *currentChar);
+            throw std::runtime_error(std::string("Invalid char ") + "'" + *currentChar + "'");
         }
 
         tokens.addNewToken(token);
