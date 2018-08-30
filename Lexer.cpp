@@ -7,7 +7,7 @@ TokenContainer Lexer::tokenize(const std::string& src) {
 
     TokenContainer tokens;
 
-    while (*currentChar != EOF) {
+    while (true) {
         Token token;
 
         while (*currentChar == ' ') {
@@ -70,12 +70,14 @@ TokenContainer Lexer::tokenize(const std::string& src) {
         } else if (*currentChar == ';') {
             token.Type = TokenTypes::SEMICOLON;
             token.Value = ";";
+        } else if (*currentChar == EOF) {
+            tokens.addNewToken(Token{TokenTypes::eof, "EOF"});
+            break;
         }
 
         tokens.addNewToken(token);
         currentChar++;
     }
-    tokens.addNewToken(Token{TokenTypes::eof, "EOF"});
 
     return tokens;
 }
