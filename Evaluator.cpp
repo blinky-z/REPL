@@ -1,47 +1,63 @@
 #include "Evaluator.h"
 
 void Evaluator::EvaluateAssignValue(BinOpNode* subtree) {
-    IdentifierNode* id = static_cast<IdentifierNode*>(subtree->left);
+    IdentifierNode* id = dynamic_cast<IdentifierNode*>(subtree->left);
 
-    if (symbolTable.isIdExist(id->name)) {
-        double value = EvaluateMathExpr(subtree->right);
+    if (id != nullptr) {
+        if (symbolTable.isIdExist(id->name)) {
+            double value = EvaluateMathExpr(subtree->right);
 
-        symbolTable.setIdValueDouble(id->name, value);
+            symbolTable.setIdValueDouble(id->name, value);
+        } else {
+            throw std::runtime_error("Can't assign value to undeclared identifier '" + id->name + "'");
+        }
     } else {
-        throw std::runtime_error("Can't assign value to undeclared identifier '" + id->name + "'");
+        throw std::runtime_error("Invalid BinOp Assign Node");
     }
 }
 
 double Evaluator::EvaluateMathExpr(ASTNode* subtree) {
     if (subtree->type == NumberValue) {
-        NumberNode* node = static_cast<NumberNode*>(subtree);
+        NumberNode* node = dynamic_cast<NumberNode*>(subtree);
 
-        return EvaluateNumberValue(node);
-    } else if (subtree->type == Id) {
-        IdentifierNode* node = static_cast<IdentifierNode*>(subtree);
-
-        if (symbolTable.isIdExist(node->name)) {
-            return EvaluateId(node);
+        if (node != nullptr) {
+            return EvaluateNumberValue(node);
         } else {
-            throw std::runtime_error("Use of undeclared identifier '" + node->name + "'");
+            throw std::runtime_error("Invalid NumberValue Node");
+        }
+    } else if (subtree->type == Id) {
+        IdentifierNode* node = dynamic_cast<IdentifierNode*>(subtree);
+
+        if (node != nullptr) {
+            if (symbolTable.isIdExist(node->name)) {
+                return EvaluateId(node);
+            } else {
+                throw std::runtime_error("Use of undeclared identifier '" + node->name + "'");
+            }
+        } else {
+            throw std::runtime_error("Invalid Id Node");
         }
     } else if (subtree->type == BinOp) {
-        BinOpNode* node = static_cast<BinOpNode*>(subtree);
+        BinOpNode* node = dynamic_cast<BinOpNode*>(subtree);
 
-        double leftValue = EvaluateMathExpr(node->left);
-        double rightValue = EvaluateMathExpr(node->right);
+        if (node != nullptr) {
+            double leftValue = EvaluateMathExpr(node->left);
+            double rightValue = EvaluateMathExpr(node->right);
 
-        switch (node->binOpType) {
-            case OperatorPlus:
-                return leftValue + rightValue;
-            case OperatorMinus:
-                return leftValue - rightValue;
-            case OperatorMul:
-                return leftValue * rightValue;
-            case OperatorDiv:
-                return leftValue / rightValue;
-            default:
-                throw std::runtime_error("Invalid binary operation");
+            switch (node->binOpType) {
+                case OperatorPlus:
+                    return leftValue + rightValue;
+                case OperatorMinus:
+                    return leftValue - rightValue;
+                case OperatorMul:
+                    return leftValue * rightValue;
+                case OperatorDiv:
+                    return leftValue / rightValue;
+                default:
+                    throw std::runtime_error("Invalid binary operation");
+            }
+        } else {
+            throw std::runtime_error("Invalid BinOp Math operation Node");
         }
     } else {
         throw std::runtime_error("Invalid AST");
@@ -65,32 +81,49 @@ void Evaluator::EvaluateDeclVar(DeclVarNode* subtree) {
 
 std::string Evaluator::Evaluate(ASTNode* root) {
     if (root->type == BinOp) {
-        BinOpNode* node = static_cast<BinOpNode*>(root);
+        BinOpNode* node = dynamic_cast<BinOpNode*>(root);
 
-        if (node->binOpType == OperatorAssign) {
-            EvaluateAssignValue(node);
-            return "Assign Variable";
+        if (node != nullptr) {
+            if (node->binOpType == OperatorAssign) {
+                EvaluateAssignValue(node);
+                return "Assign Variable";
+            } else {
+                return std::to_string(EvaluateMathExpr(root));
+            }
         } else {
-            return std::to_string(EvaluateMathExpr(root));
+            throw std::runtime_error("Invalid BinOp Node");
         }
     } else if (root->type == DeclVar) {
-        DeclVarNode* node = static_cast<DeclVarNode*>(root);
+        DeclVarNode* node = dynamic_cast<DeclVarNode*>(root);
 
-        EvaluateDeclVar(node);
-        return "Declare Variable";
-    } else if (root->type == NumberValue) {
-        NumberNode* node = static_cast<NumberNode*>(root);
-
-        return std::to_string(EvaluateNumberValue(node));
-    } else if (root->type == Id) {
-        IdentifierNode* node = static_cast<IdentifierNode*>(root);
-
-        if (symbolTable.isIdExist(node->name)) {
-            return std::to_string(EvaluateId(node));
+        if (node != nullptr) {
+            EvaluateDeclVar(node);
+            return "Declare Variable";
         } else {
-            throw std::runtime_error("Use of undeclared identifier '" + node->name + "'");
+            throw std::runtime_error("Invalid DeclVar Node");
         }
 
+    } else if (root->type == NumberValue) {
+        NumberNode* node = dynamic_cast<NumberNode*>(root);
+
+        if (node != nullptr) {
+            return std::to_string(EvaluateNumberValue(node));
+        } else {
+            throw std::runtime_error("Invalid NumberValue Node");
+        }
+
+    } else if (root->type == Id) {
+        IdentifierNode* node = dynamic_cast<IdentifierNode*>(root);
+
+        if (node != nullptr) {
+            if (symbolTable.isIdExist(node->name)) {
+                return std::to_string(EvaluateId(node));
+            } else {
+                throw std::runtime_error("Use of undeclared identifier '" + node->name + "'");
+            }
+        } else {
+            throw std::runtime_error("Invalid Id Node");
+        }
     } else {
         throw std::runtime_error("Invalid AST");
     }
