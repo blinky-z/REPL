@@ -17,6 +17,10 @@ public:
     void returnToken();
 
     void addNewToken(Token token);
+
+    unsigned long size() {
+        return tokens.size();
+    }
 };
 
 
