@@ -254,5 +254,11 @@ double Parser::getNumTokenValue(const Token& numToken) {
 }
 
 bool Parser::matchParseComplete() {
-    return tokens.getNextToken().Type == TokenTypes::eof;
+    const Token& currentToken = tokens.getNextToken();
+
+    if (currentToken.Type == TokenTypes::SEMICOLON) {
+        return tokens.getNextToken().Type == TokenTypes::eof;
+    } else {
+        return currentToken.Type == TokenTypes::eof;
+    }
 }
