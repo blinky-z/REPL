@@ -14,5 +14,37 @@ cd ~/REPL
 git clone https://github.com/blinky-z/REPL.git .
 ```
 
+СкомпилируйтеREPL:
+```
+g++ -std=c++11 -Wall -Wextra -Werror -o repl repl.cpp Token.h Identifier.h ASTNode.h TokenTypes.h Lexer.cpp Lexer.h Parser.cpp Parser.h Evaluator.cpp Evaluator.h TokenContainer.cpp TokenContainer.h SymbolTable.cpp SymbolTable.h
+```
+
+## Быстрый старт
+
+Объявление переменной:
+```
+var a;
+```
+
+Объявление и назначение переменной:
+```
+var a = 2;
+var b = a;
+```
+
+Назначение переменной:
+```
+var a
+a = 5
+```
+
+Вычисление математических выражений:
+```
+2 + 5
+(1 + 2) * -7
+var a = 6 / 3
+a + 3
+```
+
 ### Подробное описание работы REPL'а
 Более подробное описание вы можете найти в папке [docs](https://github.com/blinky-z/REPL/tree/master/docs/ru)
