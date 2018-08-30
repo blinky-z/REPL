@@ -20,7 +20,11 @@ double Evaluator::EvaluateMathExpr(ASTNode* subtree) {
     } else if (subtree->type == Id) {
         IdentifierNode* node = static_cast<IdentifierNode*>(subtree);
 
-        return EvaluateId(node);
+        if (symbolTable.isIdExist(node->name)) {
+            return EvaluateId(node);
+        } else {
+            throw std::runtime_error("Use of undeclared identifier '" + node->name + "'");
+        }
     } else if (subtree->type == BinOp) {
         BinOpNode* node = static_cast<BinOpNode*>(subtree);
 
@@ -65,7 +69,7 @@ std::string Evaluator::Evaluate(ASTNode* root) {
 
         if (node->binOpType == OperatorAssign) {
             EvaluateAssignValue(node);
-            return "Assign variable";
+            return "Assign Variable";
         } else {
             return std::to_string(EvaluateMathExpr(root));
         }
