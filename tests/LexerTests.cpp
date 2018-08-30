@@ -346,3 +346,10 @@ TEST_CASE("Expression with whitespaces after all chars tokenizing", "[Lexer][Mat
 
     matchTokens(tokens, properTokens);
 }
+
+TEST_CASE("Get throw on expression that contains unknown char", "[Lexer][Math operations tokenizing]") {
+    std::string expr = "1 + 2 ' ";
+    expr.push_back(EOF);
+
+    REQUIRE_THROWS(LexerTestsLexer.tokenize(expr));
+}
