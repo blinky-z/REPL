@@ -22,6 +22,8 @@ private:
 
     DeclVarNode* createDeclVarNode(IdentifierNode* id, ASTNode* expr);
 
+    ForLoopNode* createForLoopNode();
+
     ASTNode* createEmptyNode();
 
     double getNumTokenValue(const Token& numToken);
@@ -41,6 +43,8 @@ private:
     ASTNode* parseAssign();
 
     ASTNode* parseDeclVar();
+
+    ASTNode* parseForLoop();
 
     bool matchParseComplete();
 

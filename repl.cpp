@@ -3,6 +3,27 @@
 #include "Evaluator.h"
 #include <iostream>
 
+std::string readForLoop(const std::string input) {
+    std::string forLoopInput = input;
+
+    while (true) {
+        std::string currentInput;
+        getline(std::cin, currentInput);
+
+        if (!currentInput.empty()) {
+            forLoopInput += currentInput;
+        } else {
+            break;
+        }
+    }
+
+    return forLoopInput;
+}
+
+bool isInputForLoop(const std::string& input) {
+    return input.find("for") != std::string::npos;
+}
+
 int main() {
     Lexer lexer;
     Parser parser;
@@ -17,6 +38,10 @@ int main() {
         }
 
         if (input.size() != 0) {
+            if (isInputForLoop(input)) {
+                input = readForLoop(input);
+            }
+
             input.push_back(EOF);
 
             const TokenContainer& tokens = lexer.tokenize(input);

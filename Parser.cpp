@@ -170,6 +170,9 @@ ASTNode* Parser::parseDeclVar() {
     return createDeclVarNode(idNode, expr);
 }
 
+ASTNode* Parser::parseForLoop() {
+    return createForLoopNode();
+}
 
 ASTNode* Parser::parse(const TokenContainer& tokenizedSourceData) {
     tokens = tokenizedSourceData;
@@ -238,6 +241,12 @@ DeclVarNode* Parser::createDeclVarNode(IdentifierNode* id, ASTNode* expr) {
     DeclVarNode* node = new DeclVarNode;
     node->id = id;
     node->expr = expr;
+
+    return node;
+}
+
+ForLoopNode* Parser::createForLoopNode() {
+    ForLoopNode* node = new ForLoopNode;
 
     return node;
 }

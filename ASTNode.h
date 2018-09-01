@@ -12,9 +12,12 @@ enum ASTNodeType {
     Id,
     BinOp,
     NumberValue,
+    ForLoop
 };
 
 enum ASTNodeBinOpType {
+    OperatorLess,
+    OperatorGreater,
     OperatorAssign,
     OperatorPlus,
     OperatorMinus,
@@ -152,6 +155,18 @@ struct DeclVarNode : ASTNode {
             std::cout << "Empty expr" << std::endl;
         }
         std::cout << std::endl;
+    }
+};
+
+struct ForLoopNode : ASTNode {
+
+
+    ForLoopNode() {
+        type = ForLoop;
+    }
+
+    void print() override {
+
     }
 };
 
