@@ -353,3 +353,35 @@ TEST_CASE("Get throw on expression that contains unknown char", "[Lexer][Math op
 
     REQUIRE_THROWS(LexerTestsLexer.tokenize(expr));
 }
+
+TEST_CASE("Expression with using of operator LESS THAN", "[Lexer]") {
+    std::string expr = "1 < 2";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::Num, "1"});
+    properTokens.emplace_back(Token{TokenTypes::LESS, "<"});
+    properTokens.emplace_back(Token{TokenTypes::Num, "2"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
+
+TEST_CASE("Expression with using of operator GREATER THAN", "[Lexer]") {
+    std::string expr = "1 > 2";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::Num, "1"});
+    properTokens.emplace_back(Token{TokenTypes::GREATER, ">"});
+    properTokens.emplace_back(Token{TokenTypes::Num, "2"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
