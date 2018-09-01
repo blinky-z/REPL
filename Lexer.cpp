@@ -70,6 +70,12 @@ TokenContainer Lexer::tokenize(const std::string& src) {
         } else if (*currentChar == ';') {
             token.Type = TokenTypes::SEMICOLON;
             token.Value = ";";
+        } else if (*currentChar == '<') {
+            token.Type = TokenTypes::LESS;
+            token.Value = "<";
+        } else if (*currentChar == '>') {
+            token.Type = TokenTypes::GREATER;
+            token.Value = ">";
         } else if (*currentChar == EOF) {
             tokens.addNewToken(Token{TokenTypes::eof, "EOF"});
             break;
