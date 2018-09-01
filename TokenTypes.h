@@ -14,6 +14,8 @@ struct TokenTypes {
         ROUND_BRACKET_END,
         SQUARE_BRACKET_START,
         SQUARE_BRACKET_END,
+        LESS,
+        GREATER,
         SEMICOLON,
         Assign,
         Add,
