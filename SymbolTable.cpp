@@ -15,3 +15,11 @@ void SymbolTable::setIdValueDouble(std::string idName, double value) {
 double SymbolTable::getIdValueDouble(std::string idName) {
     return symbolTable[idName].NumValue;
 }
+
+bool SymbolTable::getIdValueBool(std::string idName) {
+    return symbolTable[idName].BoolValue;
+}
+
+void SymbolTable::setIdValueBool(std::string idName, bool value) {
+    symbolTable[idName].BoolValue = value;
+}
