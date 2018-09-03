@@ -5,10 +5,11 @@ struct TokenTypes {
     enum types {
         eof,
         Num,
+        Bool,
         String,
-        Keyword,
         DeclareId,
         DeclareFunc,
+        DeclareForLoop, // not implemented
         Id,
         ROUND_BRACKET_START,
         ROUND_BRACKET_END,
@@ -22,7 +23,7 @@ struct TokenTypes {
         Sub,
         Mul,
         Div,
-        Mod,
+        Mod, // not implemented
         Inc,
         Dec
     };
