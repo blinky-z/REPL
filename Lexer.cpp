@@ -103,10 +103,12 @@ Token Lexer::tokenizeIdentifier() {
         id_name += *currentChar;
     }
 
-    // объявление переменной
     if (id_name == "var") {
         token.Type = TokenTypes::DeclareId;
         token.Value = "var";
+    } else if (id_name == "false" || id_name == "true") {
+        token.Type = TokenTypes::Bool;
+        token.Value = id_name;
     } else {
         token.Type = TokenTypes::Id;
         token.Value = id_name;
