@@ -385,3 +385,37 @@ TEST_CASE("Expression with using of operator GREATER THAN", "[Lexer]") {
 
     matchTokens(tokens, properTokens);
 }
+
+TEST_CASE("Expression with using of bool values: false value", "[Lexer]") {
+    std::string expr = "var a = false";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::DeclareId, "var"});
+    properTokens.emplace_back(Token{TokenTypes::Id, "a"});
+    properTokens.emplace_back(Token{TokenTypes::Assign, "="});
+    properTokens.emplace_back(Token{TokenTypes::Bool, "false"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
+
+TEST_CASE("Expression with using of bool values: true value", "[Lexer]") {
+    std::string expr = "var a = true";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::DeclareId, "var"});
+    properTokens.emplace_back(Token{TokenTypes::Id, "a"});
+    properTokens.emplace_back(Token{TokenTypes::Assign, "="});
+    properTokens.emplace_back(Token{TokenTypes::Bool, "true"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
