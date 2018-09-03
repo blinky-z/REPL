@@ -19,6 +19,8 @@ enum ASTNodeType {
 enum ASTNodeBinOpType {
     OperatorLess,
     OperatorGreater,
+    OperatorBoolAND,
+    OperatorBoolOR,
     OperatorAssign,
     OperatorPlus,
     OperatorMinus,
@@ -178,7 +180,6 @@ struct DeclVarNode : ASTNode {
 };
 
 struct ForLoopNode : ASTNode {
-
 
     ForLoopNode() {
         type = ForLoop;
