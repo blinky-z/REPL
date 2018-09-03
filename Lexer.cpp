@@ -55,6 +55,16 @@ TokenContainer Lexer::tokenize(const std::string& src) {
         } else if (*currentChar == '%') {
             token.Type = TokenTypes::Mod;
             token.Value = "%";
+        } else if (*currentChar == '&' && *(currentChar + 1) == '&') {
+            token.Type = TokenTypes::BoolAND;
+            token.Value = "&&";
+
+            currentChar++;
+        } else if (*currentChar == '|' && *(currentChar + 1) == '|') {
+            token.Type = TokenTypes::BoolOR;
+            token.Value = "||";
+
+            currentChar++;
         } else if (*currentChar == '(') {
             token.Type = TokenTypes::ROUND_BRACKET_START;
             token.Value = "(";
@@ -108,7 +118,12 @@ Token Lexer::tokenizeIdentifier() {
         token.Value = "var";
     } else if (id_name == "false" || id_name == "true") {
         token.Type = TokenTypes::Bool;
-        token.Value = id_name;
+
+        if (id_name == "false") {
+            token.Value = "0";
+        } else {
+            token.Value = "1";
+        }
     } else {
         token.Type = TokenTypes::Id;
         token.Value = id_name;
