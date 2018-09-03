@@ -397,7 +397,7 @@ TEST_CASE("Expression with using of bool values: false value", "[Lexer]") {
     properTokens.emplace_back(Token{TokenTypes::DeclareId, "var"});
     properTokens.emplace_back(Token{TokenTypes::Id, "a"});
     properTokens.emplace_back(Token{TokenTypes::Assign, "="});
-    properTokens.emplace_back(Token{TokenTypes::Bool, "false"});
+    properTokens.emplace_back(Token{TokenTypes::Bool, "0"});
     properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
@@ -414,7 +414,25 @@ TEST_CASE("Expression with using of bool values: true value", "[Lexer]") {
     properTokens.emplace_back(Token{TokenTypes::DeclareId, "var"});
     properTokens.emplace_back(Token{TokenTypes::Id, "a"});
     properTokens.emplace_back(Token{TokenTypes::Assign, "="});
-    properTokens.emplace_back(Token{TokenTypes::Bool, "true"});
+    properTokens.emplace_back(Token{TokenTypes::Bool, "1"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
+
+TEST_CASE("Expression with using of bool values and bool operators", "[Lexer]") {
+    std::string expr = "true || false && false";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::Bool, "1"});
+    properTokens.emplace_back(Token{TokenTypes::BoolOR, "||"});
+    properTokens.emplace_back(Token{TokenTypes::Bool, "0"});
+    properTokens.emplace_back(Token{TokenTypes::BoolAND, "&&"});
+    properTokens.emplace_back(Token{TokenTypes::Bool, "0"});
     properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
