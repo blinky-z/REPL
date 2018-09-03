@@ -12,6 +12,7 @@ enum ASTNodeType {
     Id,
     BinOp,
     NumberValue,
+    BoolValue,
     ForLoop
 };
 
@@ -36,6 +37,7 @@ struct TypesStringNames {
         nodeTypeStringNames[Id] = "Identifier";
         nodeTypeStringNames[BinOp] = "Binary Operation";
         nodeTypeStringNames[NumberValue] = "Number";
+        nodeTypeStringNames[BoolValue] = "Bool";
 
         binOpTypeStringNames[OperatorAssign] = "Operator Assign";
         binOpTypeStringNames[OperatorPlus] = "Operator Plus";
@@ -98,6 +100,23 @@ struct NumberNode : ASTNode {
 
     NumberNode() {
         type = NumberValue;
+    }
+
+    void print() override {
+        TypesStringNames typeString;
+
+        std::cout << std::endl;
+        std::cout << "[Type]: " << typeString.nodeTypeStringNames[type] << std::endl
+                  << "[Value]: " << value << std::endl;
+        std::cout << std::endl;
+    }
+};
+
+struct BoolNode : ASTNode {
+    bool value;
+
+    BoolNode() {
+        type = BoolValue;
     }
 
     void print() override {
