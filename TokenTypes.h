@@ -25,7 +25,9 @@ struct TokenTypes {
         Div,
         Mod, // not implemented
         Inc,
-        Dec
+        Dec,
+        BoolAND,
+        BoolOR
     };
 };
 
