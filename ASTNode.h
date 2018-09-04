@@ -13,7 +13,9 @@ enum ASTNodeType {
     BinOp,
     NumberValue,
     BoolValue,
-    ForLoop
+    ForLoop,
+    MathExpr,
+    BoolExpr
 };
 
 enum ASTNodeBinOpType {
@@ -187,6 +189,34 @@ struct ForLoopNode : ASTNode {
 
     void print() override {
 
+    }
+};
+
+struct MathExprNode : ASTNode {
+    ASTNode* expr;
+
+    MathExprNode() {
+        type = MathExpr;
+    }
+
+    void print() override {
+        std::cout << std::endl;
+        expr->print();
+        std::cout << std::endl;
+    }
+};
+
+struct BoolExprNode : ASTNode {
+    ASTNode* expr;
+
+    BoolExprNode() {
+        type = BoolExpr;
+    }
+
+    void print() override {
+        std::cout << std::endl;
+        expr->print();
+        std::cout << std::endl;
     }
 };
 
