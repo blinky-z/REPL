@@ -23,7 +23,7 @@ void matchTokens(const std::vector<Token>& tokens, const std::vector<Token>& pro
 TEST_CASE("Addition Tokenizing", "[Lexer][Math operations tokenizing]") {
     std::string expr = "313 + 425 + 1131";
     expr.push_back(EOF);
-    
+
     const TokenContainer& data = LexerTestsLexer.tokenize(expr);
     const std::vector<Token>& tokens = data.getTokens();
 
@@ -386,7 +386,7 @@ TEST_CASE("Expression with using of operator GREATER THAN", "[Lexer]") {
     matchTokens(tokens, properTokens);
 }
 
-TEST_CASE("Expression with using of bool values: false value", "[Lexer]") {
+TEST_CASE("Declare bool variable: false value", "[Lexer]") {
     std::string expr = "var a = false";
     expr.push_back(EOF);
 
@@ -403,7 +403,7 @@ TEST_CASE("Expression with using of bool values: false value", "[Lexer]") {
     matchTokens(tokens, properTokens);
 }
 
-TEST_CASE("Expression with using of bool values: true value", "[Lexer]") {
+TEST_CASE("Declare bool variable: true value", "[Lexer]") {
     std::string expr = "var a = true";
     expr.push_back(EOF);
 
@@ -432,6 +432,34 @@ TEST_CASE("Expression with using of bool values and bool operators", "[Lexer]") 
     properTokens.emplace_back(Token{TokenTypes::BoolOR, "||"});
     properTokens.emplace_back(Token{TokenTypes::Bool, "0"});
     properTokens.emplace_back(Token{TokenTypes::BoolAND, "&&"});
+    properTokens.emplace_back(Token{TokenTypes::Bool, "0"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
+
+TEST_CASE("Tokenize single bool value: true", "[Lexer]") {
+    std::string expr = "true";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::Bool, "1"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
+
+TEST_CASE("Tokenize single bool value: false", "[Lexer]") {
+    std::string expr = "false";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
     properTokens.emplace_back(Token{TokenTypes::Bool, "0"});
     properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
 
