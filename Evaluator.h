@@ -12,14 +12,19 @@ private:
 
     double EvaluateMathExpr(ASTNode* subtree);
 
+    bool EvaluateBoolExpr(ASTNode* subtree);
+
     void EvaluateAssignValue(BinOpNode* subtree);
 
     void EvaluateDeclVar(DeclVarNode* subtree);
 
-    double EvaluateId(IdentifierNode* subtree);
+    double EvaluateIdDouble(IdentifierNode* subtree);
+
+    bool EvaluateIdBool(IdentifierNode* subtree);
 
     double EvaluateNumberValue(NumberNode* subtree);
 
+    bool EvaluateBoolValue(BoolNode* subtree);
 public:
     std::string Evaluate(ASTNode* root);
 };
