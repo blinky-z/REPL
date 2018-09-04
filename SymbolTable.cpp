@@ -9,17 +9,43 @@ void SymbolTable::addNewIdentifier(std::string identifierName) {
 }
 
 void SymbolTable::setIdValueDouble(std::string idName, double value) {
-    symbolTable[idName].NumValue = value;
+    if (symbolTable[idName].Type == IdentifierValueType::Undefined ||
+        symbolTable[idName].Type == IdentifierValueType::Number) {
+        symbolTable[idName].Type = IdentifierValueType::Number;
+        symbolTable[idName].NumValue = value;
+    } else {
+        IdentifierTypeStringNames typeStringNames;
+
+        // дублирущийся код
+        throw std::runtime_error("Can not assign variable '" + idName + "' of type " +
+                                 typeStringNames.idTypeStringNames[symbolTable[idName].Type] +
+                                 " to the value of type Number");
+    }
 }
 
 double SymbolTable::getIdValueDouble(std::string idName) {
     return symbolTable[idName].NumValue;
 }
 
+void SymbolTable::setIdValueBool(std::string idName, bool value) {
+    if (symbolTable[idName].Type == IdentifierValueType::Undefined ||
+        symbolTable[idName].Type == IdentifierValueType::Bool) {
+        symbolTable[idName].Type = IdentifierValueType::Bool;
+        symbolTable[idName].BoolValue = value;
+    } else {
+        IdentifierTypeStringNames typeStringNames;
+
+        // TODO: дублирующийся код, придумать более изощренный способ
+        throw std::runtime_error("Can not assign variable '" + idName + "' of type " +
+                                 typeStringNames.idTypeStringNames[symbolTable[idName].Type] +
+                                 " to the value of type Bool");
+    }
+}
+
 bool SymbolTable::getIdValueBool(std::string idName) {
     return symbolTable[idName].BoolValue;
 }
 
-void SymbolTable::setIdValueBool(std::string idName, bool value) {
-    symbolTable[idName].BoolValue = value;
+int SymbolTable::getIdType(const std::string& idName) {
+    return symbolTable[idName].Type;
 }

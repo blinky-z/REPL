@@ -16,9 +16,11 @@ public:
 
     double getIdValueDouble(std::string idName);
 
+    void setIdValueBool(std::string idName, bool value);
+
     bool getIdValueBool(std::string idName);
 
-    void setIdValueBool(std::string idName, bool value);
+    int getIdType(const std::string& idName);
 };
 
 
