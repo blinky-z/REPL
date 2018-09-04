@@ -18,15 +18,23 @@ private:
 
     NumberNode* createNumberNode(double value);
 
+    BoolNode* createBoolNode(bool value);
+
     IdentifierNode* createIdentifierNode(std::string name);
 
     DeclVarNode* createDeclVarNode(IdentifierNode* id, ASTNode* expr);
+
+    MathExprNode* createMathExprNode(ASTNode* expr);
+
+    BoolExprNode* createBoolExprNode(ASTNode* expr);
 
     ForLoopNode* createForLoopNode();
 
     ASTNode* createEmptyNode();
 
     double getNumTokenValue(const Token& numToken);
+
+    bool getBoolTokenValue(const Token& boolToken);
 
     ASTNode* expression();
 
@@ -38,11 +46,27 @@ private:
 
     ASTNode* factor();
 
-    ASTNode* parseMath();
+    ASTNode* parseMathExpr();
+
+    ASTNode* expressionBool();
+
+    ASTNode* expressionTailBool(ASTNode* lvalue);
+
+    ASTNode* termBool();
+
+    ASTNode* termTailBool(ASTNode* lvalue);
+
+    ASTNode* factorBool();
+
+    ASTNode* parseBoolExpr();
+
+    ASTNode* parseExpr();
 
     ASTNode* parseAssign();
 
     ASTNode* parseDeclVar();
+
+    ASTNode* parseId();
 
     ASTNode* parseForLoop();
 
