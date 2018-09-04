@@ -197,6 +197,11 @@ struct MathExprNode : ASTNode {
 
     MathExprNode() {
         type = MathExpr;
+        expr = nullptr;
+    }
+
+    ~MathExprNode() {
+        delete expr;
     }
 
     void print() override {
@@ -211,6 +216,11 @@ struct BoolExprNode : ASTNode {
 
     BoolExprNode() {
         type = BoolExpr;
+        expr = nullptr;
+    }
+
+    ~BoolExprNode() {
+        delete expr;
     }
 
     void print() override {
