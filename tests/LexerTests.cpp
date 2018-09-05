@@ -465,3 +465,35 @@ TEST_CASE("Tokenize single bool value: false", "[Lexer]") {
 
     matchTokens(tokens, properTokens);
 }
+
+TEST_CASE("Expression with using of variables of type bool and logical operators: Logical AND", "[Lexer]") {
+    std::string expr = "a && false";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::Id, "a"});
+    properTokens.emplace_back(Token{TokenTypes::BoolAND, "&&"});
+    properTokens.emplace_back(Token{TokenTypes::Bool, "0"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
+
+TEST_CASE("Expression with using of variables of type bool and logical operators: Logical OR", "[Lexer]") {
+    std::string expr = "a || false";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::Id, "a"});
+    properTokens.emplace_back(Token{TokenTypes::BoolOR, "||"});
+    properTokens.emplace_back(Token{TokenTypes::Bool, "0"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
