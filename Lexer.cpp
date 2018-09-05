@@ -24,8 +24,15 @@ TokenContainer Lexer::tokenize(const std::string& src) {
         } else if (*currentChar >= '0' && *currentChar <= '9') {
             token = tokenizeNumber();
         } else if (*currentChar == '=') {
-            token.Type = TokenTypes::Assign;
-            token.Value = "=";
+            if (*(currentChar + 1) == '=') {
+                currentChar++;
+
+                token.Type = TokenTypes::Equal;
+                token.Value = "==";
+            } else {
+                token.Type = TokenTypes::Assign;
+                token.Value = "=";
+            }
         } else if (*currentChar == '+') {
             if (*(currentChar + 1) == '+') {
                 currentChar++;
