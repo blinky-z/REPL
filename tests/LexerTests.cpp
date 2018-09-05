@@ -571,7 +571,7 @@ TEST_CASE("Id declare & assign bool expression tokenizing", "[Lexer]") {
     matchTokens(tokens, properTokens);
 }
 
-TEST_CASE("Expression with using of equal operator", "[Lexer]") {
+TEST_CASE("Expression with using of equal operator and bool constants", "[Lexer]") {
     std::string expr = "true == false";
     expr.push_back(EOF);
 
@@ -580,8 +580,24 @@ TEST_CASE("Expression with using of equal operator", "[Lexer]") {
 
     std::vector<Token> properTokens;
     properTokens.emplace_back(Token{TokenTypes::Bool, "1"});
-    properTokens.emplace_back(Token{TokenTypes::Assign, "=="});
+    properTokens.emplace_back(Token{TokenTypes::Equal, "=="});
     properTokens.emplace_back(Token{TokenTypes::Bool, "0"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
+
+TEST_CASE("Expression with using of equal operator and variables", "[Lexer]") {
+    std::string expr = "a == 2";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::Id, "a"});
+    properTokens.emplace_back(Token{TokenTypes::Equal, "=="});
+    properTokens.emplace_back(Token{TokenTypes::Num, "2"});
     properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
