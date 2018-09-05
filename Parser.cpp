@@ -292,6 +292,17 @@ ASTNode* Parser::parseDeclVar() {
     return createDeclVarNode(idNode, expr);
 }
 
+ASTNode* Parser::parseEqual() {
+    ASTNode* left = parseExpr();
+
+    // skip "==" token
+    tokens.getNextToken();
+
+    ASTNode* right = parseExpr();
+
+    return createBinOpNode(OperatorEqual, left, right);
+}
+
 ASTNode* Parser::parseId() {
     const Token& id = tokens.getNextToken();
 
@@ -311,7 +322,10 @@ ASTNode* Parser::parse(const TokenContainer& tokenizedSourceData) {
 
     ASTNode* parseResult;
 
-    if (currentToken.Type == TokenTypes::Id) {
+    if (isStmtEquality()) {
+        tokens.returnToken();
+        parseResult = parseEqual();
+    } else if (currentToken.Type == TokenTypes::Id) {
         const Token& nextToken = tokens.getNextToken();
         tokens.returnToken();
         tokens.returnToken();
@@ -433,4 +447,15 @@ bool Parser::matchParseComplete() {
     } else {
         return currentToken.Type == TokenTypes::eof;
     }
+}
+
+bool Parser::isStmtEquality() {
+    auto stmtTokens = tokens.getTokens();
+
+    for (const auto& currentToken : stmtTokens) {
+        if (currentToken.Type == TokenTypes::Equal) {
+            return true;
+        }
+    }
+    return false;
 }

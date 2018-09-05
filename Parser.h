@@ -66,9 +66,13 @@ private:
 
     ASTNode* parseDeclVar();
 
+    ASTNode* parseEqual();
+
     ASTNode* parseId();
 
     ASTNode* parseForLoop();
+
+    bool isStmtEquality();
 
     bool matchParseComplete();
 
