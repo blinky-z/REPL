@@ -18,13 +18,13 @@ private:
 
     void EvaluateDeclVar(DeclVarNode* subtree);
 
-    double EvaluateIdDouble(IdentifierNode* subtree);
+    double EvaluateIdDouble(IdentifierNode* id);
 
-    bool EvaluateIdBool(IdentifierNode* subtree);
+    bool EvaluateIdBool(IdentifierNode* id);
 
-    double EvaluateNumberValue(NumberNode* subtree);
+    double EvaluateNumberValue(NumberNode* num);
 
-    bool EvaluateBoolValue(BoolNode* subtree);
+    bool EvaluateBoolValue(BoolNode* num);
 public:
     std::string Evaluate(ASTNode* root);
 };

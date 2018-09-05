@@ -110,6 +110,7 @@ ASTNode* Parser::factor() {
 
         return createNumberNode(value);
     } else if (token.Type == TokenTypes::Sub) {
+        // convert unary minus (-x) into (0 - x) expr
         ASTNode* value = factor();
         ASTNode* leafMinusNode = createNumberNode(0);
 
@@ -242,9 +243,8 @@ ASTNode* Parser::parseExpr() {
         if (currentToken.Type == TokenTypes::Bool || currentToken.Type == TokenTypes::BoolOR ||
             currentToken.Type == TokenTypes::BoolAND) {
             return parseBoolExpr();
-        } else if (currentToken.Type == TokenTypes::Num ||
-                   currentToken.Type == TokenTypes::Add || currentToken.Type == TokenTypes::Sub ||
-                   currentToken.Type == TokenTypes::Mul ||
+        } else if (currentToken.Type == TokenTypes::Num || currentToken.Type == TokenTypes::Add ||
+                   currentToken.Type == TokenTypes::Sub || currentToken.Type == TokenTypes::Mul ||
                    currentToken.Type == TokenTypes::Div) {
             return parseMathExpr();
         }
@@ -273,16 +273,12 @@ ASTNode* Parser::parseAssign() {
 ASTNode* Parser::parseDeclVar() {
     ASTNode* expr = nullptr;
 
-    // skip "var" token
-    tokens.getNextToken();
-
     const Token& id = tokens.getNextToken();
     const std::string& idName = id.Value;
 
     IdentifierNode* idNode = createIdentifierNode(idName);
 
     const Token& nextToken = tokens.getNextToken();
-
     if (nextToken.Type == TokenTypes::Assign) {
         expr = parseExpr();
     } else {
@@ -331,10 +327,10 @@ ASTNode* Parser::parse(const TokenContainer& tokenizedSourceData) {
         tokens.returnToken();
         parseResult = parseBoolExpr();
     } else if (currentToken.Type == TokenTypes::Sub) {
+        // unary minus
         tokens.returnToken();
         parseResult = parseMathExpr();
     } else if (currentToken.Type == TokenTypes::DeclareId) {
-        tokens.returnToken();
         parseResult = parseDeclVar();
     } else if (currentToken.Type == TokenTypes::DeclareForLoop) {
         tokens.returnToken();
@@ -388,6 +384,22 @@ DeclVarNode* Parser::createDeclVarNode(IdentifierNode* id, ASTNode* expr) {
     return node;
 }
 
+MathExprNode* Parser::createMathExprNode(ASTNode* expr) {
+    MathExprNode* node = new MathExprNode;
+
+    node->expr = expr;
+
+    return node;
+}
+
+BoolExprNode* Parser::createBoolExprNode(ASTNode* expr) {
+    BoolExprNode* node = new BoolExprNode;
+
+    node->expr = expr;
+
+    return node;
+}
+
 ForLoopNode* Parser::createForLoopNode() {
     ForLoopNode* node = new ForLoopNode;
 
@@ -417,20 +429,4 @@ bool Parser::matchParseComplete() {
     } else {
         return currentToken.Type == TokenTypes::eof;
     }
-}
-
-MathExprNode* Parser::createMathExprNode(ASTNode* expr) {
-    MathExprNode* node = new MathExprNode;
-
-    node->expr = expr;
-
-    return node;
-}
-
-BoolExprNode* Parser::createBoolExprNode(ASTNode* expr) {
-    BoolExprNode* node = new BoolExprNode;
-
-    node->expr = expr;
-
-    return node;
 }

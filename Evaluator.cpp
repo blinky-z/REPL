@@ -252,18 +252,18 @@ std::string Evaluator::Evaluate(ASTNode* root) {
     }
 }
 
-double Evaluator::EvaluateIdDouble(IdentifierNode* subtree) {
-    return symbolTable.getIdValueDouble(subtree->name);
+double Evaluator::EvaluateIdDouble(IdentifierNode* id) {
+    return symbolTable.getIdValueDouble(id->name);
 }
 
-bool Evaluator::EvaluateIdBool(IdentifierNode* subtree) {
-    return symbolTable.getIdValueBool(subtree->name);
+bool Evaluator::EvaluateIdBool(IdentifierNode* id) {
+    return symbolTable.getIdValueBool(id->name);
 }
 
-double Evaluator::EvaluateNumberValue(NumberNode* subtree) {
-    return subtree->value;
+double Evaluator::EvaluateNumberValue(NumberNode* num) {
+    return num->value;
 }
 
-bool Evaluator::EvaluateBoolValue(BoolNode* subtree) {
-    return subtree->value;
+bool Evaluator::EvaluateBoolValue(BoolNode* num) {
+    return num->value;
 }
