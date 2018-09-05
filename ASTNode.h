@@ -28,6 +28,7 @@ enum ASTNodeBinOpType {
     OperatorMinus,
     OperatorMul,
     OperatorDiv,
+    OperatorEqual
 };
 
 struct TypesStringNames {
