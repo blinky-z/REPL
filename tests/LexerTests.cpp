@@ -74,7 +74,25 @@ TEST_CASE("Multiplication Tokenizing", "[Lexer][Math operations tokenizing]") {
     matchTokens(tokens, properTokens);
 }
 
-TEST_CASE("Negative numbers multiplication Tokenizing", "[Lexer][Math operations tokenizing]") {
+TEST_CASE("Division Tokenizing", "[Lexer][Math operations tokenizing]") {
+    std::string expr = "2500 / 5 / 10";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::Num, "2500"});
+    properTokens.emplace_back(Token{TokenTypes::Div, "/"});
+    properTokens.emplace_back(Token{TokenTypes::Num, "5"});
+    properTokens.emplace_back(Token{TokenTypes::Div, "/"});
+    properTokens.emplace_back(Token{TokenTypes::Num, "10"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
+
+TEST_CASE("Negative numbers tokenizing", "[Lexer][Math operations tokenizing]") {
     std::string expr = "5 * -123 * -3464";
     expr.push_back(EOF);
 
@@ -89,24 +107,6 @@ TEST_CASE("Negative numbers multiplication Tokenizing", "[Lexer][Math operations
     properTokens.emplace_back(Token{TokenTypes::Mul, "*"});
     properTokens.emplace_back(Token{TokenTypes::Sub, "-"});
     properTokens.emplace_back(Token{TokenTypes::Num, "3464"});
-    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
-
-    matchTokens(tokens, properTokens);
-}
-
-TEST_CASE("Division Tokenizing", "[Lexer][Math operations tokenizing]") {
-    std::string expr = "2500 / 5 / 10";
-    expr.push_back(EOF);
-
-    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
-    const std::vector<Token>& tokens = data.getTokens();
-
-    std::vector<Token> properTokens;
-    properTokens.emplace_back(Token{TokenTypes::Num, "2500"});
-    properTokens.emplace_back(Token{TokenTypes::Div, "/"});
-    properTokens.emplace_back(Token{TokenTypes::Num, "5"});
-    properTokens.emplace_back(Token{TokenTypes::Div, "/"});
-    properTokens.emplace_back(Token{TokenTypes::Num, "10"});
     properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
@@ -185,7 +185,40 @@ TEST_CASE("Id assign tokenizing", "[Lexer]") {
     matchTokens(tokens, properTokens);
 }
 
-TEST_CASE("Id declare & assign tokenizing", "[Lexer]") {
+TEST_CASE("Apply unary minus to variable", "[Lexer]") {
+    std::string expr = "-a";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::Sub, "-"});
+    properTokens.emplace_back(Token{TokenTypes::Id, "a"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
+
+TEST_CASE("Declare & Assign variable to variable with unary minus", "[Lexer]") {
+    std::string expr = "var a = -b";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::DeclareId, "var"});
+    properTokens.emplace_back(Token{TokenTypes::Id, "a"});
+    properTokens.emplace_back(Token{TokenTypes::Assign, "="});
+    properTokens.emplace_back(Token{TokenTypes::Sub, "-"});
+    properTokens.emplace_back(Token{TokenTypes::Id, "b"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
+
+TEST_CASE("Id declare & assign to constant num tokenizing", "[Lexer]") {
     std::string expr = "var a = 3";
     expr.push_back(EOF);
 
@@ -331,8 +364,8 @@ TEST_CASE("Id declare & assign negative float point number tokenizing", "[Lexer]
     matchTokens(tokens, properTokens);
 }
 
-TEST_CASE("Expression with whitespaces after all chars tokenizing", "[Lexer][Math operations tokenizing]") {
-    std::string expr = "1 + 2    ";
+TEST_CASE("Expression with redundant whitespaces tokenizing", "[Lexer][Math operations tokenizing]") {
+    std::string expr = "   1    + 2    ";
     expr.push_back(EOF);
 
     const TokenContainer& data = LexerTestsLexer.tokenize(expr);
@@ -386,7 +419,7 @@ TEST_CASE("Expression with using of operator GREATER THAN", "[Lexer]") {
     matchTokens(tokens, properTokens);
 }
 
-TEST_CASE("Declare bool variable: false value", "[Lexer]") {
+TEST_CASE("Declare bool variable and assign to: false", "[Lexer]") {
     std::string expr = "var a = false";
     expr.push_back(EOF);
 
@@ -403,7 +436,7 @@ TEST_CASE("Declare bool variable: false value", "[Lexer]") {
     matchTokens(tokens, properTokens);
 }
 
-TEST_CASE("Declare bool variable: true value", "[Lexer]") {
+TEST_CASE("Declare bool variable and assign to: true", "[Lexer]") {
     std::string expr = "var a = true";
     expr.push_back(EOF);
 
@@ -420,7 +453,7 @@ TEST_CASE("Declare bool variable: true value", "[Lexer]") {
     matchTokens(tokens, properTokens);
 }
 
-TEST_CASE("Expression with using of bool values and bool operators", "[Lexer]") {
+TEST_CASE("Expression with using of bool values and logical operators", "[Lexer]") {
     std::string expr = "true || false && false";
     expr.push_back(EOF);
 
@@ -491,6 +524,46 @@ TEST_CASE("Expression with using of variables of type bool and logical operators
 
     std::vector<Token> properTokens;
     properTokens.emplace_back(Token{TokenTypes::Id, "a"});
+    properTokens.emplace_back(Token{TokenTypes::BoolOR, "||"});
+    properTokens.emplace_back(Token{TokenTypes::Bool, "0"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
+
+TEST_CASE("Id declare & assign math expression tokenizing", "[Lexer]") {
+    std::string expr = "var a = 5 * 10 / 25";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::DeclareId, "var"});
+    properTokens.emplace_back(Token{TokenTypes::Id, "a"});
+    properTokens.emplace_back(Token{TokenTypes::Assign, "="});
+    properTokens.emplace_back(Token{TokenTypes::Num, "5"});
+    properTokens.emplace_back(Token{TokenTypes::Mul, "*"});
+    properTokens.emplace_back(Token{TokenTypes::Num, "10"});
+    properTokens.emplace_back(Token{TokenTypes::Div, "/"});
+    properTokens.emplace_back(Token{TokenTypes::Num, "25"});
+    properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
+
+TEST_CASE("Id declare & assign bool expression tokenizing", "[Lexer]") {
+    std::string expr = "var a = true || false";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenTypes::DeclareId, "var"});
+    properTokens.emplace_back(Token{TokenTypes::Id, "a"});
+    properTokens.emplace_back(Token{TokenTypes::Assign, "="});
+    properTokens.emplace_back(Token{TokenTypes::Bool, "1"});
     properTokens.emplace_back(Token{TokenTypes::BoolOR, "||"});
     properTokens.emplace_back(Token{TokenTypes::Bool, "0"});
     properTokens.emplace_back(Token{TokenTypes::eof, "EOF"});
