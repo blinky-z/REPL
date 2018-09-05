@@ -27,7 +27,8 @@ struct TokenTypes {
         Inc,
         Dec,
         BoolAND,
-        BoolOR
+        BoolOR,
+        Equal
     };
 };
 
