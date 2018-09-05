@@ -1160,3 +1160,61 @@ TEST_CASE("Get exception on assign variable of type bool to the other variable o
     delete root2;
     delete root3;
 }
+
+TEST_CASE("Bool expression evaluation: using of Logical AND and variables", "[Evaluator]") {
+    Evaluator EvaluatorTestsEvaluator;
+
+    bool a = true;
+
+    std::string expr1 = "var a = true";
+    std::string expr2 = "a && false";
+
+    expr1.push_back(EOF);
+    expr2.push_back(EOF);
+
+    const TokenContainer& tokensExpr1 = EvaluatorTestsLexer.tokenize(expr1);
+    const TokenContainer& tokensExpr2 = EvaluatorTestsLexer.tokenize(expr2);
+
+    ASTNode* root1 = EvaluatorTestsParser.parse(tokensExpr1);
+    EvaluatorTestsEvaluator.Evaluate(root1);
+
+    ASTNode* root2 = EvaluatorTestsParser.parse(tokensExpr2);
+
+    std::string result = EvaluatorTestsEvaluator.Evaluate(root2);
+
+    std::string properResult = getBoolValueStringRepresentation(a && false);
+
+    REQUIRE(result == properResult);
+
+    delete root1;
+    delete root2;
+}
+
+TEST_CASE("Bool expression evaluation: using of Logical OR and variables", "[Evaluator]") {
+    Evaluator EvaluatorTestsEvaluator;
+
+    bool a = true;
+
+    std::string expr1 = "var a = true";
+    std::string expr2 = "a || false";
+
+    expr1.push_back(EOF);
+    expr2.push_back(EOF);
+
+    const TokenContainer& tokensExpr1 = EvaluatorTestsLexer.tokenize(expr1);
+    const TokenContainer& tokensExpr2 = EvaluatorTestsLexer.tokenize(expr2);
+
+    ASTNode* root1 = EvaluatorTestsParser.parse(tokensExpr1);
+    EvaluatorTestsEvaluator.Evaluate(root1);
+
+    ASTNode* root2 = EvaluatorTestsParser.parse(tokensExpr2);
+
+    std::string result = EvaluatorTestsEvaluator.Evaluate(root2);
+
+    std::string properResult = getBoolValueStringRepresentation(a || false);
+
+    REQUIRE(result == properResult);
+
+    delete root1;
+    delete root2;
+}
