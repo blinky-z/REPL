@@ -227,6 +227,10 @@ ASTNode* Parser::factorBool() {
         } else {
             throw std::runtime_error("Invalid syntax");
         }
+    } else if (token.Type == TokenTypes::Id) {
+        const std::string& idName = token.Value;
+
+        return createIdentifierNode(idName);
     } else {
         throw std::runtime_error("Invalid syntax");
     }
