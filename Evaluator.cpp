@@ -176,6 +176,127 @@ void Evaluator::EvaluateDeclVar(DeclVarNode* subtree) {
     }
 }
 
+bool Evaluator::EvaluateEqual(BinOpNode* subtree) {
+    ASTNode* left = subtree->left;
+    ASTNode* right = subtree->right;
+    // checking for errors
+    if (left->type != MathExpr && left->type != BoolExpr && left->type != Id
+        && right->type != MathExpr && right->type != BoolExpr && right->type != Id) {
+        throw std::runtime_error("Incompatible operands's type of equality operator");
+    } else if (left->type != MathExpr && left->type != BoolExpr && left->type != Id) {
+        throw std::runtime_error("Incompatible left operand's type of equality operator");
+    } else if (right->type != MathExpr && right->type != BoolExpr && right->type != Id) {
+        throw std::runtime_error("Incompatible right operand's type of equality operator");
+    }
+
+    int leftOperandType = left->type;
+    int rightOperandType = right->type;
+
+    if (leftOperandType == Id && rightOperandType != Id) {
+        IdentifierNode* leftId = dynamic_cast<IdentifierNode*>(left);
+        if (leftId != nullptr) {
+            int leftIdType = symbolTable.getIdType(leftId->name);
+
+            if ((rightOperandType == BoolExpr && leftIdType != IdentifierValueType::Bool) ||
+                (rightOperandType == MathExpr && leftIdType != IdentifierValueType::Number)) {
+                throw std::runtime_error("Operands type mismatch of equality operator");
+            } else if (leftIdType == IdentifierValueType::Undefined) {
+                throw std::runtime_error("Use of undeclared identifier '" + leftId->name + "'");
+            }
+        } else {
+            throw std::runtime_error("Invalid left ID operand node of equality operator");
+        }
+    } else if (leftOperandType != Id && rightOperandType == Id) {
+        IdentifierNode* rightId = dynamic_cast<IdentifierNode*>(right);
+        if (rightId != nullptr) {
+            int rightIdType = symbolTable.getIdType(rightId->name);
+
+            if ((leftOperandType == BoolExpr && rightIdType != IdentifierValueType::Bool) ||
+                (leftOperandType == MathExpr && rightIdType != IdentifierValueType::Number)) {
+                throw std::runtime_error("Operands type mismatch of equality operator");
+            } else if (rightIdType == IdentifierValueType::Undefined) {
+                throw std::runtime_error("Use of undeclared identifier '" + rightId->name + "'");
+            }
+        } else {
+            throw std::runtime_error("Invalid right ID operand node of equality operator");
+        }
+    } else if (leftOperandType != Id && rightOperandType != Id) {
+        if (leftOperandType != rightOperandType) {
+            throw std::runtime_error("Operands type mismatch of equality operator");
+        }
+    } else {
+        IdentifierNode* leftId = dynamic_cast<IdentifierNode*>(left);
+        IdentifierNode* rightId = dynamic_cast<IdentifierNode*>(right);
+
+        if (leftId != nullptr && rightId != nullptr) {
+            if (symbolTable.getIdType(leftId->name) != symbolTable.getIdType(rightId->name)) {
+                throw std::runtime_error("Operands type mismatch of equality operator");
+            }
+        } else {
+            if (leftId == nullptr && rightId != nullptr) {
+                throw std::runtime_error("Invalid left ID operand node of equality operator");
+            } else if (leftId != nullptr && rightId == nullptr) {
+                throw std::runtime_error("Invalid right ID operand node of equality operator");
+            } else {
+                throw std::runtime_error("Invalid ID operands nodes of equality operator");
+            }
+        }
+    }
+
+    // evaluating
+
+    if (leftOperandType == Id && rightOperandType != Id) {
+        IdentifierNode* leftId = dynamic_cast<IdentifierNode*>(left);
+
+        int leftIdType = symbolTable.getIdType(leftId->name);
+
+        if (leftIdType == IdentifierValueType::Number) {
+            MathExprNode* rvalue = static_cast<MathExprNode*>(right);
+
+            return symbolTable.getIdValueDouble(leftId->name) == EvaluateMathExpr(rvalue->expr);
+        } else {
+            BoolExprNode* rvalue = static_cast<BoolExprNode*>(right);
+
+            return symbolTable.getIdValueBool(leftId->name) == EvaluateBoolExpr(rvalue->expr);
+        }
+    } else if (leftOperandType != Id && rightOperandType == Id) {
+        IdentifierNode* rightId = dynamic_cast<IdentifierNode*>(right);
+
+        int rightIdType = symbolTable.getIdType(rightId->name);
+
+        if (rightIdType == IdentifierValueType::Number) {
+            MathExprNode* lvalue = static_cast<MathExprNode*>(left);
+
+            return symbolTable.getIdValueDouble(rightId->name) == EvaluateMathExpr(lvalue->expr);
+        } else {
+            BoolExprNode* lvalue = static_cast<BoolExprNode*>(left);
+
+            return symbolTable.getIdValueBool(rightId->name) == EvaluateBoolExpr(lvalue->expr);
+        }
+    } else if (leftOperandType != Id && rightOperandType != Id) {
+        if (leftOperandType == MathExpr) {
+            MathExprNode* lvalue = static_cast<MathExprNode*>(left);
+            MathExprNode* rvalue = static_cast<MathExprNode*>(right);
+
+            return EvaluateMathExpr(lvalue->expr) == EvaluateMathExpr(rvalue->expr);
+        } else {
+            BoolExprNode* lvalue = static_cast<BoolExprNode*>(left);
+            BoolExprNode* rvalue = static_cast<BoolExprNode*>(right);
+
+            return EvaluateBoolExpr(lvalue->expr) == EvaluateBoolExpr(rvalue->expr);
+        }
+    } else {
+        IdentifierNode* leftId = dynamic_cast<IdentifierNode*>(left);
+        IdentifierNode* rightId = dynamic_cast<IdentifierNode*>(right);
+
+        if (symbolTable.getIdType(leftId->name) == IdentifierValueType::Number) {
+            return EvaluateIdDouble(leftId) == EvaluateIdDouble(rightId);
+        } else {
+            return EvaluateIdBool(leftId) == EvaluateIdBool(rightId);
+        }
+    }
+}
+
 std::string Evaluator::Evaluate(ASTNode* root) {
     if (root->type == BinOp) {
         BinOpNode* node = dynamic_cast<BinOpNode*>(root);
@@ -184,6 +305,10 @@ std::string Evaluator::Evaluate(ASTNode* root) {
             if (node->binOpType == OperatorAssign) {
                 EvaluateAssignValue(node);
                 return "Assign Variable";
+            } else if (node->binOpType == OperatorEqual) {
+                bool value = EvaluateEqual(node);
+
+                return value ? "true" : "false";
             } else {
                 throw std::runtime_error("Invalid BinOp Type");
             }

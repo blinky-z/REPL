@@ -18,6 +18,8 @@ private:
 
     void EvaluateDeclVar(DeclVarNode* subtree);
 
+    bool EvaluateEqual(BinOpNode* subtree);
+
     double EvaluateIdDouble(IdentifierNode* id);
 
     bool EvaluateIdBool(IdentifierNode* id);
