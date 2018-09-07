@@ -35,7 +35,7 @@ void SymbolTable::setIdValueBool(std::string idName, bool value) {
     } else {
         IdentifierTypeStringNames typeStringNames;
 
-        // TODO: дублирующийся код, придумать более изощренный способ
+        // TODO: убрать дублирующийся код ошибки (с setIdValueDouble func)
         throw std::runtime_error("Can not assign variable '" + idName + "' of type " +
                                  typeStringNames.idTypeStringNames[symbolTable[idName].Type] +
                                  " to the value of type Bool");
@@ -46,6 +46,6 @@ bool SymbolTable::getIdValueBool(std::string idName) {
     return symbolTable[idName].BoolValue;
 }
 
-int SymbolTable::getIdType(const std::string& idName) {
+IdentifierValueType::ValueType SymbolTable::getIdType(const std::string& idName) {
     return symbolTable[idName].Type;
 }
