@@ -5,58 +5,60 @@
 #include <unordered_map>
 #include <string>
 
-enum ASTNodeType {
-    Undefined,
-    DeclVar,
-    Empty,
-    Id,
-    BinOp,
-    NumberValue,
-    BoolValue,
-    ForLoop,
-    MathExpr,
-    BoolExpr
-};
+namespace NodeType {
+    enum ASTNodeType {
+        Undefined,
+        DeclVar,
+        Empty,
+        Id,
+        BinOp,
+        NumberValue,
+        BoolValue,
+        ForLoop
+    };
+}
 
-enum ASTNodeBinOpType {
-    OperatorLess,
-    OperatorGreater,
-    OperatorBoolAND,
-    OperatorBoolOR,
-    OperatorAssign,
-    OperatorPlus,
-    OperatorMinus,
-    OperatorMul,
-    OperatorDiv,
-    OperatorEqual
-};
+namespace BinOpType {
+    enum ASTNodeBinOpType {
+        OperatorLess,
+        OperatorGreater,
+        OperatorBoolAND,
+        OperatorBoolOR,
+        OperatorAssign,
+        OperatorPlus,
+        OperatorMinus,
+        OperatorMul,
+        OperatorDiv,
+        OperatorEqual
+    };
+}
 
 struct TypesStringNames {
     std::unordered_map<int, std::string> nodeTypeStringNames;
     std::unordered_map<int, std::string> binOpTypeStringNames;
 
     TypesStringNames() {
-        nodeTypeStringNames[Undefined] = "Undefined";
-        nodeTypeStringNames[DeclVar] = "Var Declaration";
-        nodeTypeStringNames[Empty] = "Empty";
-        nodeTypeStringNames[Id] = "Identifier";
-        nodeTypeStringNames[BinOp] = "Binary Operation";
-        nodeTypeStringNames[NumberValue] = "Number";
-        nodeTypeStringNames[BoolValue] = "Bool";
+        nodeTypeStringNames[NodeType::Undefined] = "Undefined";
+        nodeTypeStringNames[NodeType::DeclVar] = "Var Declaration";
+        nodeTypeStringNames[NodeType::Empty] = "Empty";
+        nodeTypeStringNames[NodeType::Id] = "Identifier";
+        nodeTypeStringNames[NodeType::BinOp] = "Binary Operation";
+        nodeTypeStringNames[NodeType::NumberValue] = "Number";
+        nodeTypeStringNames[NodeType::BoolValue] = "Bool";
 
-        binOpTypeStringNames[OperatorAssign] = "Operator Assign";
-        binOpTypeStringNames[OperatorPlus] = "Operator Plus";
-        binOpTypeStringNames[OperatorMinus] = "Operator Minus";
-        binOpTypeStringNames[OperatorMul] = "Operator Mul";
-        binOpTypeStringNames[OperatorDiv] = "Operator Div";
+        binOpTypeStringNames[BinOpType::OperatorAssign] = "Operator Assign";
+        binOpTypeStringNames[BinOpType::OperatorPlus] = "Operator Plus";
+        binOpTypeStringNames[BinOpType::OperatorMinus] = "Operator Minus";
+        binOpTypeStringNames[BinOpType::OperatorMul] = "Operator Mul";
+        binOpTypeStringNames[BinOpType::OperatorDiv] = "Operator Div";
     }
 };
 
 struct ASTNode {
-    ASTNodeType type;
+    NodeType::ASTNodeType type;
 
     ASTNode() {
-        type = Undefined;
+        type = NodeType::Undefined;
     };
 
     virtual ~ASTNode() {};
@@ -71,12 +73,12 @@ struct ASTNode {
 };
 
 struct BinOpNode : ASTNode {
-    ASTNodeBinOpType binOpType;
+    BinOpType::ASTNodeBinOpType binOpType;
     ASTNode* left;
     ASTNode* right;
 
     BinOpNode() {
-        type = BinOp;
+        type = NodeType::BinOp;
         left = nullptr;
         right = nullptr;
     }
@@ -104,7 +106,7 @@ struct NumberNode : ASTNode {
     double value;
 
     NumberNode() {
-        type = NumberValue;
+        type = NodeType::NumberValue;
     }
 
     void print() override {
@@ -121,7 +123,7 @@ struct BoolNode : ASTNode {
     bool value;
 
     BoolNode() {
-        type = BoolValue;
+        type = NodeType::BoolValue;
     }
 
     void print() override {
@@ -138,7 +140,7 @@ struct IdentifierNode : ASTNode {
     std::string name;
 
     IdentifierNode() {
-        type = Id;
+        type = NodeType::Id;
     }
 
     void print() override {
@@ -156,7 +158,8 @@ struct DeclVarNode : ASTNode {
     ASTNode* expr;
 
     DeclVarNode() {
-        type = DeclVar;
+        type = NodeType::DeclVar;
+        id = nullptr;
         expr = nullptr;
     }
 
@@ -185,49 +188,11 @@ struct DeclVarNode : ASTNode {
 struct ForLoopNode : ASTNode {
 
     ForLoopNode() {
-        type = ForLoop;
+        type = NodeType::ForLoop;
     }
 
     void print() override {
 
-    }
-};
-
-struct MathExprNode : ASTNode {
-    ASTNode* expr;
-
-    MathExprNode() {
-        type = MathExpr;
-        expr = nullptr;
-    }
-
-    ~MathExprNode() {
-        delete expr;
-    }
-
-    void print() override {
-        std::cout << std::endl;
-        expr->print();
-        std::cout << std::endl;
-    }
-};
-
-struct BoolExprNode : ASTNode {
-    ASTNode* expr;
-
-    BoolExprNode() {
-        type = BoolExpr;
-        expr = nullptr;
-    }
-
-    ~BoolExprNode() {
-        delete expr;
-    }
-
-    void print() override {
-        std::cout << std::endl;
-        expr->print();
-        std::cout << std::endl;
     }
 };
 
