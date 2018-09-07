@@ -27,74 +27,74 @@ TokenContainer Lexer::tokenize(const std::string& src) {
             if (*(currentChar + 1) == '=') {
                 currentChar++;
 
-                token.Type = TokenTypes::Equal;
+                token.Type = TokenType::Equal;
                 token.Value = "==";
             } else {
-                token.Type = TokenTypes::Assign;
+                token.Type = TokenType::Assign;
                 token.Value = "=";
             }
         } else if (*currentChar == '+') {
             if (*(currentChar + 1) == '+') {
                 currentChar++;
 
-                token.Type = TokenTypes::Inc;
+                token.Type = TokenType::Inc;
                 token.Value = "++";
             } else {
-                token.Type = TokenTypes::Add;
+                token.Type = TokenType::Add;
                 token.Value = "+";
             }
         } else if (*currentChar == '-') {
             if (*(currentChar + 1) == '-') {
                 currentChar++;
 
-                token.Type = TokenTypes::Dec;
+                token.Type = TokenType::Dec;
                 token.Value = "--";
             } else {
-                token.Type = TokenTypes::Sub;
+                token.Type = TokenType::Sub;
                 token.Value = "-";
             }
         } else if (*currentChar == '*') {
-            token.Type = TokenTypes::Mul;
+            token.Type = TokenType::Mul;
             token.Value = "*";
         } else if (*currentChar == '/') {
-            token.Type = TokenTypes::Div;
+            token.Type = TokenType::Div;
             token.Value = "/";
         } else if (*currentChar == '%') {
-            token.Type = TokenTypes::Mod;
+            token.Type = TokenType::Mod;
             token.Value = "%";
         } else if (*currentChar == '&' && *(currentChar + 1) == '&') {
-            token.Type = TokenTypes::BoolAND;
+            token.Type = TokenType::BoolAND;
             token.Value = "&&";
 
             currentChar++;
         } else if (*currentChar == '|' && *(currentChar + 1) == '|') {
-            token.Type = TokenTypes::BoolOR;
+            token.Type = TokenType::BoolOR;
             token.Value = "||";
 
             currentChar++;
         } else if (*currentChar == '(') {
-            token.Type = TokenTypes::ROUND_BRACKET_START;
+            token.Type = TokenType::ROUND_BRACKET_START;
             token.Value = "(";
         } else if (*currentChar == ')') {
-            token.Type = TokenTypes::ROUND_BRACKET_END;
+            token.Type = TokenType::ROUND_BRACKET_END;
             token.Value = ")";
         } else if (*currentChar == '[') {
-            token.Type = TokenTypes::SQUARE_BRACKET_START;
+            token.Type = TokenType::SQUARE_BRACKET_START;
             token.Value = "[";
         } else if (*currentChar == ']') {
-            token.Type = TokenTypes::SQUARE_BRACKET_END;
+            token.Type = TokenType::SQUARE_BRACKET_END;
             token.Value = "]";
         } else if (*currentChar == ';') {
-            token.Type = TokenTypes::SEMICOLON;
+            token.Type = TokenType::SEMICOLON;
             token.Value = ";";
         } else if (*currentChar == '<') {
-            token.Type = TokenTypes::LESS;
+            token.Type = TokenType::LESS;
             token.Value = "<";
         } else if (*currentChar == '>') {
-            token.Type = TokenTypes::GREATER;
+            token.Type = TokenType::GREATER;
             token.Value = ">";
         } else if (*currentChar == EOF) {
-            tokens.addNewToken(Token{TokenTypes::eof, "EOF"});
+            tokens.addNewToken(Token{TokenType::eof, "EOF"});
             break;
         } else {
             throw std::runtime_error(std::string("Invalid char ") + "'" + *currentChar + "'");
@@ -121,10 +121,10 @@ Token Lexer::tokenizeIdentifier() {
     }
 
     if (id_name == "var") {
-        token.Type = TokenTypes::DeclareId;
+        token.Type = TokenType::DeclareId;
         token.Value = "var";
     } else if (id_name == "false" || id_name == "true") {
-        token.Type = TokenTypes::Bool;
+        token.Type = TokenType::Bool;
 
         if (id_name == "false") {
             token.Value = "0";
@@ -132,7 +132,7 @@ Token Lexer::tokenizeIdentifier() {
             token.Value = "1";
         }
     } else {
-        token.Type = TokenTypes::Id;
+        token.Type = TokenType::Id;
         token.Value = id_name;
     }
 
@@ -150,7 +150,7 @@ Token Lexer::tokenizeNumber() {
         token_val += *currentChar;
     }
 
-    token.Type = TokenTypes::Num;
+    token.Type = TokenType::Num;
     token.Value = token_val;
 
     return token;
