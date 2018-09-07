@@ -3,9 +3,9 @@
 
 #include "Token.h"
 #include "Identifier.h"
-#include "TokenTypes.h"
 #include "TokenContainer.h"
 #include "ASTNode.h"
+#include "Lexer.h"
 #include <iostream>
 #include <utility>
 #include <string>
@@ -14,7 +14,7 @@
 
 class Parser {
 private:
-    BinOpNode* createBinOpNode(ASTNodeBinOpType type, ASTNode* left, ASTNode* right);
+    BinOpNode* createBinOpNode(BinOpType::ASTNodeBinOpType type, ASTNode* left, ASTNode* right);
 
     NumberNode* createNumberNode(double value);
 
@@ -23,10 +23,6 @@ private:
     IdentifierNode* createIdentifierNode(std::string name);
 
     DeclVarNode* createDeclVarNode(IdentifierNode* id, ASTNode* expr);
-
-    MathExprNode* createMathExprNode(ASTNode* expr);
-
-    BoolExprNode* createBoolExprNode(ASTNode* expr);
 
     ForLoopNode* createForLoopNode();
 
@@ -46,33 +42,13 @@ private:
 
     ASTNode* factor();
 
-    ASTNode* parseMathExpr();
-
-    ASTNode* expressionBool();
-
-    ASTNode* expressionTailBool(ASTNode* lvalue);
-
-    ASTNode* termBool();
-
-    ASTNode* termTailBool(ASTNode* lvalue);
-
-    ASTNode* factorBool();
-
-    ASTNode* parseBoolExpr();
-
-    ASTNode* parseExpr();
-
     ASTNode* parseAssign();
 
     ASTNode* parseDeclVar();
 
-    ASTNode* parseEqual();
-
     ASTNode* parseId();
 
     ASTNode* parseForLoop();
-
-    bool isStmtEquality();
 
     bool matchParseComplete();
 

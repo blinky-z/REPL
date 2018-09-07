@@ -5,7 +5,8 @@ ASTNode* Parser::expression() {
 
     const Token& nextOp = tokens.getNextToken();
     tokens.returnToken();
-    if (nextOp.Type == TokenTypes::Add || nextOp.Type == TokenTypes::Sub) {
+    if (nextOp.Type == TokenType::Add || nextOp.Type == TokenType::Sub ||
+        nextOp.Type == TokenType::BoolOR || nextOp.Type == TokenType::Equal) {
         return expressionTail(termNode);
     } else {
         return termNode;
@@ -18,31 +19,76 @@ ASTNode* Parser::expressionTail(ASTNode* lvalue) {
 
     const Token& token = tokens.getNextToken();
 
-    if (token.Type == TokenTypes::Add) {
+    if (token.Type == TokenType::Add) {
         rvalue = term();
 
-        ASTNode* currentBinOpNode = createBinOpNode(OperatorPlus, lvalue, rvalue);
+        ASTNode* currentBinOpNode = createBinOpNode(BinOpType::OperatorPlus, lvalue, rvalue);
         expressionTailNode = expressionTail(currentBinOpNode);
 
-        if (expressionTailNode->type == Empty) {
+        if (expressionTailNode->type == NodeType::Empty) {
             delete expressionTailNode;
 
             return currentBinOpNode;
         } else {
             return expressionTailNode;
         }
-    } else if (token.Type == TokenTypes::Sub) {
+    } else if (token.Type == TokenType::Sub) {
         rvalue = term();
 
-        ASTNode* currentBinOpNode = createBinOpNode(OperatorMinus, lvalue, rvalue);
+        ASTNode* currentBinOpNode = createBinOpNode(BinOpType::OperatorMinus, lvalue, rvalue);
         expressionTailNode = expressionTail(currentBinOpNode);
 
-        if (expressionTailNode->type == Empty) {
+        if (expressionTailNode->type == NodeType::Empty) {
             delete expressionTailNode;
 
             return currentBinOpNode;
         } else {
             return expressionTailNode;
+        }
+    } else if (token.Type == TokenType::BoolOR) {
+        rvalue = term();
+
+        ASTNode* currentBinOpNode = createBinOpNode(BinOpType::OperatorBoolOR, lvalue, rvalue);
+        expressionTailNode = expressionTail(currentBinOpNode);
+
+        if (expressionTailNode->type == NodeType::Empty) {
+            delete expressionTailNode;
+
+            return currentBinOpNode;
+        } else {
+            return expressionTailNode;
+        }
+    } else if (token.Type == TokenType::Equal) {
+        rvalue = term();
+
+        if (lvalue->type == NodeType::BinOp) {
+            BinOpNode* node = static_cast<BinOpNode*>(lvalue);
+
+            if (node->binOpType == BinOpType::OperatorBoolOR || node->binOpType == BinOpType::OperatorBoolAND) {
+                ASTNode* equalBinOpNode = createBinOpNode(BinOpType::OperatorEqual, node->right, rvalue);
+
+                ASTNode* curBinOpNode = createBinOpNode(node->binOpType, node->left, equalBinOpNode);
+                expressionTailNode = expressionTail(curBinOpNode);
+
+                if (expressionTailNode->type == NodeType::Empty) {
+                    delete expressionTailNode;
+
+                    return curBinOpNode;
+                } else {
+                    return expressionTailNode;
+                }
+            }
+        } else {
+            ASTNode* currentBinOpNode = createBinOpNode(BinOpType::OperatorEqual, lvalue, rvalue);
+            expressionTailNode = expressionTail(currentBinOpNode);
+
+            if (expressionTailNode->type == NodeType::Empty) {
+                delete expressionTailNode;
+
+                return currentBinOpNode;
+            } else {
+                return expressionTailNode;
+            }
         }
     } else {
         tokens.returnToken();
@@ -56,7 +102,7 @@ ASTNode* Parser::term() {
 
     const Token& nextOp = tokens.getNextToken();
     tokens.returnToken();
-    if (nextOp.Type == TokenTypes::Mul || nextOp.Type == TokenTypes::Div) {
+    if (nextOp.Type == TokenType::Mul || nextOp.Type == TokenType::Div || nextOp.Type == TokenType::BoolAND) {
         return termTail(factorNode);
     } else {
         return factorNode;
@@ -69,26 +115,39 @@ ASTNode* Parser::termTail(ASTNode* lvalue) {
 
     const Token& token = tokens.getNextToken();
 
-    if (token.Type == TokenTypes::Mul) {
+    if (token.Type == TokenType::Mul) {
         rvalue = factor();
 
-        ASTNode* currentBinOpNode = createBinOpNode(OperatorMul, lvalue, rvalue);
+        ASTNode* currentBinOpNode = createBinOpNode(BinOpType::OperatorMul, lvalue, rvalue);
         termTailNode = termTail(currentBinOpNode);
 
-        if (termTailNode->type == Empty) {
+        if (termTailNode->type == NodeType::Empty) {
             delete termTailNode;
 
             return currentBinOpNode;
         } else {
             return termTailNode;
         }
-    } else if (token.Type == TokenTypes::Div) {
+    } else if (token.Type == TokenType::Div) {
         rvalue = factor();
 
-        ASTNode* currentBinOpNode = createBinOpNode(OperatorDiv, lvalue, rvalue);
+        ASTNode* currentBinOpNode = createBinOpNode(BinOpType::OperatorDiv, lvalue, rvalue);
         termTailNode = termTail(currentBinOpNode);
 
-        if (termTailNode->type == Empty) {
+        if (termTailNode->type == NodeType::Empty) {
+            delete termTailNode;
+
+            return currentBinOpNode;
+        } else {
+            return termTailNode;
+        }
+    } else if (token.Type == TokenType::BoolAND) {
+        rvalue = factor();
+
+        ASTNode* currentBinOpNode = createBinOpNode(BinOpType::OperatorBoolAND, lvalue, rvalue);
+        termTailNode = termTail(currentBinOpNode);
+
+        if (termTailNode->type == NodeType::Empty) {
             delete termTailNode;
 
             return currentBinOpNode;
@@ -105,24 +164,28 @@ ASTNode* Parser::termTail(ASTNode* lvalue) {
 ASTNode* Parser::factor() {
     const Token& token = tokens.getNextToken();
 
-    if (token.Type == TokenTypes::Num) {
+    if (token.Type == TokenType::Num) {
         double value = getNumTokenValue(token);
 
         return createNumberNode(value);
-    } else if (token.Type == TokenTypes::Sub) {
+    } else if (token.Type == TokenType::Bool) {
+        bool value = getBoolTokenValue(token);
+
+        return createBoolNode(value);
+    } else if (token.Type == TokenType::Sub) {
         // convert unary minus (-x) into (0 - x) expr
         ASTNode* value = factor();
         ASTNode* leafMinusNode = createNumberNode(0);
 
-        return createBinOpNode(OperatorMinus, leafMinusNode, value);
-    } else if (token.Type == TokenTypes::Id) {
+        return createBinOpNode(BinOpType::OperatorMinus, leafMinusNode, value);
+    } else if (token.Type == TokenType::Id) {
         const std::string& idName = token.Value;
 
         return createIdentifierNode(idName);
-    } else if (token.Type == TokenTypes::ROUND_BRACKET_START) {
+    } else if (token.Type == TokenType::ROUND_BRACKET_START) {
         ASTNode* result = expression();
 
-        if (tokens.getNextToken().Type == TokenTypes::ROUND_BRACKET_END) {
+        if (tokens.getNextToken().Type == TokenType::ROUND_BRACKET_END) {
             return result;
         } else {
             throw std::runtime_error("Invalid syntax");
@@ -130,177 +193,34 @@ ASTNode* Parser::factor() {
     } else {
         throw std::runtime_error("Invalid syntax");
     }
-}
-
-ASTNode* Parser::parseMathExpr() {
-    return createMathExprNode(expression());
-}
-
-ASTNode* Parser::expressionBool() {
-    ASTNode* termNode = termBool();
-
-    const Token& nextOp = tokens.getNextToken();
-    tokens.returnToken();
-    if (nextOp.Type == TokenTypes::BoolOR) {
-        return expressionTailBool(termNode);
-    } else {
-        return termNode;
-    }
-}
-
-ASTNode* Parser::expressionTailBool(ASTNode* lvalue) {
-    ASTNode* rvalue;
-    ASTNode* expressionTailNode;
-
-    const Token& token = tokens.getNextToken();
-
-    if (token.Type == TokenTypes::BoolOR) {
-        rvalue = termBool();
-
-        ASTNode* currentBinOpNode = createBinOpNode(OperatorBoolOR, lvalue, rvalue);
-        expressionTailNode = expressionTail(currentBinOpNode);
-
-        if (expressionTailNode->type == Empty) {
-            delete expressionTailNode;
-
-            return currentBinOpNode;
-        } else {
-            return expressionTailNode;
-        }
-    } else {
-        tokens.returnToken();
-    }
-
-    return createEmptyNode();
-}
-
-ASTNode* Parser::termBool() {
-    ASTNode* factorNode = factorBool();
-
-    const Token& nextOp = tokens.getNextToken();
-    tokens.returnToken();
-    if (nextOp.Type == TokenTypes::BoolAND) {
-        return termTailBool(factorNode);
-    } else {
-        return factorNode;
-    }
-}
-
-ASTNode* Parser::termTailBool(ASTNode* lvalue) {
-    ASTNode* rvalue;
-    ASTNode* termTailNode;
-
-    const Token& token = tokens.getNextToken();
-
-    if (token.Type == TokenTypes::BoolAND) {
-        rvalue = factorBool();
-
-        ASTNode* currentBinOpNode = createBinOpNode(OperatorBoolAND, lvalue, rvalue);
-        termTailNode = termTailBool(currentBinOpNode);
-
-        if (termTailNode->type == Empty) {
-            delete termTailNode;
-
-            return currentBinOpNode;
-        } else {
-            return termTailNode;
-        }
-    } else {
-        tokens.returnToken();
-    }
-
-    return createEmptyNode();
-}
-
-ASTNode* Parser::factorBool() {
-    const Token& token = tokens.getNextToken();
-
-    if (token.Type == TokenTypes::Bool) {
-        bool value = getBoolTokenValue(token);
-
-        return createBoolNode(value);
-    } else if (token.Type == TokenTypes::ROUND_BRACKET_START) {
-        ASTNode* result = expressionBool();
-
-        if (tokens.getNextToken().Type == TokenTypes::ROUND_BRACKET_END) {
-            return result;
-        } else {
-            throw std::runtime_error("Invalid syntax");
-        }
-    } else if (token.Type == TokenTypes::Id) {
-        const std::string& idName = token.Value;
-
-        return createIdentifierNode(idName);
-    } else {
-        throw std::runtime_error("Invalid syntax");
-    }
-}
-
-ASTNode* Parser::parseBoolExpr() {
-    return createBoolExprNode(expressionBool());
-}
-
-ASTNode* Parser::parseExpr() {
-    const std::vector<Token> exprTokens = tokens.getTokens();
-
-    for (const auto& currentToken : exprTokens) {
-        if (currentToken.Type == TokenTypes::Bool || currentToken.Type == TokenTypes::BoolOR ||
-            currentToken.Type == TokenTypes::BoolAND) {
-            return parseBoolExpr();
-        } else if (currentToken.Type == TokenTypes::Num || currentToken.Type == TokenTypes::Add ||
-                   currentToken.Type == TokenTypes::Sub || currentToken.Type == TokenTypes::Mul ||
-                   currentToken.Type == TokenTypes::Div) {
-            return parseMathExpr();
-        }
-    }
-    if (tokens.getNextToken().Type == TokenTypes::Id && tokens.getNextToken().Type == TokenTypes::eof) {
-        tokens.returnToken();
-        tokens.returnToken();
-        return parseId();
-    }
-    throw std::runtime_error("Invalid Syntax");
 }
 
 ASTNode* Parser::parseAssign() {
     const Token& id = tokens.getNextToken();
     const std::string& idName = id.Value;
 
-    // skip Assign token
+    // skip '=' token
     tokens.getNextToken();
 
     IdentifierNode* idNode = createIdentifierNode(idName);
-    ASTNode* expr = parseExpr();
+    ASTNode* expr = expression();
 
-    return createBinOpNode(OperatorAssign, idNode, expr);
+    return createBinOpNode(BinOpType::OperatorAssign, idNode, expr);
 }
 
 ASTNode* Parser::parseDeclVar() {
     ASTNode* expr = nullptr;
 
-    const Token& id = tokens.getNextToken();
-    const std::string& idName = id.Value;
-
-    IdentifierNode* idNode = createIdentifierNode(idName);
+    IdentifierNode* idNode = static_cast<IdentifierNode*>(parseId());
 
     const Token& nextToken = tokens.getNextToken();
-    if (nextToken.Type == TokenTypes::Assign) {
-        expr = parseExpr();
+    if (nextToken.Type == TokenType::Assign) {
+        expr = expression();
     } else {
         tokens.returnToken();
     }
 
     return createDeclVarNode(idNode, expr);
-}
-
-ASTNode* Parser::parseEqual() {
-    ASTNode* left = parseExpr();
-
-    // skip "==" token
-    tokens.getNextToken();
-
-    ASTNode* right = parseExpr();
-
-    return createBinOpNode(OperatorEqual, left, right);
 }
 
 ASTNode* Parser::parseId() {
@@ -322,35 +242,32 @@ ASTNode* Parser::parse(const TokenContainer& tokenizedSourceData) {
 
     ASTNode* parseResult;
 
-    if (isStmtEquality()) {
-        tokens.returnToken();
-        parseResult = parseEqual();
-    } else if (currentToken.Type == TokenTypes::Id) {
+    if (currentToken.Type == TokenType::Id) {
         const Token& nextToken = tokens.getNextToken();
         tokens.returnToken();
         tokens.returnToken();
 
-        if (nextToken.Type == TokenTypes::Assign) {
+        if (nextToken.Type == TokenType::Assign) {
             parseResult = parseAssign();
         } else {
-            parseResult = parseExpr();
+            parseResult = expression();
         }
-    } else if (currentToken.Type == TokenTypes::ROUND_BRACKET_START) {
+    } else if (currentToken.Type == TokenType::ROUND_BRACKET_START) {
         tokens.returnToken();
-        parseResult = parseExpr();
-    } else if (currentToken.Type == TokenTypes::Num) {
+        parseResult = expression();
+    } else if (currentToken.Type == TokenType::Num) {
         tokens.returnToken();
-        parseResult = parseMathExpr();
-    } else if (currentToken.Type == TokenTypes::Bool) {
+        parseResult = expression();
+    } else if (currentToken.Type == TokenType::Bool) {
         tokens.returnToken();
-        parseResult = parseBoolExpr();
-    } else if (currentToken.Type == TokenTypes::Sub) {
+        parseResult = expression();
+    } else if (currentToken.Type == TokenType::Sub) {
         // unary minus
         tokens.returnToken();
-        parseResult = parseMathExpr();
-    } else if (currentToken.Type == TokenTypes::DeclareId) {
+        parseResult = expression();
+    } else if (currentToken.Type == TokenType::DeclareId) {
         parseResult = parseDeclVar();
-    } else if (currentToken.Type == TokenTypes::DeclareForLoop) {
+    } else if (currentToken.Type == TokenType::DeclareForLoop) {
         tokens.returnToken();
         parseResult = parseForLoop();
     } else {
@@ -364,7 +281,7 @@ ASTNode* Parser::parse(const TokenContainer& tokenizedSourceData) {
     }
 }
 
-BinOpNode* Parser::createBinOpNode(ASTNodeBinOpType type, ASTNode* left, ASTNode* right) {
+BinOpNode* Parser::createBinOpNode(BinOpType::ASTNodeBinOpType type, ASTNode* left, ASTNode* right) {
     BinOpNode* node = new BinOpNode;
     node->binOpType = type;
     node->left = left;
@@ -402,22 +319,6 @@ DeclVarNode* Parser::createDeclVarNode(IdentifierNode* id, ASTNode* expr) {
     return node;
 }
 
-MathExprNode* Parser::createMathExprNode(ASTNode* expr) {
-    MathExprNode* node = new MathExprNode;
-
-    node->expr = expr;
-
-    return node;
-}
-
-BoolExprNode* Parser::createBoolExprNode(ASTNode* expr) {
-    BoolExprNode* node = new BoolExprNode;
-
-    node->expr = expr;
-
-    return node;
-}
-
 ForLoopNode* Parser::createForLoopNode() {
     ForLoopNode* node = new ForLoopNode;
 
@@ -426,7 +327,7 @@ ForLoopNode* Parser::createForLoopNode() {
 
 ASTNode* Parser::createEmptyNode() {
     ASTNode* node = new ASTNode;
-    node->type = Empty;
+    node->type = NodeType::Empty;
 
     return node;
 }
@@ -442,20 +343,9 @@ bool Parser::getBoolTokenValue(const Token& boolToken) {
 bool Parser::matchParseComplete() {
     const Token& currentToken = tokens.getNextToken();
 
-    if (currentToken.Type == TokenTypes::SEMICOLON) {
-        return tokens.getNextToken().Type == TokenTypes::eof;
+    if (currentToken.Type == TokenType::SEMICOLON) {
+        return tokens.getNextToken().Type == TokenType::eof;
     } else {
-        return currentToken.Type == TokenTypes::eof;
+        return currentToken.Type == TokenType::eof;
     }
-}
-
-bool Parser::isStmtEquality() {
-    auto stmtTokens = tokens.getTokens();
-
-    for (const auto& currentToken : stmtTokens) {
-        if (currentToken.Type == TokenTypes::Equal) {
-            return true;
-        }
-    }
-    return false;
 }
