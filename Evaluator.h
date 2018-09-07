@@ -3,7 +3,6 @@
 
 #include "ASTNode.h"
 #include "SymbolTable.h"
-#include "TokenTypes.h"
 #include <iostream>
 
 class Evaluator {
@@ -14,7 +13,7 @@ private:
 
     bool EvaluateBoolExpr(ASTNode* subtree);
 
-    void EvaluateAssignValue(BinOpNode* subtree);
+    void EvaluateAssignValue(IdentifierNode* lvalue, ASTNode* expr);
 
     void EvaluateDeclVar(DeclVarNode* subtree);
 
@@ -27,6 +26,9 @@ private:
     double EvaluateNumberValue(NumberNode* num);
 
     bool EvaluateBoolValue(BoolNode* num);
+
+    IdentifierValueType::ValueType getNodeValueType(ASTNode* node);
+
 public:
     std::string Evaluate(ASTNode* root);
 };
