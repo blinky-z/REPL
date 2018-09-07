@@ -4,13 +4,13 @@
 #include <string>
 #include <unordered_map>
 
-struct IdentifierValueType {
+namespace IdentifierValueType {
     enum ValueType {
         Number,
         Bool,
         Undefined
     };
-};
+}
 
 struct IdentifierTypeStringNames {
     std::unordered_map<int, std::string> idTypeStringNames;
@@ -23,7 +23,7 @@ struct IdentifierTypeStringNames {
 };
 
 struct Identifier {
-    int Type; // тип контента (string, int в bash)
+    IdentifierValueType::ValueType Type; // тип контента (string, int в bash)
     std::string StringValue; // в bash есть только int и string
     double NumValue;
     bool BoolValue;
