@@ -363,17 +363,17 @@ IdentifierValueType::ValueType Evaluator::getNodeValueType(ASTNode* node) {
     IdentifierValueType::ValueType nodeValueType;
 
     if (nodeType == NodeType::BinOp) {
-        BinOpNode* leftBinOpNode = dynamic_cast<BinOpNode*>(node);
+        BinOpNode* binOpNode = dynamic_cast<BinOpNode*>(node);
 
-        if (leftBinOpNode != nullptr) {
-            if (leftBinOpNode->binOpType == BinOpType::OperatorEqual ||
-                leftBinOpNode->binOpType == BinOpType::OperatorBoolOR ||
-                leftBinOpNode->binOpType == BinOpType::OperatorBoolAND) {
+        if (binOpNode != nullptr) {
+            if (binOpNode->binOpType == BinOpType::OperatorEqual ||
+                binOpNode->binOpType == BinOpType::OperatorBoolOR ||
+                binOpNode->binOpType == BinOpType::OperatorBoolAND) {
                 nodeValueType = IdentifierValueType::Bool;
-            } else if (leftBinOpNode->binOpType == BinOpType::OperatorPlus ||
-                       leftBinOpNode->binOpType == BinOpType::OperatorMinus ||
-                       leftBinOpNode->binOpType == BinOpType::OperatorMul ||
-                       leftBinOpNode->binOpType == BinOpType::OperatorDiv) {
+            } else if (binOpNode->binOpType == BinOpType::OperatorPlus ||
+                       binOpNode->binOpType == BinOpType::OperatorMinus ||
+                       binOpNode->binOpType == BinOpType::OperatorMul ||
+                       binOpNode->binOpType == BinOpType::OperatorDiv) {
                 nodeValueType = IdentifierValueType::Number;
             } else {
                 throw std::runtime_error("Invalid binary operation type");
