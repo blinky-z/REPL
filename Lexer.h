@@ -9,7 +9,7 @@
 #include <unordered_map>
 
 namespace TokenType {
-    enum TokenTypes {
+    enum {
         eof,
         Num,
         Bool,
@@ -45,7 +45,7 @@ private:
 
     std::string::const_iterator currentChar;
 
-    Token tokenizeIdentifier();
+    Token tokenizeStringLiteral();
 
     Token tokenizeNumber();
 
