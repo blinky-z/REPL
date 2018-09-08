@@ -23,8 +23,8 @@ struct IdentifierTypeStringNames {
 };
 
 struct Identifier {
-    IdentifierValueType::ValueType Type; // тип контента (string, int в bash)
-    std::string StringValue; // в bash есть только int и string
+    IdentifierValueType::ValueType Type;
+    std::string StringValue;
     double NumValue;
     bool BoolValue;
 
