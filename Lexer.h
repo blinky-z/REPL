@@ -43,12 +43,12 @@ class Lexer {
 private:
     std::string::const_iterator currentChar;
 
-    Token tokenizeStringLiteral();
+    const Token tokenizeStringLiteral();
 
-    Token tokenizeNumber();
+    const Token tokenizeNumber();
 
 public:
-    TokenContainer tokenize(const std::string& src);
+    const TokenContainer tokenize(const std::string& src);
 };
 
 #endif //BASHCOMPILER_LEXER_H

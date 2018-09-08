@@ -1,7 +1,7 @@
 #include <iostream>
 #include "Lexer.h"
 
-TokenContainer Lexer::tokenize(const std::string& src) {
+const TokenContainer Lexer::tokenize(const std::string& src) {
     currentChar = src.begin();
 
     TokenContainer tokens;
@@ -105,7 +105,7 @@ TokenContainer Lexer::tokenize(const std::string& src) {
     return tokens;
 }
 
-Token Lexer::tokenizeStringLiteral() {
+const Token Lexer::tokenizeStringLiteral() {
     Token token;
 
     std::string id_name;
@@ -137,7 +137,7 @@ Token Lexer::tokenizeStringLiteral() {
     return token;
 }
 
-Token Lexer::tokenizeNumber() {
+const Token Lexer::tokenizeNumber() {
     Token token;
 
     std::string token_val;
