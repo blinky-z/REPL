@@ -15,11 +15,8 @@ void SymbolTable::setIdValueDouble(std::string idName, double value) {
         symbolTable[idName].NumValue = value;
     } else {
         IdentifierTypeStringNames typeStringNames;
-
-        // дублирущийся код
-        throw std::runtime_error("Can not assign variable '" + idName + "' of type " +
-                                 typeStringNames.idTypeStringNames[symbolTable[idName].Type] +
-                                 " to the value of type Number");
+        throw std::runtime_error("Can not assign integer value to the variable '" + idName + "' of type " +
+                                 typeStringNames.idTypeStringNames[symbolTable[idName].Type]);
     }
 }
 
@@ -34,11 +31,8 @@ void SymbolTable::setIdValueBool(std::string idName, bool value) {
         symbolTable[idName].BoolValue = value;
     } else {
         IdentifierTypeStringNames typeStringNames;
-
-        // TODO: убрать дублирующийся код ошибки (с setIdValueDouble func)
-        throw std::runtime_error("Can not assign variable '" + idName + "' of type " +
-                                 typeStringNames.idTypeStringNames[symbolTable[idName].Type] +
-                                 " to the value of type Bool");
+        throw std::runtime_error("Can not assign bool value to the variable '" + idName + "' of type " +
+                                 typeStringNames.idTypeStringNames[symbolTable[idName].Type]);
     }
 }
 
