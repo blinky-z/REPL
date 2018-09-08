@@ -8,19 +8,19 @@ class SymbolTable {
 private:
     std::unordered_map<std::string, Identifier> symbolTable;
 public:
-    bool isIdExist(std::string identifierName);
+    bool isIdExist(std::string identifierName) const;
 
     void addNewIdentifier(std::string identifierName);
 
     void setIdValueDouble(std::string idName, double value);
 
-    double getIdValueDouble(std::string idName);
+    double getIdValueDouble(std::string idName) const;
 
     void setIdValueBool(std::string idName, bool value);
 
-    bool getIdValueBool(std::string idName);
+    bool getIdValueBool(std::string idName) const;
 
-    IdentifierValueType::ValueType getIdType(const std::string& idName);
+    IdentifierValueType::ValueType getIdType(const std::string& idName) const;
 };
 
 

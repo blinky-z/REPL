@@ -1,6 +1,6 @@
 #include "SymbolTable.h"
 
-bool SymbolTable::isIdExist(std::string identifierName) {
+bool SymbolTable::isIdExist(std::string identifierName) const {
     return symbolTable.find(identifierName) != symbolTable.end();
 }
 
@@ -20,8 +20,8 @@ void SymbolTable::setIdValueDouble(std::string idName, double value) {
     }
 }
 
-double SymbolTable::getIdValueDouble(std::string idName) {
-    return symbolTable[idName].NumValue;
+double SymbolTable::getIdValueDouble(std::string idName) const {
+    return symbolTable.at(idName).NumValue;
 }
 
 void SymbolTable::setIdValueBool(std::string idName, bool value) {
@@ -36,10 +36,10 @@ void SymbolTable::setIdValueBool(std::string idName, bool value) {
     }
 }
 
-bool SymbolTable::getIdValueBool(std::string idName) {
-    return symbolTable[idName].BoolValue;
+bool SymbolTable::getIdValueBool(std::string idName) const {
+    return symbolTable.at(idName).BoolValue;
 }
 
-IdentifierValueType::ValueType SymbolTable::getIdType(const std::string& idName) {
-    return symbolTable[idName].Type;
+IdentifierValueType::ValueType SymbolTable::getIdType(const std::string& idName) const {
+    return symbolTable.at(idName).Type;
 }
