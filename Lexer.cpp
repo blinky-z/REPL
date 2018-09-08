@@ -2,7 +2,6 @@
 #include "Lexer.h"
 
 TokenContainer Lexer::tokenize(const std::string& src) {
-    line = 1;
     currentChar = src.begin();
 
     TokenContainer tokens;
@@ -14,7 +13,6 @@ TokenContainer Lexer::tokenize(const std::string& src) {
             currentChar++;
         }
         while (*currentChar == '\n') {
-            line++;
             currentChar++;
         }
 

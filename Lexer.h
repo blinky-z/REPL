@@ -41,8 +41,6 @@ namespace TokenType {
 
 class Lexer {
 private:
-    int line;
-
     std::string::const_iterator currentChar;
 
     Token tokenizeStringLiteral();
