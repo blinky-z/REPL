@@ -224,9 +224,13 @@ ASTNode* Parser::parseDeclVar() {
 }
 
 ASTNode* Parser::parseId() {
-    const Token& id = tokens.getNextToken();
+    const Token& token = tokens.getNextToken();
 
-    return createIdentifierNode(id.Value);
+    if (token.Type != TokenType::Id) {
+        throw std::runtime_error("Expected identifier");
+    } else {
+        return createIdentifierNode(token.Value);
+    }
 }
 
 ASTNode* Parser::parseForLoop() {
@@ -236,6 +240,7 @@ ASTNode* Parser::parseForLoop() {
 }
 
 ASTNode* Parser::parse(const TokenContainer& tokenizedSourceData) {
+    // TODO: переделать алгоримт парсинга на алгоритм Дейкстры
     tokens = tokenizedSourceData;
 
     const Token& currentToken = tokens.getNextToken();
