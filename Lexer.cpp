@@ -51,8 +51,7 @@ const TokenContainer Lexer::tokenize(const std::string& src) {
                 token.Type = TokenType::UnaryMinus;
                 token.Value = "u-";
             } else {
-                const Token& lastOp = tokens.getNextToken();
-                tokens.returnToken();
+                const Token& lastOp = tokens.getTokens()[tokens.size() - 1];
 
                 if (lastOp.Type == TokenType::Assign || lastOp.Type == TokenType::Add ||
                     lastOp.Type == TokenType::Sub || lastOp.Type == TokenType::Mul ||
