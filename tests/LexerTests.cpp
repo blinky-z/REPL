@@ -101,10 +101,10 @@ TEST_CASE("Negative numbers tokenizing", "[Lexer][Math operations tokenizing]") 
     std::vector<Token> properTokens;
     properTokens.emplace_back(Token{TokenType::Num, "5"});
     properTokens.emplace_back(Token{TokenType::Mul, "*"});
-    properTokens.emplace_back(Token{TokenType::Sub, "-"});
+    properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
     properTokens.emplace_back(Token{TokenType::Num, "123"});
     properTokens.emplace_back(Token{TokenType::Mul, "*"});
-    properTokens.emplace_back(Token{TokenType::Sub, "-"});
+    properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
     properTokens.emplace_back(Token{TokenType::Num, "3464"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
@@ -192,7 +192,7 @@ TEST_CASE("Apply unary minus to variable", "[Lexer]") {
     const std::vector<Token>& tokens = data.getTokens();
 
     std::vector<Token> properTokens;
-    properTokens.emplace_back(Token{TokenType::Sub, "-"});
+    properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
     properTokens.emplace_back(Token{TokenType::Id, "a"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
@@ -210,7 +210,7 @@ TEST_CASE("Declare & Assign variable to variable with unary minus", "[Lexer]") {
     properTokens.emplace_back(Token{TokenType::DeclareId, "var"});
     properTokens.emplace_back(Token{TokenType::Id, "a"});
     properTokens.emplace_back(Token{TokenType::Assign, "="});
-    properTokens.emplace_back(Token{TokenType::Sub, "-"});
+    properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
     properTokens.emplace_back(Token{TokenType::Id, "b"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
@@ -266,10 +266,10 @@ TEST_CASE("Expressions with using of variables and negative numbers", "[Lexer][M
     std::vector<Token> properTokens;
     properTokens.emplace_back(Token{TokenType::Id, "a"});
     properTokens.emplace_back(Token{TokenType::Mul, "*"});
-    properTokens.emplace_back(Token{TokenType::Sub, "-"});
+    properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
     properTokens.emplace_back(Token{TokenType::Num, "5"});
     properTokens.emplace_back(Token{TokenType::Div, "/"});
-    properTokens.emplace_back(Token{TokenType::Sub, "-"});
+    properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
     properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_START, "("});
     properTokens.emplace_back(Token{TokenType::Num, "1500"});
     properTokens.emplace_back(Token{TokenType::Add, "+"});
@@ -302,7 +302,7 @@ TEST_CASE("Tokenize negative float point number", "[Lexer][Math operations token
     const std::vector<Token>& tokens = data.getTokens();
 
     std::vector<Token> properTokens;
-    properTokens.emplace_back(Token{TokenType::Sub, "-"});
+    properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
     properTokens.emplace_back(Token{TokenType::Num, "2.2"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
@@ -319,7 +319,7 @@ TEST_CASE("Expressions with using of float point numbers", "[Lexer][Math operati
     std::vector<Token> properTokens;
     properTokens.emplace_back(Token{TokenType::Id, "a"});
     properTokens.emplace_back(Token{TokenType::Mul, "*"});
-    properTokens.emplace_back(Token{TokenType::Sub, "-"});
+    properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
     properTokens.emplace_back(Token{TokenType::Num, "5.2"});
     properTokens.emplace_back(Token{TokenType::Div, "/"});
     properTokens.emplace_back(Token{TokenType::Num, "3.1"});
@@ -356,7 +356,7 @@ TEST_CASE("Id declare & assign negative float point number tokenizing", "[Lexer]
     properTokens.emplace_back(Token{TokenType::DeclareId, "var"});
     properTokens.emplace_back(Token{TokenType::Id, "a"});
     properTokens.emplace_back(Token{TokenType::Assign, "="});
-    properTokens.emplace_back(Token{TokenType::Sub, "-"});
+    properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
     properTokens.emplace_back(Token{TokenType::Num, "3.2"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
