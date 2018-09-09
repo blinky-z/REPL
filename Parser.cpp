@@ -88,6 +88,7 @@ ASTNode* Parser::expression() {
                     case TokenType::UnaryMinus: {
                         node = createBinOpNode(BinOpType::OperatorMinus, createNumberNode(0), operand);
                         nodeStack.push(node);
+                        break;
                     }
                     default: {
                         throw std::runtime_error("Invalid syntax");
