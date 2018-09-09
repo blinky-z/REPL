@@ -108,30 +108,30 @@ const TokenContainer Lexer::tokenize(const std::string& src) {
 const Token Lexer::tokenizeStringLiteral() {
     Token token;
 
-    std::string id_name;
-    id_name += *currentChar;
+    std::string strLiteral;
+    strLiteral += *currentChar;
 
     while ((*(currentChar + 1) >= 'a' && *(currentChar + 1) <= 'z') ||
            (*(currentChar + 1) >= 'A' && *(currentChar + 1) <= 'Z') ||
            (*(currentChar + 1) >= '0' && *(currentChar + 1) <= '9') || (*(currentChar + 1) == '_')) {
         currentChar++;
-        id_name += *currentChar;
+        strLiteral += *currentChar;
     }
 
-    if (id_name == "var") {
+    if (strLiteral == "var") {
         token.Type = TokenType::DeclareId;
         token.Value = "var";
-    } else if (id_name == "false" || id_name == "true") {
+    } else if (strLiteral == "false" || strLiteral == "true") {
         token.Type = TokenType::Bool;
 
-        if (id_name == "false") {
+        if (strLiteral == "false") {
             token.Value = "0";
         } else {
             token.Value = "1";
         }
     } else {
         token.Type = TokenType::Id;
-        token.Value = id_name;
+        token.Value = strLiteral;
     }
 
     return token;
