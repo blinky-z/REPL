@@ -411,6 +411,35 @@ TEST_CASE("Declare & assign variable in separate expr", "[Evaluator]") {
     delete root3;
 }
 
+TEST_CASE("Declare & assign var to math expr", "[Evaluator]") {
+    Evaluator EvaluatorTestsEvaluator;
+
+    double a = 200.25 + 5 * 100;
+
+    std::string expr1 = "var a = 200.25 + 5 * 100";
+    std::string expr2 = "a";
+
+    expr1.push_back(EOF);
+    expr2.push_back(EOF);
+
+    const TokenContainer& tokensExpr1 = EvaluatorTestsLexer.tokenize(expr1);
+    const TokenContainer& tokensExpr2 = EvaluatorTestsLexer.tokenize(expr2);
+
+    // declare and assign var evaluate
+    ASTNode* root1 = EvaluatorTestsParser.parse(tokensExpr1);
+    EvaluatorTestsEvaluator.Evaluate(root1);
+
+    ASTNode* root2 = EvaluatorTestsParser.parse(tokensExpr2);
+
+    std::string result = EvaluatorTestsEvaluator.Evaluate(root2);
+    std::string properResult = std::to_string(a);
+
+    REQUIRE(result == properResult);
+
+    delete root1;
+    delete root2;
+}
+
 TEST_CASE("Assign variable to the other variable", "[Evaluator]") {
     Evaluator EvaluatorTestsEvaluator;
 
@@ -1182,35 +1211,6 @@ TEST_CASE("Bool expression evaluation with variables: Logical OR", "[Evaluator]"
     delete root2;
 }
 
-TEST_CASE("Declare & assign var to math expr", "[Evaluator]") {
-    Evaluator EvaluatorTestsEvaluator;
-
-    double a = 200.25 + 5 * 100;
-
-    std::string expr1 = "var a = 200.25 + 5 * 100";
-    std::string expr2 = "a";
-
-    expr1.push_back(EOF);
-    expr2.push_back(EOF);
-
-    const TokenContainer& tokensExpr1 = EvaluatorTestsLexer.tokenize(expr1);
-    const TokenContainer& tokensExpr2 = EvaluatorTestsLexer.tokenize(expr2);
-
-    // declare and assign var evaluate
-    ASTNode* root1 = EvaluatorTestsParser.parse(tokensExpr1);
-    EvaluatorTestsEvaluator.Evaluate(root1);
-
-    ASTNode* root2 = EvaluatorTestsParser.parse(tokensExpr2);
-
-    std::string result = EvaluatorTestsEvaluator.Evaluate(root2);
-    std::string properResult = std::to_string(a);
-
-    REQUIRE(result == properResult);
-
-    delete root1;
-    delete root2;
-}
-
 TEST_CASE("Declare & assign var to bool expr", "[Evaluator]") {
     Evaluator EvaluatorTestsEvaluator;
 
@@ -1237,4 +1237,42 @@ TEST_CASE("Declare & assign var to bool expr", "[Evaluator]") {
 
     delete root1;
     delete root2;
+}
+
+TEST_CASE("Bool expression with using of equality operator [1]", "[Evaluator]") {
+    Evaluator EvaluatorTestsEvaluator;
+
+    std::string expr1 = "false || true == false || true";
+
+    expr1.push_back(EOF);
+
+    const TokenContainer& tokensExpr1 = EvaluatorTestsLexer.tokenize(expr1);
+
+    ASTNode* root1 = EvaluatorTestsParser.parse(tokensExpr1);
+
+    std::string result = EvaluatorTestsEvaluator.Evaluate(root1);
+    std::string properResult = getBoolValueStringRepresentation(false || true == false || true);
+
+    REQUIRE(result == properResult);
+
+    delete root1;
+}
+
+TEST_CASE("Bool expression with using of equality operator [2]", "[Evaluator]") {
+    Evaluator EvaluatorTestsEvaluator;
+
+    std::string expr1 = "false || true && 1 == 1";
+
+    expr1.push_back(EOF);
+
+    const TokenContainer& tokensExpr1 = EvaluatorTestsLexer.tokenize(expr1);
+
+    ASTNode* root1 = EvaluatorTestsParser.parse(tokensExpr1);
+
+    std::string result = EvaluatorTestsEvaluator.Evaluate(root1);
+    std::string properResult = getBoolValueStringRepresentation(false || true && 1 == 1);
+
+    REQUIRE(result == properResult);
+
+    delete root1;
 }
