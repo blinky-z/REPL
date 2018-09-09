@@ -9,7 +9,6 @@ namespace NodeType {
     enum ASTNodeType {
         Undefined,
         DeclVar,
-        Empty,
         Id,
         BinOp,
         NumberValue,
@@ -40,7 +39,6 @@ struct TypesStringNames {
     TypesStringNames() {
         nodeTypeStringNames[NodeType::Undefined] = "Undefined";
         nodeTypeStringNames[NodeType::DeclVar] = "Var Declaration";
-        nodeTypeStringNames[NodeType::Empty] = "Empty";
         nodeTypeStringNames[NodeType::Id] = "Identifier";
         nodeTypeStringNames[NodeType::BinOp] = "Binary Operation";
         nodeTypeStringNames[NodeType::NumberValue] = "Number";
