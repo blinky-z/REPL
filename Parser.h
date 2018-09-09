@@ -11,6 +11,8 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <queue>
+#include <stack>
 
 class Parser {
 private:
@@ -26,21 +28,11 @@ private:
 
     ForLoopNode* createForLoopNode();
 
-    ASTNode* createEmptyNode();
-
     double getNumTokenValue(const Token& numToken);
 
     bool getBoolTokenValue(const Token& boolToken);
 
     ASTNode* expression();
-
-    ASTNode* expressionTail(ASTNode* lvalue);
-
-    ASTNode* term();
-
-    ASTNode* termTail(ASTNode* lvalue);
-
-    ASTNode* factor();
 
     ASTNode* parseAssign();
 
@@ -50,9 +42,19 @@ private:
 
     ASTNode* parseForLoop();
 
+    std::queue<Token> convertExpr();
+
+    bool isOperator(const Token& token);
+
+    bool isBinaryOperator(const Token& token);
+
+    bool isLeftAssociative(const Token& token);
+
     bool matchParseComplete();
 
     TokenContainer tokens;
+
+    std::stack<Token> stack;
 public:
     ASTNode* parse(const TokenContainer& tokenizedSourceData);
 };
