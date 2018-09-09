@@ -31,8 +31,9 @@ namespace TokenType {
         Mul,
         Div,
         Mod, // not implemented
-        Inc,
-        Dec,
+        UnaryMinus,
+        Inc, // not implemented
+        Dec, // not implemented
         BoolAND,
         BoolOR,
         Equal
