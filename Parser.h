@@ -53,8 +53,6 @@ private:
     bool matchParseComplete();
 
     TokenContainer tokens;
-
-    std::stack<Token> stack;
 public:
     ASTNode* parse(const TokenContainer& tokenizedSourceData);
 };

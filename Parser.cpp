@@ -3,7 +3,6 @@
 ASTNode* Parser::expression() {
     std::queue<Token> outQueue = convertExpr();
 
-    std::stack<Token> stack;
     std::stack<ASTNode*> nodeStack;
 
     Token currentToken;
@@ -26,13 +25,14 @@ ASTNode* Parser::expression() {
                     break;
                 }
                 default: {
-                    break;
+                    throw std::runtime_error("Invalid syntax");
                 }
             }
         } else {
-            if (isBinaryOperator(currentToken)) { // binary operation
+            if (isBinaryOperator(currentToken)) {
                 ASTNode* node;
 
+                // since stack is LIFO need to get 2nd operand first to not break the order of operands
                 ASTNode* operand2 = nodeStack.top();
                 nodeStack.pop();
                 ASTNode* operand1 = nodeStack.top();
@@ -75,10 +75,10 @@ ASTNode* Parser::expression() {
                         break;
                     }
                     default: {
-                        break;
+                        throw std::runtime_error("Invalid syntax");
                     }
                 }
-            } else { // unary operation, no ternary operations is language
+            } else {
                 ASTNode* node;
 
                 ASTNode* operand = nodeStack.top();
@@ -90,7 +90,7 @@ ASTNode* Parser::expression() {
                         nodeStack.push(node);
                     }
                     default: {
-
+                        throw std::runtime_error("Invalid syntax");
                     }
                 }
             }
@@ -145,7 +145,6 @@ ASTNode* Parser::parseForLoop() {
 }
 
 ASTNode* Parser::parse(const TokenContainer& tokenizedSourceData) {
-    // TODO: переделать алгоримт парсинга на алгоритм Дейкстры
     tokens = tokenizedSourceData;
 
     const Token& currentToken = tokens.getNextToken();
@@ -269,21 +268,23 @@ std::queue<Token> Parser::convertExpr() {
     opPrecedence["/"] = 5;
     opPrecedence["u-"] = 6;
 
-    Token token;
+    std::stack<Token> stack;
+    std::queue<Token> RPNExpr;
 
-    std::queue<Token> outQueue;
+    Token token;
 
     while ((token = tokens.getNextToken()).Type != TokenType::eof) {
         if (token.Type == TokenType::Num || token.Type == TokenType::Bool || token.Type == TokenType::Id) {
-            outQueue.push(token);
+            RPNExpr.push(token);
         } else if (isOperator(token)) {
             const Token& op1 = token;
 
             while (!stack.empty() && isOperator(stack.top())) {
                 const Token& op2 = stack.top();
+
                 if ((isLeftAssociative(op1) && (opPrecedence[op1.Value] <= opPrecedence[op2.Value])) ||
                     (!isLeftAssociative(op1) && (opPrecedence[op1.Value] < opPrecedence[op2.Value]))) {
-                    outQueue.push(stack.top());
+                    RPNExpr.push(stack.top());
                     stack.pop();
                     continue;
                 }
@@ -297,7 +298,7 @@ std::queue<Token> Parser::convertExpr() {
                 Token topToken;
                 while ((topToken = stack.top()).Type != TokenType::ROUND_BRACKET_START) {
                     stack.pop();
-                    outQueue.push(topToken);
+                    RPNExpr.push(topToken);
                 }
                 stack.pop(); // remove left bracket
             } catch (std::exception) {
@@ -310,16 +311,10 @@ std::queue<Token> Parser::convertExpr() {
     while (!stack.empty()) {
         const Token& topToken = stack.top();
         stack.pop();
-        outQueue.push(topToken);
+        RPNExpr.push(topToken);
     }
 
-//    while (!outQueue.empty()) {
-//        std::cout << outQueue.front().Value << " ";
-//        outQueue.pop();
-//    }
-//    std::cout << std::endl;
-
-    return outQueue;
+    return RPNExpr;
 }
 
 bool Parser::isLeftAssociative(const Token& token) {
