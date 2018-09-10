@@ -11,7 +11,7 @@ add_executable(tests
         ../Evaluator.h ../Evaluator.cpp
         ../SymbolTable.h ../SymbolTable.cpp
         ../TokenContainer.h ../TokenContainer.cpp
-
+        ../EvalResult.cpp ../EvalResult.h
 #        ------------------------
 #        tests
 #        include lib to evaluate string math expressions
