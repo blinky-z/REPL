@@ -64,7 +64,7 @@ int main() {
             if (!result.isError()) {
                 printResult(result);
             } else {
-                throw std::runtime_error(result.error->what());
+                throw std::runtime_error(result.error.what());
             }
 
             delete root;
