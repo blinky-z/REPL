@@ -3,21 +3,22 @@
 
 #include "ASTNode.h"
 #include "SymbolTable.h"
+#include "EvalResult.h"
 #include <iostream>
 
 class Evaluator {
 private:
     SymbolTable symbolTable;
 
-    double EvaluateMathExpr(ASTNode* subtree);
+    EvalResult EvaluateMathExpr(ASTNode* subtree);
 
-    bool EvaluateBoolExpr(ASTNode* subtree);
+    EvalResult EvaluateBoolExpr(ASTNode* subtree);
 
-    void EvaluateAssignValue(IdentifierNode* lvalue, ASTNode* expr);
+    EvalResult EvaluateAssignValue(IdentifierNode* lvalue, ASTNode* expr);
 
-    void EvaluateDeclVar(DeclVarNode* subtree);
+    EvalResult EvaluateDeclVar(DeclVarNode* subtree);
 
-    bool EvaluateEqual(BinOpNode* subtree);
+    EvalResult EvaluateEqual(BinOpNode* subtree);
 
     double EvaluateIdDouble(IdentifierNode* id);
 
@@ -29,8 +30,12 @@ private:
 
     IdentifierValueType::ValueType getNodeValueType(ASTNode* node);
 
+    EvalError newError(EvalErrorCode::Error err);
+
+    EvalError newError(EvalErrorCode::Error err, const std::string errMessage);
+
 public:
-    std::string Evaluate(ASTNode* root);
+    EvalResult Evaluate(ASTNode* root);
 };
 
 #endif //REPL_EVALUATOR_H
