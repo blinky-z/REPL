@@ -8,6 +8,7 @@ namespace IdentifierValueType {
     enum ValueType {
         Number,
         Bool,
+        String,
         Undefined
     };
 }
