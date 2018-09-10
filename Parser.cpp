@@ -319,7 +319,7 @@ std::queue<Token> Parser::convertExpr() {
 }
 
 bool Parser::isLeftAssociative(const Token& token) {
-    return token.Type != TokenType::UnaryMinus || token.Type != TokenType::Assign;
+    return token.Type != TokenType::UnaryMinus && token.Type != TokenType::Assign;
 }
 
 bool Parser::isBinaryOperator(const Token& token) {
