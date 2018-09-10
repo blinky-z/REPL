@@ -16,8 +16,7 @@ const TokenContainer Lexer::tokenize(const std::string& src) {
             currentChar++;
         }
 
-        if ((*currentChar >= 'a' && *currentChar <= 'z') || (*currentChar >= 'A' && *currentChar <= 'Z') ||
-            (*currentChar == '_')) {
+        if (isalpha(*currentChar) || (*currentChar == '_')) {
             token = tokenizeStringLiteral();
         } else if (*currentChar >= '0' && *currentChar <= '9') {
             token = tokenizeNumber();
