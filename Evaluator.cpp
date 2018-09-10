@@ -10,8 +10,7 @@ double Evaluator::EvaluateMathExpr(ASTNode* subtree) {
             throw std::runtime_error("Invalid number node");
         }
     } else if (subtree->type == NodeType::BoolValue) {
-        throw std::runtime_error(
-                "Invalid value type. Only number values are allowed to use in math expressions");
+        throw std::runtime_error("Incompatible operands type");
     } else if (subtree->type == NodeType::Id) {
         IdentifierNode* node = dynamic_cast<IdentifierNode*>(subtree);
 
@@ -24,8 +23,7 @@ double Evaluator::EvaluateMathExpr(ASTNode* subtree) {
                 } else if (idType == IdentifierValueType::Undefined) {
                     throw std::runtime_error("Use of uninitialized identifier '" + node->name + "'");
                 } else {
-                    throw std::runtime_error("Invalid Identifier value type."
-                                             " Only number values are allowed to use in math expressions");
+                    throw std::runtime_error("Incompatible operands type");
                 }
             } else {
                 throw std::runtime_error("Use of undeclared identifier '" + node->name + "'");
@@ -50,7 +48,7 @@ double Evaluator::EvaluateMathExpr(ASTNode* subtree) {
                 case BinOpType::OperatorDiv:
                     return leftValue / rightValue;
                 default:
-                    throw std::runtime_error("Invalid or not allowed binary operation");
+                    throw std::runtime_error("Incompatible operands type");
             }
         } else {
             throw std::runtime_error("Invalid binary operation node");
@@ -70,8 +68,7 @@ bool Evaluator::EvaluateBoolExpr(ASTNode* subtree) {
             throw std::runtime_error("Invalid BoolValue Node");
         }
     } else if (subtree->type == NodeType::NumberValue) {
-        throw std::runtime_error(
-                "Invalid value type. Only bool values are allowed to use in bool expressions");
+        throw std::runtime_error("Incompatible operands type");
     } else if (subtree->type == NodeType::Id) {
         IdentifierNode* node = dynamic_cast<IdentifierNode*>(subtree);
 
@@ -84,8 +81,7 @@ bool Evaluator::EvaluateBoolExpr(ASTNode* subtree) {
                 } else if (idType == IdentifierValueType::Undefined) {
                     throw std::runtime_error("Use of uninitialized identifier '" + node->name + "'");
                 } else {
-                    throw std::runtime_error("Invalid Identifier value type."
-                                             " Only bool values are allowed to use in bool expressions");
+                    throw std::runtime_error("Incompatible operands type");
                 }
             } else {
                 throw std::runtime_error("Use of undeclared identifier '" + node->name + "'");
@@ -110,7 +106,7 @@ bool Evaluator::EvaluateBoolExpr(ASTNode* subtree) {
                 case BinOpType::OperatorBoolOR:
                     return leftValue || rightValue;
                 default:
-                    throw std::runtime_error("Invalid or not allowed binary operation");
+                    throw std::runtime_error("Incompatible operands type");
             }
         } else {
             throw std::runtime_error("Invalid binary operation node");
@@ -143,7 +139,7 @@ void Evaluator::EvaluateAssignValue(IdentifierNode* lvalue, ASTNode* expr) {
 
                     symbolTable.setIdValueBool(lvalue->name, result);
                 } else {
-                    throw std::runtime_error("Invalid Binary Operator Type");
+                    throw std::runtime_error("Invalid Binary Operation");
                 }
             } else if (idExpr != nullptr) {
                 if (symbolTable.isIdExist(idExpr->name)) {
@@ -280,7 +276,7 @@ std::string Evaluator::Evaluate(ASTNode* root) {
 
                 return result ? "true" : "false";
             } else {
-                throw std::runtime_error("Invalid Binary Operator Type");
+                throw std::runtime_error("Invalid Binary Operation");
             }
         } else {
             throw std::runtime_error("Invalid Binary Operation Node");
