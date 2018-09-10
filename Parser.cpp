@@ -252,12 +252,6 @@ bool Parser::matchParseComplete() {
     }
 }
 
-bool Parser::isOperator(const Token& token) {
-    return token.Type == TokenType::Add || token.Type == TokenType::Sub ||
-           token.Type == TokenType::Mul || token.Type == TokenType::Div || token.Type == TokenType::BoolOR ||
-           token.Type == TokenType::BoolAND || token.Type == TokenType::Equal || token.Type == TokenType::UnaryMinus;
-}
-
 std::queue<Token> Parser::convertExpr() {
     static std::unordered_map<std::string, int> opPrecedence;
     opPrecedence["||"] = 1;
@@ -283,8 +277,30 @@ std::queue<Token> Parser::convertExpr() {
             while (!stack.empty() && isOperator(stack.top())) {
                 const Token& op2 = stack.top();
 
-                if ((isLeftAssociative(op1) && (opPrecedence[op1.Value] <= opPrecedence[op2.Value])) ||
-                    (!isLeftAssociative(op1) && (opPrecedence[op1.Value] < opPrecedence[op2.Value]))) {
+                // из стека нужно вытолкнуть те операторы, которые имеют приоритет выше или равный текущему оператору
+                // иначе нарушится порядок выполнения операций
+                // дело в том, что наверху стека лежат операторы, которые должны выполняться первее других
+                // ведь операторы ложатся в выходной результат с верха стека, и именно они будут выполняться первыми
+                // если встретился оператор, имеющий приоритет ниже или равный операторам, лежащим на стеке,
+                // значит нужно обязательно вытолкнуть с стека операторы, имеющие приоритет выше, чтобы они выполнились
+                // первее
+                // например, в выражении expr(2 / 4 + 5) парсинг будет происходить так:
+                // 1) 2 4
+                // 2) встретился оператор /, он ложится в стек
+                // result: 2, 4 | operands stack: /
+                // 3) встретился оператор +, он имеет приоритет меньший, чем у того, который лежит наверху стека
+                // если бы мы не вытолкнули оператор /, то нарушился бы порядок вычислений, то есть стек был бы такой:
+                // result: 2, 4, 5 | operands stack: + (top)
+                //                                   /
+                //
+                // но ведь первые операнды 2, 4 должны были использоваться ранее с оператором /, который имеет приоритет
+                // выше, однако сначала со стека выйдет +, и только потом /: 2, 4, 5, +, /, что в корне неверно
+                // именно для этого нужно выталкивать операторы, имеющие приоритет выше, чтобы не нарушить порядок
+                // вычислений
+                // и наоборот: если текущий оператор имеет приоритет выше, чем лежаший наверху стека операторов, то
+                // данный оператор должен ложиться наверх стека, не выталкивая со стека ничего, чтобы данный оператор
+                // был вычислен первее (ведь он будет вытолкнут со стека первее)
+                if (opPrecedence[op1.Value] <= opPrecedence[op2.Value]) {
                     RPNExpr.push(stack.top());
                     stack.pop();
                     continue;
@@ -305,6 +321,8 @@ std::queue<Token> Parser::convertExpr() {
             } catch (std::exception) {
                 throw std::runtime_error("Invalid syntax");
             }
+        } else {
+            throw std::runtime_error("Invalid syntax");
         }
     }
     tokens.returnToken();
@@ -316,6 +334,12 @@ std::queue<Token> Parser::convertExpr() {
     }
 
     return RPNExpr;
+}
+
+bool Parser::isOperator(const Token& token) {
+    return token.Type == TokenType::Add || token.Type == TokenType::Sub ||
+           token.Type == TokenType::Mul || token.Type == TokenType::Div || token.Type == TokenType::BoolOR ||
+           token.Type == TokenType::BoolAND || token.Type == TokenType::Equal || token.Type == TokenType::UnaryMinus;
 }
 
 bool Parser::isLeftAssociative(const Token& token) {
