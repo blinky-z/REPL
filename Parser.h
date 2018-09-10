@@ -32,7 +32,7 @@ private:
 
     bool getBoolTokenValue(const Token& boolToken);
 
-    ASTNode* expression();
+    ASTNode* parseExpression();
 
     ASTNode* parseAssign();
 

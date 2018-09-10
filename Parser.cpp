@@ -1,6 +1,6 @@
 #include "Parser.h"
 
-ASTNode* Parser::expression() {
+ASTNode* Parser::parseExpression() {
     std::queue<Token> outQueue = convertExpr();
 
     std::stack<ASTNode*> nodeStack;
@@ -109,7 +109,7 @@ ASTNode* Parser::parseAssign() {
     tokens.getNextToken();
 
     IdentifierNode* idNode = createIdentifierNode(idName);
-    ASTNode* expr = expression();
+    ASTNode* expr = parseExpression();
 
     return createBinOpNode(BinOpType::OperatorAssign, idNode, expr);
 }
@@ -121,7 +121,7 @@ ASTNode* Parser::parseDeclVar() {
 
     const Token& nextToken = tokens.getNextToken();
     if (nextToken.Type == TokenType::Assign) {
-        expr = expression();
+        expr = parseExpression();
     } else {
         tokens.returnToken();
     }
@@ -160,20 +160,20 @@ ASTNode* Parser::parse(const TokenContainer& tokenizedSourceData) {
         if (nextToken.Type == TokenType::Assign) {
             parseResult = parseAssign();
         } else {
-            parseResult = expression();
+            parseResult = parseExpression();
         }
     } else if (currentToken.Type == TokenType::ROUND_BRACKET_START) {
         tokens.returnToken();
-        parseResult = expression();
+        parseResult = parseExpression();
     } else if (currentToken.Type == TokenType::Num) {
         tokens.returnToken();
-        parseResult = expression();
+        parseResult = parseExpression();
     } else if (currentToken.Type == TokenType::Bool) {
         tokens.returnToken();
-        parseResult = expression();
+        parseResult = parseExpression();
     } else if (currentToken.Type == TokenType::UnaryMinus) {
         tokens.returnToken();
-        parseResult = expression();
+        parseResult = parseExpression();
     } else if (currentToken.Type == TokenType::DeclareId) {
         parseResult = parseDeclVar();
     } else if (currentToken.Type == TokenType::DeclareForLoop) {
@@ -259,7 +259,7 @@ bool Parser::isOperator(const Token& token) {
 }
 
 std::queue<Token> Parser::convertExpr() {
-    std::unordered_map<std::string, int> opPrecedence;
+    static std::unordered_map<std::string, int> opPrecedence;
     opPrecedence["||"] = 1;
     opPrecedence["&&"] = 2;
     opPrecedence["=="] = 3;
