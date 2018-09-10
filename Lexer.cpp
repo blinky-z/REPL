@@ -114,8 +114,7 @@ const TokenContainer Lexer::tokenize(const std::string& src) {
         currentChar++;
     }
 
-    return
-            tokens;
+    return tokens;
 }
 
 const Token Lexer::tokenizeStringLiteral() {
