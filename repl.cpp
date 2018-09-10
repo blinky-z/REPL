@@ -1,6 +1,7 @@
 #include "Lexer.h"
 #include "Parser.h"
 #include "Evaluator.h"
+#include "EvalResult.h"
 #include <iostream>
 
 std::string readForLoop(const std::string input) {
@@ -22,6 +23,16 @@ std::string readForLoop(const std::string input) {
 
 bool isInputForLoop(const std::string& input) {
     return input.find("for") != std::string::npos;
+}
+
+void printResult(const EvalResult& result) {
+    IdentifierValueType::ValueType resultType = result.getResultType();
+
+    if (resultType == IdentifierValueType::Number) {
+        std::cout << result.getResultDouble() << std::endl;
+    } else {
+        std::cout << result.getResultBool() << std::endl;
+    }
 }
 
 int main() {
@@ -48,13 +59,12 @@ int main() {
 
             ASTNode* root = parser.parse(tokens);
 
-            std::string result = evaluator.Evaluate(root);
+            EvalResult result = evaluator.Evaluate(root);
 
-            // check if result is number
-            if (result.find_first_not_of(".-0123456789") == std::string::npos) {
-                std::cout << std::stod(result) << std::endl;
+            if (!result.isError()) {
+                printResult(result);
             } else {
-                std::cout << result << std::endl;
+                throw std::runtime_error(result.error->what());
             }
 
             delete root;
