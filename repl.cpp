@@ -31,7 +31,7 @@ void printResult(const EvalResult& result) {
     if (resultType == IdentifierValueType::Number) {
         std::cout << result.getResultDouble() << std::endl;
     } else if (resultType == IdentifierValueType::Bool) {
-        std::cout << result.getResultBool() << std::endl;
+        std::cout << (result.getResultBool() ? "true" : "false") << std::endl;
     } else {
         std::cout << result.getResultString() << std::endl;
     }
