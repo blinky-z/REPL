@@ -34,18 +34,13 @@ public:
 struct EvalResult {
 private:
     bool resultBool;
+
     double resultDouble;
+
     std::string resultString;
+
     IdentifierValueType::ValueType resultType;
 public:
-    bool operator==(const EvalResult& other) {
-        if (this->resultType == IdentifierValueType::Number) {
-            return this->resultDouble == other.resultDouble;
-        } else {
-            return this->resultBool == other.resultBool;
-        }
-    }
-
     EvalError error;
 
     bool isError() const;
