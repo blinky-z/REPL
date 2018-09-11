@@ -272,15 +272,17 @@ bool Parser::matchParseComplete() {
 
 std::queue<Token> Parser::convertExpr() {
     static std::unordered_map<std::string, int> opPrecedence;
-    opPrecedence["="] = 0;
-    opPrecedence["||"] = 1;
-    opPrecedence["&&"] = 2;
-    opPrecedence["=="] = 3;
-    opPrecedence["+"] = 4;
-    opPrecedence["-"] = 4;
-    opPrecedence["*"] = 5;
-    opPrecedence["/"] = 5;
-    opPrecedence["u-"] = 6;
+    opPrecedence["="] = 1;
+    opPrecedence["||"] = 2;
+    opPrecedence["&&"] = 3;
+    opPrecedence["=="] = 4;
+    opPrecedence["<"] = 5;
+    opPrecedence[">"] = 5;
+    opPrecedence["+"] = 6;
+    opPrecedence["-"] = 6;
+    opPrecedence["*"] = 7;
+    opPrecedence["/"] = 7;
+    opPrecedence["u-"] = 8;
 
     std::stack<Token> stack;
     std::queue<Token> RPNExpr;
@@ -359,7 +361,8 @@ std::queue<Token> Parser::convertExpr() {
 bool Parser::isOperator(const Token& token) {
     return token.Type == TokenType::Add || token.Type == TokenType::Sub || token.Type == TokenType::Mul ||
            token.Type == TokenType::Div || token.Type == TokenType::BoolOR || token.Type == TokenType::BoolAND ||
-           token.Type == TokenType::Equal || token.Type == TokenType::UnaryMinus || token.Type == TokenType::Assign;
+           token.Type == TokenType::Equal || token.Type == TokenType::UnaryMinus || token.Type == TokenType::Assign ||
+           token.Type == TokenType::LESS || token.Type == TokenType::GREATER;
 }
 
 bool Parser::isLeftAssociative(const Token& token) {
