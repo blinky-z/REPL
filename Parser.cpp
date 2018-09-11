@@ -33,10 +33,17 @@ ASTNode* Parser::parseExpression() {
                 ASTNode* node;
 
                 // since stack is LIFO need to get 2nd operand first to not break the order of operands
-                ASTNode* operand2 = nodeStack.top();
-                nodeStack.pop();
-                ASTNode* operand1 = nodeStack.top();
-                nodeStack.pop();
+                ASTNode* operand1;
+                ASTNode* operand2;
+
+                if (nodeStack.size() >= 2) {
+                    operand2 = nodeStack.top();
+                    nodeStack.pop();
+                    operand1 = nodeStack.top();
+                    nodeStack.pop();
+                } else {
+                    throw std::runtime_error("Invalid Syntax");
+                }
 
                 switch (currentToken.Type) {
                     case TokenType::Add: {
@@ -74,6 +81,11 @@ ASTNode* Parser::parseExpression() {
                         nodeStack.push(node);
                         break;
                     }
+                    case TokenType::Assign: {
+                        node = createBinOpNode(BinOpType::OperatorAssign, operand1, operand2);
+                        nodeStack.push(node);
+                        break;
+                    }
                     default: {
                         throw std::runtime_error("Invalid syntax");
                     }
@@ -81,8 +93,14 @@ ASTNode* Parser::parseExpression() {
             } else {
                 ASTNode* node;
 
-                ASTNode* operand = nodeStack.top();
-                nodeStack.pop();
+                ASTNode* operand;
+
+                if (nodeStack.size() >= 1) {
+                    operand = nodeStack.top();
+                    nodeStack.pop();
+                } else {
+                    throw std::runtime_error("Invalid Syntax");
+                }
 
                 switch (currentToken.Type) {
                     case TokenType::UnaryMinus: {
@@ -254,6 +272,7 @@ bool Parser::matchParseComplete() {
 
 std::queue<Token> Parser::convertExpr() {
     static std::unordered_map<std::string, int> opPrecedence;
+    opPrecedence["="] = 0;
     opPrecedence["||"] = 1;
     opPrecedence["&&"] = 2;
     opPrecedence["=="] = 3;
@@ -337,9 +356,9 @@ std::queue<Token> Parser::convertExpr() {
 }
 
 bool Parser::isOperator(const Token& token) {
-    return token.Type == TokenType::Add || token.Type == TokenType::Sub ||
-           token.Type == TokenType::Mul || token.Type == TokenType::Div || token.Type == TokenType::BoolOR ||
-           token.Type == TokenType::BoolAND || token.Type == TokenType::Equal || token.Type == TokenType::UnaryMinus;
+    return token.Type == TokenType::Add || token.Type == TokenType::Sub || token.Type == TokenType::Mul ||
+           token.Type == TokenType::Div || token.Type == TokenType::BoolOR || token.Type == TokenType::BoolAND ||
+           token.Type == TokenType::Equal || token.Type == TokenType::UnaryMinus || token.Type == TokenType::Assign;
 }
 
 bool Parser::isLeftAssociative(const Token& token) {
