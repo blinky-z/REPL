@@ -19,6 +19,7 @@ struct IdentifierTypeStringNames {
     IdentifierTypeStringNames() {
         idTypeStringNames[IdentifierValueType::Number] = "Number";
         idTypeStringNames[IdentifierValueType::Bool] = "Bool";
+        idTypeStringNames[IdentifierValueType::String] = "String";
         idTypeStringNames[IdentifierValueType::Undefined] = "Undefined";
     }
 };
