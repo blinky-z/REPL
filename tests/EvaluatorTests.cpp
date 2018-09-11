@@ -642,6 +642,31 @@ TEST_CASE("Compare two non-equal double values", "[Evaluator]") {
     REQUIRE(result.getResultBool() == false);
 }
 
+TEST_CASE("Compare math expressions", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "(2 + 2) == (2 * 2)";
+
+    expressionHandler.handleExpression(expr);
+
+    const EvalResult& result = expressionHandler.handleExpression(expr);
+
+    REQUIRE(result.getResultBool() == true);
+}
+
+TEST_CASE("Compare bool expressions", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "(true && false) == (true == false)";
+
+    expressionHandler.handleExpression(expr);
+
+    const EvalResult& result = expressionHandler.handleExpression(expr);
+
+    REQUIRE(result.getResultBool() == true);
+}
+
+
 TEST_CASE("Get error on math expression with incompatible operand value types", "[Evaluator]") {
     ExpressionHandler expressionHandler;
 
