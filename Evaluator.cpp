@@ -43,7 +43,7 @@ EvalResult Evaluator::EvaluateMathExpr(ASTNode* subtree) {
                 return leftValue;
             }
             EvalResult rightValue = EvaluateMathExpr(node->right);
-            if (leftValue.isError()) {
+            if (rightValue.isError()) {
                 return rightValue;
             }
 
@@ -121,7 +121,7 @@ EvalResult Evaluator::EvaluateBoolExpr(ASTNode* subtree) {
                 return leftValue;
             }
             EvalResult rightValue = EvaluateBoolExpr(node->right);
-            if (leftValue.isError()) {
+            if (rightValue.isError()) {
                 return rightValue;
             }
 
