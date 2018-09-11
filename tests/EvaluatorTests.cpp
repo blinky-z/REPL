@@ -701,3 +701,114 @@ TEST_CASE("Get error on eval of bool expression with incompatible Identifier val
 
     REQUIRE(result.error.errorCode == EvalError::INCOMPATIBLE_OPERAND_TYPES);
 }
+
+TEST_CASE("Comparison operator evaluation: LESS THAN", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "2 < 5";
+
+    const EvalResult& result = expressionHandler.handleExpression(expr);
+    bool properResult = 2 < 5;
+
+    REQUIRE(result.getResultBool() == properResult);
+}
+
+TEST_CASE("Comparison operator evaluation: GREATER THAN", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "2 > 5";
+
+    const EvalResult& result = expressionHandler.handleExpression(expr);
+    bool properResult = 2 > 5;
+
+    REQUIRE(result.getResultBool() == properResult);
+}
+
+TEST_CASE("Math Expressions comparison", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "(2 * 5) > (4 * 4)";
+
+    const EvalResult& result = expressionHandler.handleExpression(expr);
+    bool properResult = (2 * 5) > (4 * 4);
+
+    REQUIRE(result.getResultBool() == properResult);
+}
+
+TEST_CASE("Negative values comparison", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "-4 < -2";
+
+    const EvalResult& result = expressionHandler.handleExpression(expr);
+    bool properResult = -4 < -2;
+
+    REQUIRE(result.getResultBool() == properResult);
+}
+
+TEST_CASE("Variables comparison", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "var a = 5";
+    std::string expr2 = "var b = 10";
+    std::string expr3 = "a < b";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+
+    const EvalResult& result = expressionHandler.handleExpression(expr3);
+    bool properResult = 5 < 10;
+
+    REQUIRE(result.getResultBool() == properResult);
+}
+
+TEST_CASE("Negative variables comparison", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "var a = 5";
+    std::string expr2 = "var b = 10";
+    std::string expr3 = "-a < -b";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+
+    const EvalResult& result = expressionHandler.handleExpression(expr3);
+    bool properResult = -5 < -10;
+
+    REQUIRE(result.getResultBool() == properResult);
+}
+
+TEST_CASE("Get error on comparison of incompatible value types [1]", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "false < true";
+
+    const EvalResult& result = expressionHandler.handleExpression(expr);
+
+    REQUIRE(result.error.errorCode == EvalError::INCOMPATIBLE_OPERAND_TYPES);
+}
+
+TEST_CASE("Get error on comparison of incompatible value types [2]", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "false > (5 + 6)";
+
+    const EvalResult& result = expressionHandler.handleExpression(expr);
+
+    REQUIRE(result.error.errorCode == EvalError::INCOMPATIBLE_OPERAND_TYPES);
+}
+
+TEST_CASE("Get error on comparison of incompatible Identifier value types [1]", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "var a = 5";
+    std::string expr2 = "var b = 3 == 3";
+    std::string expr3 = "a < b";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+
+    const EvalResult& result = expressionHandler.handleExpression(expr3);
+
+    REQUIRE(result.error.errorCode == EvalError::INCOMPATIBLE_OPERAND_TYPES);
+}
