@@ -30,9 +30,9 @@ private:
 
     IdentifierValueType::ValueType getNodeValueType(ASTNode* node);
 
-    EvalError newError(EvalErrorCode::Error err);
+    EvalError newError(EvalError::Error err);
 
-    EvalError newError(EvalErrorCode::Error err, const std::string errMessage);
+    EvalError newError(EvalError::Error err, const std::string errMessage);
 
 public:
     EvalResult Evaluate(ASTNode* root);
