@@ -19,16 +19,16 @@ namespace NodeType {
 
 namespace BinOpType {
     enum ASTNodeBinOpType {
-        OperatorLess,
-        OperatorGreater,
-        OperatorBoolAND,
-        OperatorBoolOR,
         OperatorAssign,
         OperatorPlus,
         OperatorMinus,
         OperatorMul,
         OperatorDiv,
-        OperatorEqual
+        OperatorBoolAND,
+        OperatorBoolOR,
+        OperatorEqual,
+        OperatorLess,
+        OperatorGreater
     };
 }
 
@@ -49,6 +49,11 @@ struct TypesStringNames {
         binOpTypeStringNames[BinOpType::OperatorMinus] = "Operator Minus";
         binOpTypeStringNames[BinOpType::OperatorMul] = "Operator Mul";
         binOpTypeStringNames[BinOpType::OperatorDiv] = "Operator Div";
+        binOpTypeStringNames[BinOpType::OperatorBoolAND] = "Logical AND";
+        binOpTypeStringNames[BinOpType::OperatorBoolOR] = "Logical OR";
+        binOpTypeStringNames[BinOpType::OperatorEqual] = "Operator Equal To";
+        binOpTypeStringNames[BinOpType::OperatorLess] = "Operator LESS THAN";
+        binOpTypeStringNames[BinOpType::OperatorGreater] = "Operator GREATER THAN";
     }
 };
 
