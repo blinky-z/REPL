@@ -386,7 +386,7 @@ TEST_CASE("Get throw on expression that contains unknown char", "[Lexer][Math op
     REQUIRE_THROWS(LexerTestsLexer.tokenize(expr));
 }
 
-TEST_CASE("Expression with using of operator LESS THAN", "[Lexer]") {
+TEST_CASE("Expression with using of operator LESS THAN and number constants", "[Lexer]") {
     std::string expr = "1 < 2";
     expr.push_back(EOF);
 
@@ -402,7 +402,7 @@ TEST_CASE("Expression with using of operator LESS THAN", "[Lexer]") {
     matchTokens(tokens, properTokens);
 }
 
-TEST_CASE("Expression with using of operator GREATER THAN", "[Lexer]") {
+TEST_CASE("Expression with using of operator GREATER THAN and number constants", "[Lexer]") {
     std::string expr = "1 > 2";
     expr.push_back(EOF);
 
@@ -413,6 +413,46 @@ TEST_CASE("Expression with using of operator GREATER THAN", "[Lexer]") {
     properTokens.emplace_back(Token{TokenType::Num, "1"});
     properTokens.emplace_back(Token{TokenType::GREATER, ">"});
     properTokens.emplace_back(Token{TokenType::Num, "2"});
+    properTokens.emplace_back(Token{TokenType::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
+
+TEST_CASE("Bool Expression with using of operator LESS THAN and variable", "[Lexer]") {
+    std::string expr = "a < (2 + 5)";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenType::Id, "a"});
+    properTokens.emplace_back(Token{TokenType::LESS, "<"});
+    properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_START, "("});
+    properTokens.emplace_back(Token{TokenType::Num, "2"});
+    properTokens.emplace_back(Token{TokenType::Add, "+"});
+    properTokens.emplace_back(Token{TokenType::Num, "5"});
+    properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_END, ")"});
+    properTokens.emplace_back(Token{TokenType::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
+
+TEST_CASE("Bool Expression with using of operator LESS THAN", "[Lexer]") {
+    std::string expr = "true && (2 < 5)";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenType::Bool, "1"});
+    properTokens.emplace_back(Token{TokenType::BoolAND, "&&"});
+    properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_START, "("});
+    properTokens.emplace_back(Token{TokenType::Num, "2"});
+    properTokens.emplace_back(Token{TokenType::LESS, "<"});
+    properTokens.emplace_back(Token{TokenType::Num, "5"});
+    properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_END, ")"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
