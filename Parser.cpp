@@ -330,14 +330,15 @@ std::queue<Token> Parser::convertExpr() {
         } else if (token.Type == TokenType::ROUND_BRACKET_START) {
             stack.push(token);
         } else if (token.Type == TokenType::ROUND_BRACKET_END) {
-            try {
-                Token topToken;
-                while ((topToken = stack.top()).Type != TokenType::ROUND_BRACKET_START) {
-                    stack.pop();
-                    RPNExpr.push(topToken);
-                }
+            Token topToken;
+            while (!stack.empty() && ((topToken = stack.top()).Type != TokenType::ROUND_BRACKET_START)) {
+                stack.pop();
+                RPNExpr.push(topToken);
+            }
+
+            if (topToken.Type == TokenType::ROUND_BRACKET_START) {
                 stack.pop(); // remove left bracket
-            } catch (std::exception) {
+            } else {
                 throw std::runtime_error("Invalid syntax");
             }
         } else {
