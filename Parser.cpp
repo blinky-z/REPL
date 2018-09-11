@@ -66,8 +66,8 @@ ASTNode* Parser::parseExpression() {
                         nodeStack.push(node);
                         break;
                     }
-                    case TokenType::BoolOR: {
-                        node = createBinOpNode(BinOpType::OperatorBoolOR, operand1, operand2);
+                    case TokenType::Assign: {
+                        node = createBinOpNode(BinOpType::OperatorAssign, operand1, operand2);
                         nodeStack.push(node);
                         break;
                     }
@@ -76,13 +76,23 @@ ASTNode* Parser::parseExpression() {
                         nodeStack.push(node);
                         break;
                     }
+                    case TokenType::BoolOR: {
+                        node = createBinOpNode(BinOpType::OperatorBoolOR, operand1, operand2);
+                        nodeStack.push(node);
+                        break;
+                    }
                     case TokenType::Equal: {
                         node = createBinOpNode(BinOpType::OperatorEqual, operand1, operand2);
                         nodeStack.push(node);
                         break;
                     }
-                    case TokenType::Assign: {
-                        node = createBinOpNode(BinOpType::OperatorAssign, operand1, operand2);
+                    case TokenType::LESS: {
+                        node = createBinOpNode(BinOpType::OperatorLess, operand1, operand2);
+                        nodeStack.push(node);
+                        break;
+                    }
+                    case TokenType::GREATER: {
+                        node = createBinOpNode(BinOpType::OperatorGreater, operand1, operand2);
                         nodeStack.push(node);
                         break;
                     }
@@ -271,6 +281,7 @@ bool Parser::matchParseComplete() {
 }
 
 std::queue<Token> Parser::convertExpr() {
+    // TODO: написать тесты на данный алгоритм
     static std::unordered_map<std::string, int> opPrecedence;
     opPrecedence["="] = 1;
     opPrecedence["||"] = 2;
