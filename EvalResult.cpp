@@ -43,7 +43,7 @@ const std::string& EvalError::what() {
     errorMessage[UNDECLARED_VAR] = "Use of undeclared variable";
     errorMessage[UNINITIALIZED_VAR] = "Use of uninitialized variable";
     errorMessage[INVALID_LVALUE] = "Invalid Lvalue";
-    errorMessage[INVALID_BIN_OPERATION] = "Invalid Binary Operation";
+    errorMessage[INVALID_OPERATION] = "Invalid Binary Operation";
     errorMessage[INVALID_VALUE_TYPE] = "Invalid value type";
     errorMessage[VAR_REDEFINITION] = "Variable Redefinition";
     errorMessage[null] = "No Error";
