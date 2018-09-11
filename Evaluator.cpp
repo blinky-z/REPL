@@ -120,6 +120,8 @@ EvalResult Evaluator::EvaluateBoolExpr(ASTNode* subtree) {
         if (node != nullptr) {
             if (node->binOpType == BinOpType::OperatorEqual) {
                 return EvaluateEqual(node);
+            } else if (node->binOpType == BinOpType::OperatorLess || node->binOpType == BinOpType::OperatorGreater) {
+                return EvaluateComparison(node);
             }
 
             EvalResult leftValue = EvaluateBoolExpr(node->left);
@@ -180,7 +182,9 @@ EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* lvalue, ASTNode* expr)
                     }
                 } else if (binOpExpr->binOpType == BinOpType::OperatorBoolAND ||
                            binOpExpr->binOpType == BinOpType::OperatorBoolOR ||
-                           binOpExpr->binOpType == BinOpType::OperatorEqual) {
+                           binOpExpr->binOpType == BinOpType::OperatorEqual ||
+                           binOpExpr->binOpType == BinOpType::OperatorLess ||
+                           binOpExpr->binOpType == BinOpType::OperatorGreater) {
                     EvalResult exprResult = EvaluateBoolExpr(binOpExpr);
 
                     if (!exprResult.isError()) {
@@ -304,6 +308,34 @@ EvalResult Evaluator::EvaluateEqual(BinOpNode* subtree) {
     return result;
 }
 
+EvalResult Evaluator::EvaluateComparison(BinOpNode* subtree) {
+    EvalResult result;
+
+    EvalResult leftValue = Evaluate(subtree->left);
+    if (leftValue.isError()) {
+        return leftValue;
+    }
+
+    EvalResult rightValue = Evaluate(subtree->right);
+    if (rightValue.isError()) {
+        return rightValue;
+    }
+
+    if (leftValue.getResultType() != IdentifierValueType::Number ||
+        rightValue.getResultType() != IdentifierValueType::Number) {
+        result.error = newError(EvalError::INCOMPATIBLE_OPERAND_TYPES);
+        return result;
+    }
+
+    if (subtree->binOpType == BinOpType::OperatorLess) {
+        result.setValueBool(leftValue.getResultDouble() < rightValue.getResultDouble());
+    } else {
+        result.setValueBool(leftValue.getResultDouble() > rightValue.getResultDouble());
+    }
+
+    return result;
+}
+
 EvalResult Evaluator::Evaluate(ASTNode* root) {
     EvalResult result;
 
@@ -322,7 +354,9 @@ EvalResult Evaluator::Evaluate(ASTNode* root) {
                 result = EvaluateMathExpr(node);
             } else if (node->binOpType == BinOpType::OperatorBoolAND ||
                        node->binOpType == BinOpType::OperatorBoolOR ||
-                       node->binOpType == BinOpType::OperatorEqual) {
+                       node->binOpType == BinOpType::OperatorEqual ||
+                       node->binOpType == BinOpType::OperatorLess ||
+                       node->binOpType == BinOpType::OperatorGreater) {
                 result = EvaluateBoolExpr(node);
             } else {
                 result.error = newError(EvalError::INVALID_OPERATION, "Unknown or not allowed binary operation");

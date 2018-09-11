@@ -20,6 +20,8 @@ private:
 
     EvalResult EvaluateEqual(BinOpNode* subtree);
 
+    EvalResult EvaluateComparison(BinOpNode* subtree);
+
     double EvaluateIdDouble(IdentifierNode* id);
 
     bool EvaluateIdBool(IdentifierNode* id);
