@@ -28,8 +28,6 @@ private:
 
     bool EvaluateBoolConstant(BoolNode* num);
 
-    IdentifierValueType::ValueType getNodeValueType(ASTNode* node);
-
     EvalError newError(EvalError::Error err);
 
     EvalError newError(EvalError::Error err, const std::string errMessage);

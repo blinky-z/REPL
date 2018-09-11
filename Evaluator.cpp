@@ -19,13 +19,19 @@ EvalResult Evaluator::EvaluateMathExpr(ASTNode* subtree) {
             if (symbolTable.isIdExist(node->name)) {
                 IdentifierValueType::ValueType idType = symbolTable.getIdType(node->name);
 
-                if (idType == IdentifierValueType::Number) {
-                    result.setValueDouble(EvaluateIdDouble(node));
-                } else if (idType == IdentifierValueType::Undefined) {
-                    result.error = newError(EvalError::UNINITIALIZED_VAR,
-                                            "Use of uninitialized identifier '" + node->name + "'");
-                } else {
-                    result.error = newError(EvalError::INCOMPATIBLE_OPERAND_TYPES);
+                switch (idType) {
+                    case IdentifierValueType::Number: {
+                        result.setValueDouble(EvaluateIdDouble(node));
+                        break;
+                    }
+                    case IdentifierValueType::Undefined: {
+                        result.error = newError(EvalError::UNINITIALIZED_VAR,
+                                                "Use of uninitialized identifier '" + node->name + "'");
+                        break;
+                    }
+                    default: {
+                        result.error = newError(EvalError::INCOMPATIBLE_OPERAND_TYPES);
+                    }
                 }
             } else {
                 result.error = newError(EvalError::UNDECLARED_VAR,
@@ -234,13 +240,13 @@ EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* lvalue, ASTNode* expr)
                     result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
                 }
             } else {
-                result.error = newError(EvalError::INVALID_AST, "Invalid expression in assign expression");
+                result.error = newError(EvalError::INVALID_AST, "Invalid expression in assignment statement");
             }
         } else {
-            result.error = newError(EvalError::INVALID_LVALUE, "Assignment to undeclared variable");
+            result.error = newError(EvalError::UNDECLARED_VAR, "Assignment to undeclared variable");
         }
     } else {
-        result.error = newError(EvalError::INVALID_LVALUE, "Invalid Lvalue in assignment expression");
+        result.error = newError(EvalError::INVALID_LVALUE, "Invalid Lvalue in assignment statement");
     }
 
     return result;
@@ -272,97 +278,28 @@ EvalResult Evaluator::EvaluateDeclVar(DeclVarNode* subtree) {
 EvalResult Evaluator::EvaluateEqual(BinOpNode* subtree) {
     EvalResult result;
 
-    IdentifierValueType::ValueType leftOperandValueType = getNodeValueType(subtree->left);
-    IdentifierValueType::ValueType rightOperandValueType = getNodeValueType(subtree->right);
+    EvalResult leftValue = Evaluate(subtree->left);
+    if (leftValue.isError()) {
+        return leftValue;
+    }
 
-    if (leftOperandValueType != rightOperandValueType) {
+    EvalResult rightValue = Evaluate(subtree->right);
+    if (rightValue.isError()) {
+        return rightValue;
+    }
+
+    if (leftValue.getResultType() != rightValue.getResultType()) {
         result.error = newError(EvalError::INCOMPATIBLE_OPERAND_TYPES);
         return result;
     }
 
-    NodeType::ASTNodeType leftOperandType = subtree->left->type;
-    NodeType::ASTNodeType rightOperandType = subtree->right->type;
+    IdentifierValueType::ValueType operationValueType = leftValue.getResultType();
 
-    if (leftOperandValueType == IdentifierValueType::Number) {
-        double leftValue;
-        double rightValue;
-
-        if (leftOperandType == NodeType::NumberValue) {
-            leftValue = EvaluateNumberConstant(static_cast<NumberNode*>(subtree->left));
-        } else if (leftOperandType == NodeType::BinOp) {
-            const EvalResult& exprResult = EvaluateMathExpr(subtree->left);
-
-            if (exprResult.isError()) {
-                return exprResult;
-            }
-
-            leftValue = exprResult.getResultDouble();
-        } else if (leftOperandType == NodeType::Id) {
-            leftValue = EvaluateIdDouble(static_cast<IdentifierNode*>(subtree->left));
-        } else {
-            result.error = newError(EvalError::INVALID_VALUE_TYPE);
-            return result;
-        }
-
-        if (rightOperandType == NodeType::NumberValue) {
-            rightValue = EvaluateNumberConstant(static_cast<NumberNode*>(subtree->right));
-        } else if (rightOperandType == NodeType::BinOp) {
-            const EvalResult& exprResult = EvaluateMathExpr(subtree->right);
-
-            if (exprResult.isError()) {
-                return exprResult;
-            }
-
-            rightValue = exprResult.getResultDouble();
-        } else if (rightOperandType == NodeType::Id) {
-            rightValue = EvaluateIdDouble(static_cast<IdentifierNode*>(subtree->right));
-        } else {
-            result.error = newError(EvalError::INVALID_VALUE_TYPE);
-            return result;
-        }
-
+    if (operationValueType == IdentifierValueType::Number) {
         double epsilon = 0.001;
-        result.setValueBool(std::abs(leftValue - rightValue) < epsilon);
+        result.setValueBool(std::abs(leftValue.getResultDouble() - rightValue.getResultDouble()) < epsilon);
     } else {
-        bool leftValue;
-        bool rightValue;
-
-        if (leftOperandType == NodeType::BoolValue) {
-            leftValue = EvaluateBoolConstant(static_cast<BoolNode*>(subtree->left));
-        } else if (leftOperandType == NodeType::BinOp) {
-            const EvalResult& exprResult = EvaluateBoolExpr(subtree->left);
-
-            if (exprResult.isError()) {
-                return exprResult;
-            }
-
-            leftValue = exprResult.getResultBool();
-        } else if (leftOperandType == NodeType::Id) {
-            leftValue = EvaluateIdBool(static_cast<IdentifierNode*>(subtree->left));
-        } else {
-            result.error = newError(EvalError::INVALID_VALUE_TYPE);
-            return result;
-        }
-
-
-        if (rightOperandType == NodeType::BoolValue) {
-            rightValue = EvaluateBoolConstant(static_cast<BoolNode*>(subtree->right));
-        } else if (rightOperandType == NodeType::BinOp) {
-            const EvalResult& exprResult = EvaluateBoolExpr(subtree->right);
-
-            if (exprResult.isError()) {
-                return exprResult;
-            }
-
-            rightValue = exprResult.getResultBool();
-        } else if (rightOperandType == NodeType::Id) {
-            rightValue = EvaluateIdBool(static_cast<IdentifierNode*>(subtree->right));
-        } else {
-            result.error = newError(EvalError::INVALID_VALUE_TYPE);
-            return result;
-        }
-
-        result.setValueBool(leftValue == rightValue);
+        result.setValueBool(leftValue.getResultBool() == rightValue.getResultBool());
     }
 
     return result;
@@ -471,70 +408,6 @@ double Evaluator::EvaluateNumberConstant(NumberNode* num) {
 
 bool Evaluator::EvaluateBoolConstant(BoolNode* num) {
     return num->value;
-}
-
-IdentifierValueType::ValueType Evaluator::getNodeValueType(ASTNode* node) {
-    NodeType::ASTNodeType nodeType = node->type;
-    IdentifierValueType::ValueType nodeValueType;
-
-    if (nodeType == NodeType::BinOp) {
-        BinOpNode* binOpNode = dynamic_cast<BinOpNode*>(node);
-
-        if (binOpNode != nullptr) {
-            if (binOpNode->binOpType == BinOpType::OperatorEqual ||
-                binOpNode->binOpType == BinOpType::OperatorBoolOR ||
-                binOpNode->binOpType == BinOpType::OperatorBoolAND) {
-                nodeValueType = IdentifierValueType::Bool;
-            } else if (binOpNode->binOpType == BinOpType::OperatorPlus ||
-                       binOpNode->binOpType == BinOpType::OperatorMinus ||
-                       binOpNode->binOpType == BinOpType::OperatorMul ||
-                       binOpNode->binOpType == BinOpType::OperatorDiv) {
-                nodeValueType = IdentifierValueType::Number;
-            } else {
-                throw std::runtime_error("Invalid binary operation type");
-            }
-        } else {
-            throw std::runtime_error("Invalid Binary operation node");
-        }
-    } else if (nodeType == NodeType::NumberValue) {
-        NumberNode* numNode = dynamic_cast<NumberNode*>(node);
-
-        if (numNode != nullptr) {
-            nodeValueType = IdentifierValueType::Number;
-        } else {
-            throw std::runtime_error("Invalid Number Value node");
-        }
-    } else if (nodeType == NodeType::BoolValue) {
-        BoolNode* boolNode = dynamic_cast<BoolNode*>(node);
-
-        if (boolNode != nullptr) {
-            nodeValueType = IdentifierValueType::Bool;
-        } else {
-            throw std::runtime_error("Invalid Bool Value node");
-        }
-    } else if (nodeType == NodeType::Id) {
-        IdentifierNode* id = dynamic_cast<IdentifierNode*>(node);
-
-        if (id != nullptr) {
-            if (symbolTable.isIdExist(id->name)) {
-                IdentifierValueType::ValueType idValueType = symbolTable.getIdType(id->name);
-
-                if (idValueType != IdentifierValueType::Undefined) {
-                    nodeValueType = idValueType;
-                } else {
-                    throw std::runtime_error("Use of uninitialized identifier '" + id->name + "'");
-                }
-            } else {
-                throw std::runtime_error("Use of undeclared identifier '" + id->name + "'");
-            }
-        } else {
-            throw std::runtime_error("Invalid Identifier node");
-        }
-    } else {
-        throw std::runtime_error("Invalid node");
-    }
-
-    return nodeValueType;
 }
 
 EvalError Evaluator::newError(EvalError::Error err) {
