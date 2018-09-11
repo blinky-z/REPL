@@ -418,6 +418,42 @@ TEST_CASE("Expression with using of operator GREATER THAN and number constants",
     matchTokens(tokens, properTokens);
 }
 
+TEST_CASE("Expression with using of comparison operator and negative values", "[Lexer]") {
+    std::string expr = "-2 < -1";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
+    properTokens.emplace_back(Token{TokenType::Num, "2"});
+    properTokens.emplace_back(Token{TokenType::LESS, "<"});
+    properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
+    properTokens.emplace_back(Token{TokenType::Num, "1"});
+    properTokens.emplace_back(Token{TokenType::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
+
+TEST_CASE("Expression with using of comparison operator and negative variables", "[Lexer]") {
+    std::string expr = "-a > -b";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
+    properTokens.emplace_back(Token{TokenType::Id, "a"});
+    properTokens.emplace_back(Token{TokenType::GREATER, ">"});
+    properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
+    properTokens.emplace_back(Token{TokenType::Id, "b"});
+    properTokens.emplace_back(Token{TokenType::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
+
 TEST_CASE("Bool Expression with using of operator LESS THAN and variable", "[Lexer]") {
     std::string expr = "a < (2 + 5)";
     expr.push_back(EOF);
