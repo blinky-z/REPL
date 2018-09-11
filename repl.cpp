@@ -30,8 +30,10 @@ void printResult(const EvalResult& result) {
 
     if (resultType == IdentifierValueType::Number) {
         std::cout << result.getResultDouble() << std::endl;
-    } else {
+    } else if (resultType == IdentifierValueType::Bool) {
         std::cout << result.getResultBool() << std::endl;
+    } else {
+        std::cout << result.getResultString() << std::endl;
     }
 }
 
