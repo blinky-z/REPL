@@ -6,7 +6,7 @@ EvalResult Evaluator::EvaluateMathExpr(ASTNode* subtree) {
         NumberNode* node = dynamic_cast<NumberNode*>(subtree);
 
         if (node != nullptr) {
-            result.setValueDouble(EvaluateNumberValue(node));
+            result.setValueDouble(EvaluateNumberConstant(node));
         } else {
             result.error = newError(EvalError::INVALID_AST, "Invalid Number Constant Node");
         }
@@ -80,7 +80,7 @@ EvalResult Evaluator::EvaluateBoolExpr(ASTNode* subtree) {
         BoolNode* node = dynamic_cast<BoolNode*>(subtree);
 
         if (node != nullptr) {
-            result.setValueBool(EvaluateBoolValue(node));
+            result.setValueBool(EvaluateBoolConstant(node));
         } else {
             result.error = newError(EvalError::INVALID_AST, "Invalid Bool Constant Node");
         }
@@ -221,14 +221,14 @@ EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* lvalue, ASTNode* expr)
                 }
             } else if (numberConst != nullptr) {
                 try {
-                    symbolTable.setIdValueDouble(lvalue->name, EvaluateNumberValue(numberConst));
+                    symbolTable.setIdValueDouble(lvalue->name, EvaluateNumberConstant(numberConst));
                     result.setValueString("Assign value");
                 } catch (std::runtime_error e) {
                     result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
                 }
             } else if (boolConst != nullptr) {
                 try {
-                    symbolTable.setIdValueBool(lvalue->name, EvaluateBoolValue(boolConst));
+                    symbolTable.setIdValueBool(lvalue->name, EvaluateBoolConstant(boolConst));
                     result.setValueString("Assign value");
                 } catch (std::runtime_error e) {
                     result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
@@ -288,7 +288,7 @@ EvalResult Evaluator::EvaluateEqual(BinOpNode* subtree) {
         double rightValue;
 
         if (leftOperandType == NodeType::NumberValue) {
-            leftValue = EvaluateNumberValue(static_cast<NumberNode*>(subtree->left));
+            leftValue = EvaluateNumberConstant(static_cast<NumberNode*>(subtree->left));
         } else if (leftOperandType == NodeType::BinOp) {
             const EvalResult& exprResult = EvaluateMathExpr(subtree->left);
 
@@ -305,7 +305,7 @@ EvalResult Evaluator::EvaluateEqual(BinOpNode* subtree) {
         }
 
         if (rightOperandType == NodeType::NumberValue) {
-            rightValue = EvaluateNumberValue(static_cast<NumberNode*>(subtree->right));
+            rightValue = EvaluateNumberConstant(static_cast<NumberNode*>(subtree->right));
         } else if (rightOperandType == NodeType::BinOp) {
             const EvalResult& exprResult = EvaluateMathExpr(subtree->right);
 
@@ -328,7 +328,7 @@ EvalResult Evaluator::EvaluateEqual(BinOpNode* subtree) {
         bool rightValue;
 
         if (leftOperandType == NodeType::BoolValue) {
-            leftValue = EvaluateBoolValue(static_cast<BoolNode*>(subtree->left));
+            leftValue = EvaluateBoolConstant(static_cast<BoolNode*>(subtree->left));
         } else if (leftOperandType == NodeType::BinOp) {
             const EvalResult& exprResult = EvaluateBoolExpr(subtree->left);
 
@@ -336,7 +336,7 @@ EvalResult Evaluator::EvaluateEqual(BinOpNode* subtree) {
                 return exprResult;
             }
 
-            leftValue = EvaluateBoolExpr(subtree->left).getResultBool();
+            leftValue = exprResult.getResultBool();
         } else if (leftOperandType == NodeType::Id) {
             leftValue = EvaluateIdBool(static_cast<IdentifierNode*>(subtree->left));
         } else {
@@ -346,7 +346,7 @@ EvalResult Evaluator::EvaluateEqual(BinOpNode* subtree) {
 
 
         if (rightOperandType == NodeType::BoolValue) {
-            rightValue = EvaluateBoolValue(static_cast<BoolNode*>(subtree->right));
+            rightValue = EvaluateBoolConstant(static_cast<BoolNode*>(subtree->right));
         } else if (rightOperandType == NodeType::BinOp) {
             const EvalResult& exprResult = EvaluateBoolExpr(subtree->right);
 
@@ -406,7 +406,7 @@ EvalResult Evaluator::Evaluate(ASTNode* root) {
         NumberNode* node = dynamic_cast<NumberNode*>(root);
 
         if (node != nullptr) {
-            result.setValueDouble(EvaluateNumberValue(node));
+            result.setValueDouble(EvaluateNumberConstant(node));
         } else {
             result.error = newError(EvalError::INVALID_AST, "Invalid Number Constant Node");
         }
@@ -414,7 +414,7 @@ EvalResult Evaluator::Evaluate(ASTNode* root) {
         BoolNode* node = dynamic_cast<BoolNode*>(root);
 
         if (node != nullptr) {
-            result.setValueBool(EvaluateBoolValue(node));
+            result.setValueBool(EvaluateBoolConstant(node));
         } else {
             result.error = newError(EvalError::INVALID_AST, "Invalid Bool Constant Node");
         }
@@ -465,11 +465,11 @@ bool Evaluator::EvaluateIdBool(IdentifierNode* id) {
     return symbolTable.getIdValueBool(id->name);
 }
 
-double Evaluator::EvaluateNumberValue(NumberNode* num) {
+double Evaluator::EvaluateNumberConstant(NumberNode* num) {
     return num->value;
 }
 
-bool Evaluator::EvaluateBoolValue(BoolNode* num) {
+bool Evaluator::EvaluateBoolConstant(BoolNode* num) {
     return num->value;
 }
 

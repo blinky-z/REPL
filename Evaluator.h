@@ -24,9 +24,9 @@ private:
 
     bool EvaluateIdBool(IdentifierNode* id);
 
-    double EvaluateNumberValue(NumberNode* num);
+    double EvaluateNumberConstant(NumberNode* num);
 
-    bool EvaluateBoolValue(BoolNode* num);
+    bool EvaluateBoolConstant(BoolNode* num);
 
     IdentifierValueType::ValueType getNodeValueType(ASTNode* node);
 
