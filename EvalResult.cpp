@@ -32,22 +32,29 @@ void EvalResult::setValueString(const std::string value) {
 }
 
 bool EvalResult::isError() const {
-    return error.errorCode != EvalErrorCode::SUCCESS;
+    return error.errorCode != EvalError::null;
 }
 
 const std::string& EvalError::what() {
-    if (message.empty()) {
-        static std::unordered_map<EvalErrorCode::Error, std::string> errorMessage;
+    static std::unordered_map<Error, std::string> errorMessage;
 
-        errorMessage[EvalErrorCode::INVALID_AST] = "Invalid AST";
-        errorMessage[EvalErrorCode::INCOMPATIBLE_OPERANDS_TYPE] = "Incompatible Operands Type";
-        errorMessage[EvalErrorCode::UNDECLARED_VAR] = "Use of undeclared variable";
-        errorMessage[EvalErrorCode::UNINITIALIZED_VAR] = "Use of uninitialized variable";
+    errorMessage[INVALID_AST] = "Invalid AST";
+    errorMessage[INCOMPATIBLE_OPERANDS_TYPE] = "Incompatible Operands Type";
+    errorMessage[UNDECLARED_VAR] = "Use of undeclared variable";
+    errorMessage[UNINITIALIZED_VAR] = "Use of uninitialized variable";
+    errorMessage[INVALID_LVALUE] = "Invalid Lvalue";
+    errorMessage[INVALID_BIN_OPERATION] = "Invalid Binary Operation";
+    errorMessage[INVALID_VALUE_TYPE] = "Invalid value type";
+    errorMessage[VAR_REDEFINITION] = "Variable Redefinition";
+    errorMessage[null] = "No Error";
+
+    if (message.empty()) {
+        return errorMessage[errorCode];
     }
     return message;
 }
 
-EvalError::EvalError(EvalErrorCode::Error err, std::string errMessage) {
-    errorCode = err;
+EvalError::EvalError(Error errCode, std::string errMessage) {
+    errorCode = errCode;
     message = errMessage;
 }

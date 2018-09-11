@@ -4,32 +4,30 @@
 #include "Identifier.h"
 #include <unordered_map>
 
-namespace EvalErrorCode {
-    enum Error {
-        SUCCESS,
-        INCOMPATIBLE_OPERANDS_TYPE,
-        INVALID_AST,
-        UNDECLARED_VAR,
-        UNDECLARED_VAR_LVALUE,
-        UNINITIALIZED_VAR,
-        INVALiD_BIN_OPERATION,
-        INVALID_VALUE_TYPE,
-        VAR_DEREFINITION
-    };
-}
-
 class EvalError {
 private:
     std::string message;
 public:
+    enum Error {
+        null,
+        INCOMPATIBLE_OPERANDS_TYPE,
+        INVALID_AST,
+        UNDECLARED_VAR,
+        INVALID_LVALUE,
+        UNINITIALIZED_VAR,
+        INVALID_BIN_OPERATION,
+        INVALID_VALUE_TYPE,
+        VAR_REDEFINITION
+    };
+
     const std::string& what();
 
-    EvalErrorCode::Error errorCode;
+    Error errorCode;
 
-    EvalError(EvalErrorCode::Error err, std::string errMessage = "");
+    EvalError(Error errCode, std::string errMessage = "");
 
     EvalError() {
-        errorCode = EvalErrorCode::SUCCESS;
+        errorCode = Error::null;
     };
 };
 
