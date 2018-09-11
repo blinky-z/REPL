@@ -39,7 +39,7 @@ const std::string& EvalError::what() {
     static std::unordered_map<Error, std::string> errorMessage;
 
     errorMessage[INVALID_AST] = "Invalid AST";
-    errorMessage[INCOMPATIBLE_OPERANDS_TYPE] = "Incompatible Operands Type";
+    errorMessage[INCOMPATIBLE_OPERAND_TYPES] = "Incompatible Operand Types";
     errorMessage[UNDECLARED_VAR] = "Use of undeclared variable";
     errorMessage[UNINITIALIZED_VAR] = "Use of uninitialized variable";
     errorMessage[INVALID_LVALUE] = "Invalid Lvalue";

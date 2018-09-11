@@ -10,7 +10,7 @@ private:
 public:
     enum Error {
         null,
-        INCOMPATIBLE_OPERANDS_TYPE,
+        INCOMPATIBLE_OPERAND_TYPES,
         INVALID_AST,
         UNDECLARED_VAR,
         INVALID_LVALUE,

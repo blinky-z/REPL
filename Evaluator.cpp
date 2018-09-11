@@ -11,7 +11,7 @@ EvalResult Evaluator::EvaluateMathExpr(ASTNode* subtree) {
             result.error = newError(EvalError::INVALID_AST, "Invalid Number Constant Node");
         }
     } else if (subtree->type == NodeType::BoolValue) {
-        result.error = newError(EvalError::INCOMPATIBLE_OPERANDS_TYPE);
+        result.error = newError(EvalError::INCOMPATIBLE_OPERAND_TYPES);
     } else if (subtree->type == NodeType::Id) {
         IdentifierNode* node = dynamic_cast<IdentifierNode*>(subtree);
 
@@ -25,7 +25,7 @@ EvalResult Evaluator::EvaluateMathExpr(ASTNode* subtree) {
                     result.error = newError(EvalError::UNINITIALIZED_VAR,
                                             "Use of uninitialized identifier '" + node->name + "'");
                 } else {
-                    result.error = newError(EvalError::INCOMPATIBLE_OPERANDS_TYPE);
+                    result.error = newError(EvalError::INCOMPATIBLE_OPERAND_TYPES);
                 }
             } else {
                 result.error = newError(EvalError::UNDECLARED_VAR,
@@ -61,7 +61,7 @@ EvalResult Evaluator::EvaluateMathExpr(ASTNode* subtree) {
                     result.setValueDouble(leftValue.getResultDouble() / rightValue.getResultDouble());
                     break;
                 default:
-                    result.error = newError(EvalError::INCOMPATIBLE_OPERANDS_TYPE);
+                    result.error = newError(EvalError::INCOMPATIBLE_OPERAND_TYPES);
             }
         } else {
             result.error = newError(EvalError::INVALID_AST, "Invalid Binary Operation Node");
@@ -85,7 +85,7 @@ EvalResult Evaluator::EvaluateBoolExpr(ASTNode* subtree) {
             result.error = newError(EvalError::INVALID_AST, "Invalid Bool Constant Node");
         }
     } else if (subtree->type == NodeType::NumberValue) {
-        result.error = newError(EvalError::INCOMPATIBLE_OPERANDS_TYPE);
+        result.error = newError(EvalError::INCOMPATIBLE_OPERAND_TYPES);
     } else if (subtree->type == NodeType::Id) {
         IdentifierNode* node = dynamic_cast<IdentifierNode*>(subtree);
 
@@ -99,7 +99,7 @@ EvalResult Evaluator::EvaluateBoolExpr(ASTNode* subtree) {
                     result.error = newError(EvalError::UNINITIALIZED_VAR,
                                             "Use of uninitialized identifier '" + node->name + "'");
                 } else {
-                    result.error = newError(EvalError::INCOMPATIBLE_OPERANDS_TYPE);
+                    result.error = newError(EvalError::INCOMPATIBLE_OPERAND_TYPES);
                 }
             } else {
                 result.error = newError(EvalError::UNDECLARED_VAR,
@@ -133,7 +133,7 @@ EvalResult Evaluator::EvaluateBoolExpr(ASTNode* subtree) {
                     result.setValueBool(leftValue.getResultBool() || rightValue.getResultBool());
                     break;
                 default:
-                    result.error = newError(EvalError::INCOMPATIBLE_OPERANDS_TYPE);
+                    result.error = newError(EvalError::INCOMPATIBLE_OPERAND_TYPES);
             }
         } else {
             result.error = newError(EvalError::INVALID_AST, "Invalid Binary Operation Node");
@@ -276,7 +276,7 @@ EvalResult Evaluator::EvaluateEqual(BinOpNode* subtree) {
     IdentifierValueType::ValueType rightOperandValueType = getNodeValueType(subtree->right);
 
     if (leftOperandValueType != rightOperandValueType) {
-        result.error = newError(EvalError::INCOMPATIBLE_OPERANDS_TYPE);
+        result.error = newError(EvalError::INCOMPATIBLE_OPERAND_TYPES);
         return result;
     }
 
