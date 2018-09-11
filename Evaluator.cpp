@@ -296,8 +296,7 @@ EvalResult Evaluator::EvaluateEqual(BinOpNode* subtree) {
     IdentifierValueType::ValueType operationValueType = leftValue.getResultType();
 
     if (operationValueType == IdentifierValueType::Number) {
-        double epsilon = 0.001;
-        result.setValueBool(std::abs(leftValue.getResultDouble() - rightValue.getResultDouble()) < epsilon);
+        result.setValueBool(leftValue.getResultDouble() == rightValue.getResultDouble());
     } else {
         result.setValueBool(leftValue.getResultBool() == rightValue.getResultBool());
     }
