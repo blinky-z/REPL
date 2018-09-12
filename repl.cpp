@@ -4,25 +4,46 @@
 #include "EvalResult.h"
 #include <iostream>
 
-std::string readForLoop(const std::string input) {
-    std::string forLoopInput = input;
+std::string readIfStmt(const std::string& input) {
+    std::string ifStmt = input;
 
-    while (true) {
-        std::string currentInput;
+    std::string currentInput;
+    while (!currentInput.empty()) {
         getline(std::cin, currentInput);
 
-        if (!currentInput.empty()) {
-            forLoopInput += currentInput;
-        } else {
-            break;
+        if (std::cin.eof()) {
+            exit(EXIT_SUCCESS);
         }
+
+        ifStmt += currentInput;
     }
 
-    return forLoopInput;
+    return ifStmt;
+}
+
+std::string readForLoop(const std::string& input) {
+    std::string forLoop = input;
+
+    std::string currentInput;
+    while (!currentInput.empty()) {
+        getline(std::cin, currentInput);
+
+        if (std::cin.eof()) {
+            exit(EXIT_SUCCESS);
+        }
+
+        forLoop += currentInput;
+    }
+
+    return forLoop;
 }
 
 bool isInputForLoop(const std::string& input) {
     return input.find("for") != std::string::npos;
+}
+
+bool isIfStmt(const std::string& input) {
+    return input.find("if") != std::string::npos;
 }
 
 void printResult(const EvalResult& result) {
@@ -53,14 +74,14 @@ int main() {
         if (input.size() != 0) {
             if (isInputForLoop(input)) {
                 input = readForLoop(input);
+            } else if (isIfStmt(input)) {
+                input = readIfStmt(input);
             }
 
             input.push_back(EOF);
 
             const TokenContainer& tokens = lexer.tokenize(input);
-
             ASTNode* root = parser.parse(tokens);
-
             EvalResult result = evaluator.Evaluate(root);
 
             if (!result.isError()) {
