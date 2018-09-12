@@ -4,6 +4,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <string>
+#include <vector>
 
 namespace NodeType {
     enum ASTNodeType {
@@ -13,7 +14,9 @@ namespace NodeType {
         BinOp,
         NumberValue,
         BoolValue,
-        ForLoop
+        IfStmt,
+        ForLoop,
+        CompoundStmt
     };
 }
 
@@ -43,6 +46,7 @@ struct TypesStringNames {
         nodeTypeStringNames[NodeType::BinOp] = "Binary Operation";
         nodeTypeStringNames[NodeType::NumberValue] = "Number";
         nodeTypeStringNames[NodeType::BoolValue] = "Bool";
+        nodeTypeStringNames[NodeType::IfStmt] = "If Statement";
 
         binOpTypeStringNames[BinOpType::OperatorAssign] = "Operator Assign";
         binOpTypeStringNames[BinOpType::OperatorPlus] = "Operator Plus";
@@ -184,6 +188,45 @@ struct DeclVarNode : ASTNode {
         } else {
             std::cout << "Empty expr" << std::endl;
         }
+        std::cout << std::endl;
+    }
+};
+
+struct CompoundStmtNode : ASTNode {
+    std::vector<ASTNode*> statements;
+
+    CompoundStmtNode() {
+        type = NodeType::CompoundStmt;
+    }
+
+    void print() override {
+        TypesStringNames typeString;
+
+        std::cout << std::endl;
+        std::cout << "[Type]: " << typeString.nodeTypeStringNames[type] << std::endl;
+        std::cout << "Statements:" << std::endl;
+        for (const auto& currentStmt : statements) {
+            currentStmt->print();
+        }
+        std::cout << std::endl;
+    }
+};
+
+struct IfStmtNode : ASTNode {
+    ASTNode* condition;
+    CompoundStmtNode* statement;
+
+    IfStmtNode() {
+        type = NodeType::IfStmt;
+    }
+
+    void print() override {
+        TypesStringNames typeString;
+
+        std::cout << std::endl;
+        std::cout << "[Type]: " << typeString.nodeTypeStringNames[type] << std::endl;
+        std::cout << "Condition: " << std::endl;
+        condition->print();
         std::cout << std::endl;
     }
 };
