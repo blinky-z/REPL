@@ -11,9 +11,9 @@
 
 class ExpressionHandler {
 private:
-    Lexer lexer;
+    static Lexer lexer;
 
-    Parser parser;
+    static Parser parser;
 
     Evaluator evaluator;
 public:
@@ -32,6 +32,9 @@ public:
         return result;
     }
 };
+
+Lexer ExpressionHandler::lexer = Lexer();
+Parser ExpressionHandler::parser = Parser();
 
 TEST_CASE("Addition Expression Evaluation", "[Evaluator]") {
     ExpressionHandler expressionHandler;
@@ -494,7 +497,7 @@ TEST_CASE("Bool expression evaluation: using of Logical AND and OR", "[Evaluator
     REQUIRE(result.getResultBool() == properResult);
 }
 
-TEST_CASE("Bool expression evaluation with changing the order of operations [1]", "[Evaluator]") {
+TEST_CASE("Bool expression evaluation with changing the order of operations", "[Evaluator]") {
     ExpressionHandler expressionHandler;
 
     std::string expr = "false && (true || false)";
@@ -665,7 +668,6 @@ TEST_CASE("Compare bool expressions", "[Evaluator]") {
 
     REQUIRE(result.getResultBool() == true);
 }
-
 
 TEST_CASE("Get error on math expression with incompatible operand value types", "[Evaluator]") {
     ExpressionHandler expressionHandler;
