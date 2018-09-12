@@ -11,6 +11,7 @@ namespace TokenType {
         String,
         DeclareId,
         DeclareFunc,
+        IfStmt,
         DeclareForLoop, // not implemented
         Id,
         ROUND_BRACKET_START,
