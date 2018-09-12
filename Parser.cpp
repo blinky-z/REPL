@@ -1,14 +1,13 @@
 #include "Parser.h"
 
 ASTNode* Parser::parseExpression() {
-    std::queue<Token> outQueue = convertExpr();
-
+    std::queue<Token> exprTokens = convertToReversePolish();
     std::stack<ASTNode*> nodeStack;
 
     Token currentToken;
-    while (!outQueue.empty()) {
-        currentToken = outQueue.front();
-        outQueue.pop();
+    while (!exprTokens.empty()) {
+        currentToken = exprTokens.front();
+        exprTokens.pop();
 
         if (!isOperator(currentToken)) {
             switch (currentToken.Type) {
@@ -30,7 +29,7 @@ ASTNode* Parser::parseExpression() {
             }
         } else {
             if (isBinaryOperator(currentToken)) {
-                ASTNode* node;
+                ASTNode* operationNode;
 
                 // since stack is LIFO need to get 2nd operand first to not break the order of operands
                 ASTNode* operand1;
@@ -47,53 +46,53 @@ ASTNode* Parser::parseExpression() {
 
                 switch (currentToken.Type) {
                     case TokenType::Add: {
-                        node = createBinOpNode(BinOpType::OperatorPlus, operand1, operand2);
-                        nodeStack.push(node);
+                        operationNode = createBinOpNode(BinOpType::OperatorPlus, operand1, operand2);
+                        nodeStack.push(operationNode);
                         break;
                     }
                     case TokenType::Sub: {
-                        node = createBinOpNode(BinOpType::OperatorMinus, operand1, operand2);
-                        nodeStack.push(node);
+                        operationNode = createBinOpNode(BinOpType::OperatorMinus, operand1, operand2);
+                        nodeStack.push(operationNode);
                         break;
                     }
                     case TokenType::Mul: {
-                        node = createBinOpNode(BinOpType::OperatorMul, operand1, operand2);
-                        nodeStack.push(node);
+                        operationNode = createBinOpNode(BinOpType::OperatorMul, operand1, operand2);
+                        nodeStack.push(operationNode);
                         break;
                     }
                     case TokenType::Div: {
-                        node = createBinOpNode(BinOpType::OperatorDiv, operand1, operand2);
-                        nodeStack.push(node);
+                        operationNode = createBinOpNode(BinOpType::OperatorDiv, operand1, operand2);
+                        nodeStack.push(operationNode);
                         break;
                     }
                     case TokenType::Assign: {
-                        node = createBinOpNode(BinOpType::OperatorAssign, operand1, operand2);
-                        nodeStack.push(node);
+                        operationNode = createBinOpNode(BinOpType::OperatorAssign, operand1, operand2);
+                        nodeStack.push(operationNode);
                         break;
                     }
                     case TokenType::BoolAND: {
-                        node = createBinOpNode(BinOpType::OperatorBoolAND, operand1, operand2);
-                        nodeStack.push(node);
+                        operationNode = createBinOpNode(BinOpType::OperatorBoolAND, operand1, operand2);
+                        nodeStack.push(operationNode);
                         break;
                     }
                     case TokenType::BoolOR: {
-                        node = createBinOpNode(BinOpType::OperatorBoolOR, operand1, operand2);
-                        nodeStack.push(node);
+                        operationNode = createBinOpNode(BinOpType::OperatorBoolOR, operand1, operand2);
+                        nodeStack.push(operationNode);
                         break;
                     }
                     case TokenType::Equal: {
-                        node = createBinOpNode(BinOpType::OperatorEqual, operand1, operand2);
-                        nodeStack.push(node);
+                        operationNode = createBinOpNode(BinOpType::OperatorEqual, operand1, operand2);
+                        nodeStack.push(operationNode);
                         break;
                     }
                     case TokenType::LESS: {
-                        node = createBinOpNode(BinOpType::OperatorLess, operand1, operand2);
-                        nodeStack.push(node);
+                        operationNode = createBinOpNode(BinOpType::OperatorLess, operand1, operand2);
+                        nodeStack.push(operationNode);
                         break;
                     }
                     case TokenType::GREATER: {
-                        node = createBinOpNode(BinOpType::OperatorGreater, operand1, operand2);
-                        nodeStack.push(node);
+                        operationNode = createBinOpNode(BinOpType::OperatorGreater, operand1, operand2);
+                        nodeStack.push(operationNode);
                         break;
                     }
                     default: {
@@ -101,7 +100,7 @@ ASTNode* Parser::parseExpression() {
                     }
                 }
             } else {
-                ASTNode* node;
+                ASTNode* operationNode;
 
                 ASTNode* operand;
 
@@ -114,8 +113,8 @@ ASTNode* Parser::parseExpression() {
 
                 switch (currentToken.Type) {
                     case TokenType::UnaryMinus: {
-                        node = createBinOpNode(BinOpType::OperatorMinus, createNumberNode(0), operand);
-                        nodeStack.push(node);
+                        operationNode = createBinOpNode(BinOpType::OperatorMinus, createNumberNode(0), operand);
+                        nodeStack.push(operationNode);
                         break;
                     }
                     default: {
@@ -280,34 +279,35 @@ bool Parser::matchParseComplete() {
     }
 }
 
-std::queue<Token> Parser::convertExpr() {
+std::queue<Token> Parser::convertToReversePolish() {
     // TODO: написать тесты на данный алгоритм
-    static std::unordered_map<std::string, int> opPrecedence;
-    opPrecedence["="] = 1;
-    opPrecedence["||"] = 2;
-    opPrecedence["&&"] = 3;
-    opPrecedence["=="] = 4;
-    opPrecedence["<"] = 5;
-    opPrecedence[">"] = 5;
-    opPrecedence["+"] = 6;
-    opPrecedence["-"] = 6;
-    opPrecedence["*"] = 7;
-    opPrecedence["/"] = 7;
-    opPrecedence["u-"] = 8;
+    static std::unordered_map<std::string, int> opPrecedence = {
+            std::pair<std::string, int>("=", 1),
+            std::pair<std::string, int>("||", 2),
+            std::pair<std::string, int>("&&", 3),
+            std::pair<std::string, int>("==", 4),
+            std::pair<std::string, int>("<", 5),
+            std::pair<std::string, int>(">", 5),
+            std::pair<std::string, int>("+", 6),
+            std::pair<std::string, int>("-", 6),
+            std::pair<std::string, int>("*", 7),
+            std::pair<std::string, int>("/", 7),
+            std::pair<std::string, int>("u-", 8),
+    };
 
-    std::stack<Token> stack;
-    std::queue<Token> RPNExpr;
+    std::stack<Token> opStack;
+    std::queue<Token> reversePolishExpr;
 
     Token token;
 
     while ((token = tokens.getNextToken()).Type != TokenType::eof) {
         if (token.Type == TokenType::Num || token.Type == TokenType::Bool || token.Type == TokenType::Id) {
-            RPNExpr.push(token);
+            reversePolishExpr.push(token);
         } else if (isOperator(token)) {
             const Token& op1 = token;
 
-            while (!stack.empty() && isOperator(stack.top())) {
-                const Token& op2 = stack.top();
+            while (!opStack.empty() && isOperator(opStack.top())) {
+                const Token& op2 = opStack.top();
 
                 // из стека нужно вытолкнуть те операторы, которые имеют приоритет выше или равный текущему оператору
                 // иначе нарушится порядок выполнения операций
@@ -333,24 +333,24 @@ std::queue<Token> Parser::convertExpr() {
                 // данный оператор должен ложиться наверх стека, не выталкивая со стека ничего, чтобы данный оператор
                 // был вычислен первее (ведь он будет вытолкнут со стека первее)
                 if (opPrecedence[op1.Value] <= opPrecedence[op2.Value]) {
-                    RPNExpr.push(stack.top());
-                    stack.pop();
+                    reversePolishExpr.push(opStack.top());
+                    opStack.pop();
                     continue;
                 }
                 break;
             }
-            stack.push(token);
+            opStack.push(token);
         } else if (token.Type == TokenType::ROUND_BRACKET_START) {
-            stack.push(token);
+            opStack.push(token);
         } else if (token.Type == TokenType::ROUND_BRACKET_END) {
             Token topToken;
-            while (!stack.empty() && ((topToken = stack.top()).Type != TokenType::ROUND_BRACKET_START)) {
-                stack.pop();
-                RPNExpr.push(topToken);
+            while (!opStack.empty() && ((topToken = opStack.top()).Type != TokenType::ROUND_BRACKET_START)) {
+                opStack.pop();
+                reversePolishExpr.push(topToken);
             }
 
             if (topToken.Type == TokenType::ROUND_BRACKET_START) {
-                stack.pop(); // remove left bracket
+                opStack.pop(); // remove left bracket
             } else {
                 throw std::runtime_error("Invalid syntax");
             }
@@ -360,13 +360,13 @@ std::queue<Token> Parser::convertExpr() {
     }
     tokens.returnToken();
 
-    while (!stack.empty()) {
-        const Token& topToken = stack.top();
-        stack.pop();
-        RPNExpr.push(topToken);
+    while (!opStack.empty()) {
+        const Token& topToken = opStack.top();
+        opStack.pop();
+        reversePolishExpr.push(topToken);
     }
 
-    return RPNExpr;
+    return reversePolishExpr;
 }
 
 bool Parser::isOperator(const Token& token) {
