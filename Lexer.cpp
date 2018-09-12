@@ -142,6 +142,9 @@ const Token Lexer::tokenizeStringLiteral() {
         } else {
             token.Value = "1";
         }
+    } else if (strLiteral == "if") {
+        token.Type = TokenType::IfStmt;
+        token.Value = strLiteral;
     } else {
         token.Type = TokenType::Id;
         token.Value = strLiteral;
@@ -149,6 +152,7 @@ const Token Lexer::tokenizeStringLiteral() {
 
     return token;
 }
+
 
 const Token Lexer::tokenizeNumber() {
     Token token;
