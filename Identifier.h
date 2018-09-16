@@ -5,7 +5,7 @@
 #include <unordered_map>
 
 namespace ValueType {
-    enum T {
+    enum Type {
         Number,
         Bool,
         String,
@@ -27,7 +27,7 @@ struct IdentifierTypeStringNames {
 };
 
 struct Identifier {
-    ValueType::T Type;
+    ValueType::Type Type;
     std::string StringValue;
     double NumValue;
     bool BoolValue;

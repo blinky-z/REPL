@@ -19,7 +19,7 @@ EvalResult Evaluator::EvaluateMathExpr(ASTNode* subtree) {
             Scope* curScope;
 
             if ((curScope = lookTopId(id->name))) {
-                ValueType::T idType = curScope->symbolTable.getIdValueType(id->name);
+                ValueType::Type idType = curScope->symbolTable.getIdValueType(id->name);
 
                 switch (idType) {
                     case ValueType::Number: {
@@ -101,7 +101,7 @@ EvalResult Evaluator::EvaluateBoolExpr(ASTNode* subtree) {
             Scope* curScope;
 
             if ((curScope = lookTopId(id->name))) {
-                ValueType::T idType = curScope->symbolTable.getIdValueType(id->name);
+                ValueType::Type idType = curScope->symbolTable.getIdValueType(id->name);
 
                 if (idType == ValueType::Bool) {
                     result.setValueBool(EvaluateIdBool(curScope, id));
@@ -305,7 +305,7 @@ EvalResult Evaluator::EvaluateEqual(BinOpNode* subtree) {
         return result;
     }
 
-    ValueType::T operationValueType = leftValue.getResultType();
+    ValueType::Type operationValueType = leftValue.getResultType();
 
     if (operationValueType == ValueType::Number) {
         result.setValueBool(leftValue.getResultDouble() == rightValue.getResultDouble());
@@ -427,7 +427,7 @@ EvalResult Evaluator::Evaluate(ASTNode* root) {
         if (id != nullptr) {
             Scope* curScope;
             if ((curScope = lookTopId(id->name))) {
-                ValueType::T idValueType = curScope->symbolTable.getIdValueType(id->name);
+                ValueType::Type idValueType = curScope->symbolTable.getIdValueType(id->name);
 
                 switch (idValueType) {
                     case ValueType::Number: {

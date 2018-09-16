@@ -40,6 +40,6 @@ bool SymbolTable::getIdValueBool(const std::string& identifierName) const {
     return symbolTable.at(identifierName).BoolValue;
 }
 
-ValueType::T SymbolTable::getIdValueType(const std::string& identifierName) const {
+ValueType::Type SymbolTable::getIdValueType(const std::string& identifierName) const {
     return symbolTable.at(identifierName).Type;
 }

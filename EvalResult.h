@@ -40,7 +40,7 @@ private:
 
     std::string resultString;
 
-    ValueType::T resultType;
+    ValueType::Type resultType;
 
     std::vector<EvalResult> resultBlock;
 public:
@@ -48,7 +48,7 @@ public:
 
     bool isError() const;
 
-    ValueType::T getResultType() const;
+    ValueType::Type getResultType() const;
 
     double getResultDouble() const;
 

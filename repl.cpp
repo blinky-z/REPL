@@ -69,7 +69,7 @@ std::string readForLoop(const std::string& input) {
 }
 
 void printResult(const EvalResult& result, int tabCount = 0) {
-    ValueType::T resultType = result.getResultType();
+    ValueType::Type resultType = result.getResultType();
 
     if (!result.isError()) {
         if (resultType == ValueType::Number) {

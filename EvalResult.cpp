@@ -1,6 +1,6 @@
 #include "EvalResult.h"
 
-ValueType::T EvalResult::getResultType() const {
+ValueType::Type EvalResult::getResultType() const {
     return resultType;
 }
 
