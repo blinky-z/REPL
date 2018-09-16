@@ -192,10 +192,10 @@ struct DeclVarNode : ASTNode {
     }
 };
 
-struct CompoundStmtNode : ASTNode {
-    std::vector<ASTNode*> statements;
+struct BlockStmtNode : ASTNode {
+    std::vector<ASTNode*> stmtList;
 
-    CompoundStmtNode() {
+    BlockStmtNode() {
         type = NodeType::CompoundStmt;
     }
 
@@ -205,7 +205,7 @@ struct CompoundStmtNode : ASTNode {
         std::cout << std::endl;
         std::cout << "[Type]: " << typeString.nodeTypeStringNames[type] << std::endl;
         std::cout << "Statements:" << std::endl;
-        for (const auto& currentStmt : statements) {
+        for (const auto& currentStmt : stmtList) {
             currentStmt->print();
         }
         std::cout << std::endl;
@@ -214,10 +214,12 @@ struct CompoundStmtNode : ASTNode {
 
 struct IfStmtNode : ASTNode {
     ASTNode* condition;
-    CompoundStmtNode* statement;
+    BlockStmtNode* body;
+    ASTNode* elseStmt;
 
     IfStmtNode() {
         type = NodeType::IfStmt;
+        elseStmt = nullptr;
     }
 
     void print() override {
