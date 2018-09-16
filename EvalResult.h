@@ -3,6 +3,7 @@
 
 #include "Identifier.h"
 #include <unordered_map>
+#include <vector>
 
 class EvalError {
 private:
@@ -20,7 +21,7 @@ public:
         VAR_REDEFINITION
     };
 
-    const std::string& what();
+    const std::string& what() const;
 
     Error errorCode;
 
@@ -39,13 +40,15 @@ private:
 
     std::string resultString;
 
-    IdentifierValueType::ValueType resultType;
+    ValueType::T resultType;
+
+    std::vector<EvalResult> resultBlock;
 public:
     EvalError error;
 
     bool isError() const;
 
-    IdentifierValueType::ValueType getResultType() const;
+    ValueType::T getResultType() const;
 
     double getResultDouble() const;
 
@@ -53,14 +56,18 @@ public:
 
     std::string getResultString() const;
 
+    std::vector<EvalResult> getResultBlock() const;
+
     void setValueDouble(double value);
 
     void setValueBool(bool value);
 
     void setValueString(const std::string value);
 
+    void setBlockResult(const std::vector<EvalResult> results);
+
     EvalResult() {
-        resultType = IdentifierValueType::Undefined;
+        resultType = ValueType::Undefined;
     }
 };
 

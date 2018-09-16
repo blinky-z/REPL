@@ -1,41 +1,50 @@
 #include "EvalResult.h"
 
-bool EvalResult::getResultBool() const {
-    return resultBool;
+ValueType::T EvalResult::getResultType() const {
+    return resultType;
 }
 
 double EvalResult::getResultDouble() const {
     return resultDouble;
 }
 
-void EvalResult::setValueDouble(double value) {
-    resultType = IdentifierValueType::Number;
-    resultDouble = value;
-}
-
-void EvalResult::setValueBool(bool value) {
-    resultType = IdentifierValueType::Bool;
-    resultBool = value;
-}
-
-IdentifierValueType::ValueType EvalResult::getResultType() const {
-    return resultType;
+bool EvalResult::getResultBool() const {
+    return resultBool;
 }
 
 std::string EvalResult::getResultString() const {
     return resultString;
 }
 
+std::vector<EvalResult> EvalResult::getResultBlock() const {
+    return resultBlock;
+}
+
+void EvalResult::setValueDouble(double value) {
+    resultType = ValueType::Number;
+    resultDouble = value;
+}
+
+void EvalResult::setValueBool(bool value) {
+    resultType = ValueType::Bool;
+    resultBool = value;
+}
+
 void EvalResult::setValueString(const std::string value) {
-    resultType = IdentifierValueType::String;
+    resultType = ValueType::String;
     resultString = value;
+}
+
+void EvalResult::setBlockResult(const std::vector<EvalResult> results) {
+    resultType = ValueType::Compound;
+    resultBlock = results;
 }
 
 bool EvalResult::isError() const {
     return error.errorCode != EvalError::null;
 }
 
-const std::string& EvalError::what() {
+const std::string& EvalError::what() const {
     static std::unordered_map<Error, std::string> errorMessage;
 
     errorMessage[INVALID_AST] = "Invalid AST";
