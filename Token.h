@@ -6,7 +6,8 @@
 namespace TokenType {
     enum {
         eof,
-        Num,
+        NL,
+        Number,
         Bool,
         String,
         DeclareId,
@@ -18,6 +19,8 @@ namespace TokenType {
         ROUND_BRACKET_END,
         SQUARE_BRACKET_START,
         SQUARE_BRACKET_END,
+        CURLY_BRACKET_START,
+        CURLY_BRACKET_END,
         LESS,
         GREATER,
         SEMICOLON,
