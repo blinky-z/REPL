@@ -13,20 +13,22 @@ EvalResult Evaluator::EvaluateMathExpr(ASTNode* subtree) {
     } else if (subtree->type == NodeType::BoolValue) {
         result.error = newError(EvalError::INCOMPATIBLE_OPERAND_TYPES);
     } else if (subtree->type == NodeType::Id) {
-        IdentifierNode* node = dynamic_cast<IdentifierNode*>(subtree);
+        IdentifierNode* id = dynamic_cast<IdentifierNode*>(subtree);
 
-        if (node != nullptr) {
-            if (symbolTable.isIdExist(node->name)) {
-                IdentifierValueType::ValueType idType = symbolTable.getIdType(node->name);
+        if (id != nullptr) {
+            Scope* curScope;
+
+            if ((curScope = lookTopId(id->name))) {
+                ValueType::T idType = curScope->symbolTable.getIdValueType(id->name);
 
                 switch (idType) {
-                    case IdentifierValueType::Number: {
-                        result.setValueDouble(EvaluateIdDouble(node));
+                    case ValueType::Number: {
+                        result.setValueDouble(EvaluateIdDouble(curScope, id));
                         break;
                     }
-                    case IdentifierValueType::Undefined: {
+                    case ValueType::Undefined: {
                         result.error = newError(EvalError::UNINITIALIZED_VAR,
-                                                "Use of uninitialized identifier '" + node->name + "'");
+                                                "Use of uninitialized identifier '" + id->name + "'");
                         break;
                     }
                     default: {
@@ -35,7 +37,7 @@ EvalResult Evaluator::EvaluateMathExpr(ASTNode* subtree) {
                 }
             } else {
                 result.error = newError(EvalError::UNDECLARED_VAR,
-                                        "Use of undeclared identifier '" + node->name + "'");
+                                        "Use of undeclared identifier '" + id->name + "'");
             }
         } else {
             result.error = newError(EvalError::INVALID_AST, "Invalid Identifier Node");
@@ -93,47 +95,49 @@ EvalResult Evaluator::EvaluateBoolExpr(ASTNode* subtree) {
     } else if (subtree->type == NodeType::NumberValue) {
         result.error = newError(EvalError::INCOMPATIBLE_OPERAND_TYPES);
     } else if (subtree->type == NodeType::Id) {
-        IdentifierNode* node = dynamic_cast<IdentifierNode*>(subtree);
+        IdentifierNode* id = dynamic_cast<IdentifierNode*>(subtree);
 
-        if (node != nullptr) {
-            if (symbolTable.isIdExist(node->name)) {
-                IdentifierValueType::ValueType idType = symbolTable.getIdType(node->name);
+        if (id != nullptr) {
+            Scope* curScope;
 
-                if (idType == IdentifierValueType::Bool) {
-                    result.setValueBool(EvaluateIdBool(node));
-                } else if (idType == IdentifierValueType::Undefined) {
+            if ((curScope = lookTopId(id->name))) {
+                ValueType::T idType = curScope->symbolTable.getIdValueType(id->name);
+
+                if (idType == ValueType::Bool) {
+                    result.setValueBool(EvaluateIdBool(curScope, id));
+                } else if (idType == ValueType::Undefined) {
                     result.error = newError(EvalError::UNINITIALIZED_VAR,
-                                            "Use of uninitialized identifier '" + node->name + "'");
+                                            "Use of uninitialized identifier '" + id->name + "'");
                 } else {
                     result.error = newError(EvalError::INCOMPATIBLE_OPERAND_TYPES);
                 }
             } else {
                 result.error = newError(EvalError::UNDECLARED_VAR,
-                                        "Use of undeclared identifier '" + node->name + "'");
+                                        "Use of undeclared identifier '" + id->name + "'");
             }
         } else {
             result.error = newError(EvalError::INVALID_AST, "Invalid Identifier Node");
         }
     } else if (subtree->type == NodeType::BinOp) {
-        BinOpNode* node = dynamic_cast<BinOpNode*>(subtree);
+        BinOpNode* binOp = dynamic_cast<BinOpNode*>(subtree);
 
-        if (node != nullptr) {
-            if (node->binOpType == BinOpType::OperatorEqual) {
-                return EvaluateEqual(node);
-            } else if (node->binOpType == BinOpType::OperatorLess || node->binOpType == BinOpType::OperatorGreater) {
-                return EvaluateComparison(node);
+        if (binOp != nullptr) {
+            if (binOp->binOpType == BinOpType::OperatorEqual) {
+                return EvaluateEqual(binOp);
+            } else if (binOp->binOpType == BinOpType::OperatorLess || binOp->binOpType == BinOpType::OperatorGreater) {
+                return EvaluateComparison(binOp);
             }
 
-            EvalResult leftValue = EvaluateBoolExpr(node->left);
+            EvalResult leftValue = EvaluateBoolExpr(binOp->left);
             if (leftValue.isError()) {
                 return leftValue;
             }
-            EvalResult rightValue = EvaluateBoolExpr(node->right);
+            EvalResult rightValue = EvaluateBoolExpr(binOp->right);
             if (rightValue.isError()) {
                 return rightValue;
             }
 
-            switch (node->binOpType) {
+            switch (binOp->binOpType) {
                 case BinOpType::OperatorBoolAND:
                     result.setValueBool(leftValue.getResultBool() && rightValue.getResultBool());
                     break;
@@ -153,11 +157,13 @@ EvalResult Evaluator::EvaluateBoolExpr(ASTNode* subtree) {
     return result;
 }
 
-EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* lvalue, ASTNode* expr) {
+EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* id, ASTNode* expr) {
     EvalResult result;
 
-    if (lvalue != nullptr) {
-        if (symbolTable.isIdExist(lvalue->name)) {
+    if (id != nullptr) {
+        Scope* curScope;
+
+        if ((curScope = lookTopId(id->name))) {
             BinOpNode* binOpExpr = dynamic_cast<BinOpNode*>(expr);
             IdentifierNode* idExpr = dynamic_cast<IdentifierNode*>(expr);
             NumberNode* numberConst = dynamic_cast<NumberNode*>(expr);
@@ -172,7 +178,7 @@ EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* lvalue, ASTNode* expr)
 
                     if (!exprResult.isError()) {
                         try {
-                            symbolTable.setIdValueDouble(lvalue->name, exprResult.getResultDouble());
+                            curScope->symbolTable.setIdValueDouble(id->name, exprResult.getResultDouble());
                             result.setValueString("Assign value");
                         } catch (std::runtime_error e) {
                             result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
@@ -189,7 +195,7 @@ EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* lvalue, ASTNode* expr)
 
                     if (!exprResult.isError()) {
                         try {
-                            symbolTable.setIdValueBool(lvalue->name, exprResult.getResultBool());
+                            curScope->symbolTable.setIdValueBool(id->name, exprResult.getResultBool());
                             result.setValueString("Assign value");
                         } catch (std::runtime_error e) {
                             result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
@@ -201,25 +207,26 @@ EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* lvalue, ASTNode* expr)
                     result.error = newError(EvalError::INVALID_OPERATION, "Unknown or not allowed binary operation");
                 }
             } else if (idExpr != nullptr) {
-                if (symbolTable.isIdExist(idExpr->name)) {
+                Scope* rhsIdScope;
 
-                    int idExprType = symbolTable.getIdType(idExpr->name);
+                if ((rhsIdScope = lookTopId(idExpr->name))) {
+                    int idExprType = rhsIdScope->symbolTable.getIdValueType(idExpr->name);
 
-                    if (idExprType == IdentifierValueType::Number) {
+                    if (idExprType == ValueType::Number) {
                         try {
-                            symbolTable.setIdValueDouble(lvalue->name, EvaluateIdDouble(idExpr));
+                            rhsIdScope->symbolTable.setIdValueDouble(id->name, EvaluateIdDouble(rhsIdScope, idExpr));
                             result.setValueString("Assign value");
                         } catch (std::runtime_error e) {
                             result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
                         }
-                    } else if (idExprType == IdentifierValueType::Bool) {
+                    } else if (idExprType == ValueType::Bool) {
                         try {
-                            symbolTable.setIdValueBool(lvalue->name, EvaluateIdBool(idExpr));
+                            rhsIdScope->symbolTable.setIdValueBool(id->name, EvaluateIdBool(rhsIdScope, idExpr));
                             result.setValueString("Assign value");
                         } catch (std::runtime_error e) {
                             result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
                         }
-                    } else if (idExprType == IdentifierValueType::Undefined) {
+                    } else if (idExprType == ValueType::Undefined) {
                         result.error = newError(EvalError::UNINITIALIZED_VAR,
                                                 "Use of uninitialized identifier '" + idExpr->name + "'");
                     } else {
@@ -231,14 +238,14 @@ EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* lvalue, ASTNode* expr)
                 }
             } else if (numberConst != nullptr) {
                 try {
-                    symbolTable.setIdValueDouble(lvalue->name, EvaluateNumberConstant(numberConst));
+                    curScope->symbolTable.setIdValueDouble(id->name, EvaluateNumberConstant(numberConst));
                     result.setValueString("Assign value");
                 } catch (std::runtime_error e) {
                     result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
                 }
             } else if (boolConst != nullptr) {
                 try {
-                    symbolTable.setIdValueBool(lvalue->name, EvaluateBoolConstant(boolConst));
+                    curScope->symbolTable.setIdValueBool(id->name, EvaluateBoolConstant(boolConst));
                     result.setValueString("Assign value");
                 } catch (std::runtime_error e) {
                     result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
@@ -247,7 +254,8 @@ EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* lvalue, ASTNode* expr)
                 result.error = newError(EvalError::INVALID_AST, "Invalid expression in assignment statement");
             }
         } else {
-            result.error = newError(EvalError::UNDECLARED_VAR, "Assignment to undeclared variable");
+            result.error = newError(EvalError::UNDECLARED_VAR,
+                                    "Assignment to undeclared variable '" + id->name + "'");
         }
     } else {
         result.error = newError(EvalError::INVALID_LVALUE, "Invalid Lvalue in assignment statement");
@@ -262,8 +270,8 @@ EvalResult Evaluator::EvaluateDeclVar(DeclVarNode* subtree) {
     if (subtree->id != nullptr) {
         std::string idName = subtree->id->name;
 
-        if (!symbolTable.isIdExist(idName)) {
-            symbolTable.addNewIdentifier(idName);
+        if (!topScope->symbolTable.isIdExist(idName)) {
+            topScope->symbolTable.addNewIdentifier(idName);
 
             if (subtree->expr != nullptr) {
                 result = EvaluateAssignValue(subtree->id, subtree->expr);
@@ -297,9 +305,9 @@ EvalResult Evaluator::EvaluateEqual(BinOpNode* subtree) {
         return result;
     }
 
-    IdentifierValueType::ValueType operationValueType = leftValue.getResultType();
+    ValueType::T operationValueType = leftValue.getResultType();
 
-    if (operationValueType == IdentifierValueType::Number) {
+    if (operationValueType == ValueType::Number) {
         result.setValueBool(leftValue.getResultDouble() == rightValue.getResultDouble());
     } else {
         result.setValueBool(leftValue.getResultBool() == rightValue.getResultBool());
@@ -321,8 +329,8 @@ EvalResult Evaluator::EvaluateComparison(BinOpNode* subtree) {
         return rightValue;
     }
 
-    if (leftValue.getResultType() != IdentifierValueType::Number ||
-        rightValue.getResultType() != IdentifierValueType::Number) {
+    if (leftValue.getResultType() != ValueType::Number ||
+        rightValue.getResultType() != ValueType::Number) {
         result.error = newError(EvalError::INCOMPATIBLE_OPERAND_TYPES);
         return result;
     }
@@ -332,6 +340,31 @@ EvalResult Evaluator::EvaluateComparison(BinOpNode* subtree) {
     } else {
         result.setValueBool(leftValue.getResultDouble() > rightValue.getResultDouble());
     }
+
+    return result;
+}
+
+EvalResult Evaluator::EvaluateIfStmt(IfStmtNode* subtree) {
+    EvalResult result;
+
+    const EvalResult& conditionResult = EvaluateBoolExpr(subtree->condition);
+    if (conditionResult.isError()) {
+        result = conditionResult;
+        return result;
+    }
+
+    openScope();
+
+    std::vector<EvalResult> blockStmtResults;
+    BlockStmtNode* blockStmt = subtree->body;
+    if (conditionResult.getResultBool()) {
+        for (auto currentStatement : blockStmt->stmtList) {
+            blockStmtResults.emplace_back(Evaluate(currentStatement));
+        }
+    }
+    result.setBlockResult(blockStmtResults);
+
+    closeScope();
 
     return result;
 }
@@ -389,24 +422,25 @@ EvalResult Evaluator::Evaluate(ASTNode* root) {
             result.error = newError(EvalError::INVALID_AST, "Invalid Bool Constant Node");
         }
     } else if (root->type == NodeType::Id) {
-        IdentifierNode* node = dynamic_cast<IdentifierNode*>(root);
+        IdentifierNode* id = dynamic_cast<IdentifierNode*>(root);
 
-        if (node != nullptr) {
-            if (symbolTable.isIdExist(node->name)) {
-                int idType = symbolTable.getIdType(node->name);
+        if (id != nullptr) {
+            Scope* curScope;
+            if ((curScope = lookTopId(id->name))) {
+                ValueType::T idValueType = curScope->symbolTable.getIdValueType(id->name);
 
-                switch (idType) {
-                    case IdentifierValueType::Number: {
-                        result.setValueDouble(EvaluateIdDouble(node));
+                switch (idValueType) {
+                    case ValueType::Number: {
+                        result.setValueDouble(EvaluateIdDouble(curScope, id));
                         break;
                     }
-                    case IdentifierValueType::Bool: {
-                        result.setValueBool(EvaluateIdBool(node));
+                    case ValueType::Bool: {
+                        result.setValueBool(EvaluateIdBool(curScope, id));
                         break;
                     }
-                    case IdentifierValueType::Undefined: {
+                    case ValueType::Undefined: {
                         result.error = newError(EvalError::UNINITIALIZED_VAR,
-                                                "Use of uninitialized identifier '" + node->name + "'");
+                                                "Use of uninitialized identifier '" + id->name + "'");
                         break;
                     }
                     default: {
@@ -415,10 +449,18 @@ EvalResult Evaluator::Evaluate(ASTNode* root) {
                 }
             } else {
                 result.error = newError(EvalError::UNDECLARED_VAR,
-                                        "Use of undeclared identifier '" + node->name + "'");
+                                        "Use of undeclared identifier '" + id->name + "'");
             }
         } else {
             result.error = newError(EvalError::INVALID_AST, "Invalid Identifier Node");
+        }
+    } else if (root->type == NodeType::IfStmt) {
+        IfStmtNode* node = dynamic_cast<IfStmtNode*>(root);
+
+        if (node != nullptr) {
+            result = EvaluateIfStmt(node);
+        } else {
+            result.error = newError(EvalError::INVALID_AST, "Invalid If Statement Node");
         }
     } else {
         result.error = newError(EvalError::INVALID_AST);
@@ -427,12 +469,12 @@ EvalResult Evaluator::Evaluate(ASTNode* root) {
     return result;
 }
 
-double Evaluator::EvaluateIdDouble(IdentifierNode* id) {
-    return symbolTable.getIdValueDouble(id->name);
+double Evaluator::EvaluateIdDouble(Scope* scope, IdentifierNode* id) {
+    return scope->symbolTable.getIdValueDouble(id->name);
 }
 
-bool Evaluator::EvaluateIdBool(IdentifierNode* id) {
-    return symbolTable.getIdValueBool(id->name);
+bool Evaluator::EvaluateIdBool(Scope* scope, IdentifierNode* id) {
+    return scope->symbolTable.getIdValueBool(id->name);
 }
 
 double Evaluator::EvaluateNumberConstant(NumberNode* num) {
@@ -449,4 +491,25 @@ EvalError Evaluator::newError(EvalError::Error err) {
 
 EvalError Evaluator::newError(EvalError::Error err, const std::string errMessage) {
     return EvalError{err, errMessage};
+}
+
+void Evaluator::openScope() {
+    topScope = new Scope(topScope);
+}
+
+void Evaluator::closeScope() {
+    topScope = topScope->outer;
+}
+
+Evaluator::Scope* Evaluator::lookTopId(const std::string& idName) {
+    Scope* currentScope = topScope;
+
+    while (currentScope != nullptr) {
+        if (currentScope->symbolTable.isIdExist(idName)) {
+            return currentScope;
+        }
+        currentScope = currentScope->outer;
+    }
+
+    return nullptr;
 }

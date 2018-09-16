@@ -8,13 +8,20 @@
 
 class Evaluator {
 private:
-    SymbolTable symbolTable;
+    struct Scope {
+        Scope* outer;
+        SymbolTable symbolTable;
+
+        Scope(Scope* outerScope) {
+            outer = outerScope;
+        }
+    };
 
     EvalResult EvaluateMathExpr(ASTNode* subtree);
 
     EvalResult EvaluateBoolExpr(ASTNode* subtree);
 
-    EvalResult EvaluateAssignValue(IdentifierNode* lvalue, ASTNode* expr);
+    EvalResult EvaluateAssignValue(IdentifierNode* id, ASTNode* expr);
 
     EvalResult EvaluateDeclVar(DeclVarNode* subtree);
 
@@ -22,9 +29,11 @@ private:
 
     EvalResult EvaluateComparison(BinOpNode* subtree);
 
-    double EvaluateIdDouble(IdentifierNode* id);
+    EvalResult EvaluateIfStmt(IfStmtNode* subtree);
 
-    bool EvaluateIdBool(IdentifierNode* id);
+    double EvaluateIdDouble(Scope* scope, IdentifierNode* id);
+
+    bool EvaluateIdBool(Scope* scope, IdentifierNode* id);
 
     double EvaluateNumberConstant(NumberNode* num);
 
@@ -34,7 +43,19 @@ private:
 
     EvalError newError(EvalError::Error err, const std::string errMessage);
 
+    Scope* lookTopId(const std::string& idName);
+
+    Scope* topScope;
+
+    void openScope();
+
+    void closeScope();
+
 public:
+    Evaluator() {
+        topScope = new Scope(nullptr);
+    }
+
     EvalResult Evaluate(ASTNode* root);
 };
 
