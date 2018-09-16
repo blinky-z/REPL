@@ -12,11 +12,11 @@ const TokenContainer Lexer::tokenize(const std::string& src) {
         while (*currentChar == ' ') {
             currentChar++;
         }
-        while (*currentChar == '\n') {
-            currentChar++;
-        }
 
-        if (isalpha(*currentChar) || (*currentChar == '_')) {
+        if (*currentChar == '\n') {
+            token.Type = TokenType::NL;
+            token.Value = "\n";
+        } else if (isalpha(*currentChar) || (*currentChar == '_')) {
             token = tokenizeStringLiteral();
         } else if (*currentChar >= '0' && *currentChar <= '9') {
             token = tokenizeNumber();
@@ -95,6 +95,12 @@ const TokenContainer Lexer::tokenize(const std::string& src) {
         } else if (*currentChar == ']') {
             token.Type = TokenType::SQUARE_BRACKET_END;
             token.Value = "]";
+        } else if (*currentChar == '{') {
+            token.Type = TokenType::CURLY_BRACKET_START;
+            token.Value = "{";
+        } else if (*currentChar == '}') {
+            token.Type = TokenType::CURLY_BRACKET_END;
+            token.Value = "}";
         } else if (*currentChar == ';') {
             token.Type = TokenType::SEMICOLON;
             token.Value = ";";
@@ -165,7 +171,7 @@ const Token Lexer::tokenizeNumber() {
         token_val += *currentChar;
     }
 
-    token.Type = TokenType::Num;
+    token.Type = TokenType::Number;
     token.Value = token_val;
 
     return token;
