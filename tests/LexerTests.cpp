@@ -27,11 +27,11 @@ TEST_CASE("Addition Tokenizing", "[Lexer][Math operations tokenizing]") {
     const std::vector<Token>& tokens = data.getTokens();
 
     std::vector<Token> properTokens;
-    properTokens.emplace_back(Token{TokenType::Num, "313"});
+    properTokens.emplace_back(Token{TokenType::Number, "313"});
     properTokens.emplace_back(Token{TokenType::Add, "+"});
-    properTokens.emplace_back(Token{TokenType::Num, "425"});
+    properTokens.emplace_back(Token{TokenType::Number, "425"});
     properTokens.emplace_back(Token{TokenType::Add, "+"});
-    properTokens.emplace_back(Token{TokenType::Num, "1131"});
+    properTokens.emplace_back(Token{TokenType::Number, "1131"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
@@ -45,11 +45,11 @@ TEST_CASE("Subtraction Tokenizing", "[Lexer][Math operations tokenizing]") {
     const std::vector<Token>& tokens = data.getTokens();
 
     std::vector<Token> properTokens;
-    properTokens.emplace_back(Token{TokenType::Num, "1000"});
+    properTokens.emplace_back(Token{TokenType::Number, "1000"});
     properTokens.emplace_back(Token{TokenType::Sub, "-"});
-    properTokens.emplace_back(Token{TokenType::Num, "100"});
+    properTokens.emplace_back(Token{TokenType::Number, "100"});
     properTokens.emplace_back(Token{TokenType::Sub, "-"});
-    properTokens.emplace_back(Token{TokenType::Num, "255"});
+    properTokens.emplace_back(Token{TokenType::Number, "255"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
@@ -63,11 +63,11 @@ TEST_CASE("Multiplication Tokenizing", "[Lexer][Math operations tokenizing]") {
     const std::vector<Token>& tokens = data.getTokens();
 
     std::vector<Token> properTokens;
-    properTokens.emplace_back(Token{TokenType::Num, "5"});
+    properTokens.emplace_back(Token{TokenType::Number, "5"});
     properTokens.emplace_back(Token{TokenType::Mul, "*"});
-    properTokens.emplace_back(Token{TokenType::Num, "123"});
+    properTokens.emplace_back(Token{TokenType::Number, "123"});
     properTokens.emplace_back(Token{TokenType::Mul, "*"});
-    properTokens.emplace_back(Token{TokenType::Num, "3464"});
+    properTokens.emplace_back(Token{TokenType::Number, "3464"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
@@ -81,11 +81,11 @@ TEST_CASE("Division Tokenizing", "[Lexer][Math operations tokenizing]") {
     const std::vector<Token>& tokens = data.getTokens();
 
     std::vector<Token> properTokens;
-    properTokens.emplace_back(Token{TokenType::Num, "2500"});
+    properTokens.emplace_back(Token{TokenType::Number, "2500"});
     properTokens.emplace_back(Token{TokenType::Div, "/"});
-    properTokens.emplace_back(Token{TokenType::Num, "5"});
+    properTokens.emplace_back(Token{TokenType::Number, "5"});
     properTokens.emplace_back(Token{TokenType::Div, "/"});
-    properTokens.emplace_back(Token{TokenType::Num, "10"});
+    properTokens.emplace_back(Token{TokenType::Number, "10"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
@@ -99,13 +99,13 @@ TEST_CASE("Negative numbers tokenizing", "[Lexer][Math operations tokenizing]") 
     const std::vector<Token>& tokens = data.getTokens();
 
     std::vector<Token> properTokens;
-    properTokens.emplace_back(Token{TokenType::Num, "5"});
+    properTokens.emplace_back(Token{TokenType::Number, "5"});
     properTokens.emplace_back(Token{TokenType::Mul, "*"});
     properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
-    properTokens.emplace_back(Token{TokenType::Num, "123"});
+    properTokens.emplace_back(Token{TokenType::Number, "123"});
     properTokens.emplace_back(Token{TokenType::Mul, "*"});
     properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
-    properTokens.emplace_back(Token{TokenType::Num, "3464"});
+    properTokens.emplace_back(Token{TokenType::Number, "3464"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
@@ -119,13 +119,13 @@ TEST_CASE("Multiple operations", "[Lexer][Math operations tokenizing]") {
     const std::vector<Token>& tokens = data.getTokens();
 
     std::vector<Token> properTokens;
-    properTokens.emplace_back(Token{TokenType::Num, "2500"});
+    properTokens.emplace_back(Token{TokenType::Number, "2500"});
     properTokens.emplace_back(Token{TokenType::Mul, "*"});
-    properTokens.emplace_back(Token{TokenType::Num, "5"});
+    properTokens.emplace_back(Token{TokenType::Number, "5"});
     properTokens.emplace_back(Token{TokenType::Div, "/"});
-    properTokens.emplace_back(Token{TokenType::Num, "10"});
+    properTokens.emplace_back(Token{TokenType::Number, "10"});
     properTokens.emplace_back(Token{TokenType::Add, "+"});
-    properTokens.emplace_back(Token{TokenType::Num, "1000"});
+    properTokens.emplace_back(Token{TokenType::Number, "1000"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
@@ -139,14 +139,14 @@ TEST_CASE("Expressions with using of round brackets", "[Lexer][Math operations t
     const std::vector<Token>& tokens = data.getTokens();
 
     std::vector<Token> properTokens;
-    properTokens.emplace_back(Token{TokenType::Num, "2500"});
+    properTokens.emplace_back(Token{TokenType::Number, "2500"});
     properTokens.emplace_back(Token{TokenType::Mul, "*"});
-    properTokens.emplace_back(Token{TokenType::Num, "5"});
+    properTokens.emplace_back(Token{TokenType::Number, "5"});
     properTokens.emplace_back(Token{TokenType::Div, "/"});
     properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_START, "("});
-    properTokens.emplace_back(Token{TokenType::Num, "1500"});
+    properTokens.emplace_back(Token{TokenType::Number, "1500"});
     properTokens.emplace_back(Token{TokenType::Add, "+"});
-    properTokens.emplace_back(Token{TokenType::Num, "1000"});
+    properTokens.emplace_back(Token{TokenType::Number, "1000"});
     properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_END, ")"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
@@ -178,7 +178,7 @@ TEST_CASE("Id assign tokenizing", "[Lexer]") {
     std::vector<Token> properTokens;
     properTokens.emplace_back(Token{TokenType::Id, "a"});
     properTokens.emplace_back(Token{TokenType::Assign, "="});
-    properTokens.emplace_back(Token{TokenType::Num, "3"});
+    properTokens.emplace_back(Token{TokenType::Number, "3"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
@@ -228,7 +228,7 @@ TEST_CASE("Id declare & assign to constant num tokenizing", "[Lexer]") {
     properTokens.emplace_back(Token{TokenType::DeclareId, "var"});
     properTokens.emplace_back(Token{TokenType::Id, "a"});
     properTokens.emplace_back(Token{TokenType::Assign, "="});
-    properTokens.emplace_back(Token{TokenType::Num, "3"});
+    properTokens.emplace_back(Token{TokenType::Number, "3"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
@@ -244,10 +244,10 @@ TEST_CASE("Expressions with using of variables", "[Lexer][Math operations tokeni
     std::vector<Token> properTokens;
     properTokens.emplace_back(Token{TokenType::Id, "a"});
     properTokens.emplace_back(Token{TokenType::Mul, "*"});
-    properTokens.emplace_back(Token{TokenType::Num, "5"});
+    properTokens.emplace_back(Token{TokenType::Number, "5"});
     properTokens.emplace_back(Token{TokenType::Div, "/"});
     properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_START, "("});
-    properTokens.emplace_back(Token{TokenType::Num, "1500"});
+    properTokens.emplace_back(Token{TokenType::Number, "1500"});
     properTokens.emplace_back(Token{TokenType::Add, "+"});
     properTokens.emplace_back(Token{TokenType::Id, "b"});
     properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_END, ")"});
@@ -267,11 +267,11 @@ TEST_CASE("Expressions with using of variables and negative numbers", "[Lexer][M
     properTokens.emplace_back(Token{TokenType::Id, "a"});
     properTokens.emplace_back(Token{TokenType::Mul, "*"});
     properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
-    properTokens.emplace_back(Token{TokenType::Num, "5"});
+    properTokens.emplace_back(Token{TokenType::Number, "5"});
     properTokens.emplace_back(Token{TokenType::Div, "/"});
     properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
     properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_START, "("});
-    properTokens.emplace_back(Token{TokenType::Num, "1500"});
+    properTokens.emplace_back(Token{TokenType::Number, "1500"});
     properTokens.emplace_back(Token{TokenType::Add, "+"});
     properTokens.emplace_back(Token{TokenType::Id, "b"});
     properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_END, ")"});
@@ -288,7 +288,7 @@ TEST_CASE("Tokenize float point number", "[Lexer][Math operations tokenizing]") 
     const std::vector<Token>& tokens = data.getTokens();
 
     std::vector<Token> properTokens;
-    properTokens.emplace_back(Token{TokenType::Num, "2.2"});
+    properTokens.emplace_back(Token{TokenType::Number, "2.2"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
@@ -303,7 +303,7 @@ TEST_CASE("Tokenize negative float point number", "[Lexer][Math operations token
 
     std::vector<Token> properTokens;
     properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
-    properTokens.emplace_back(Token{TokenType::Num, "2.2"});
+    properTokens.emplace_back(Token{TokenType::Number, "2.2"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
@@ -320,9 +320,9 @@ TEST_CASE("Expressions with using of float point numbers", "[Lexer][Math operati
     properTokens.emplace_back(Token{TokenType::Id, "a"});
     properTokens.emplace_back(Token{TokenType::Mul, "*"});
     properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
-    properTokens.emplace_back(Token{TokenType::Num, "5.2"});
+    properTokens.emplace_back(Token{TokenType::Number, "5.2"});
     properTokens.emplace_back(Token{TokenType::Div, "/"});
-    properTokens.emplace_back(Token{TokenType::Num, "3.1"});
+    properTokens.emplace_back(Token{TokenType::Number, "3.1"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
@@ -339,7 +339,7 @@ TEST_CASE("Id declare & assign float point number tokenizing", "[Lexer]") {
     properTokens.emplace_back(Token{TokenType::DeclareId, "var"});
     properTokens.emplace_back(Token{TokenType::Id, "a"});
     properTokens.emplace_back(Token{TokenType::Assign, "="});
-    properTokens.emplace_back(Token{TokenType::Num, "3.2"});
+    properTokens.emplace_back(Token{TokenType::Number, "3.2"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
@@ -357,7 +357,7 @@ TEST_CASE("Id declare & assign negative float point number tokenizing", "[Lexer]
     properTokens.emplace_back(Token{TokenType::Id, "a"});
     properTokens.emplace_back(Token{TokenType::Assign, "="});
     properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
-    properTokens.emplace_back(Token{TokenType::Num, "3.2"});
+    properTokens.emplace_back(Token{TokenType::Number, "3.2"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
@@ -371,9 +371,9 @@ TEST_CASE("Expression with redundant whitespaces tokenizing", "[Lexer][Math oper
     const std::vector<Token>& tokens = data.getTokens();
 
     std::vector<Token> properTokens;
-    properTokens.emplace_back(Token{TokenType::Num, "1"});
+    properTokens.emplace_back(Token{TokenType::Number, "1"});
     properTokens.emplace_back(Token{TokenType::Add, "+"});
-    properTokens.emplace_back(Token{TokenType::Num, "2"});
+    properTokens.emplace_back(Token{TokenType::Number, "2"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
@@ -394,9 +394,9 @@ TEST_CASE("Expression with using of operator LESS THAN and number constants", "[
     const std::vector<Token>& tokens = data.getTokens();
 
     std::vector<Token> properTokens;
-    properTokens.emplace_back(Token{TokenType::Num, "1"});
+    properTokens.emplace_back(Token{TokenType::Number, "1"});
     properTokens.emplace_back(Token{TokenType::LESS, "<"});
-    properTokens.emplace_back(Token{TokenType::Num, "2"});
+    properTokens.emplace_back(Token{TokenType::Number, "2"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
@@ -410,9 +410,9 @@ TEST_CASE("Expression with using of operator GREATER THAN and number constants",
     const std::vector<Token>& tokens = data.getTokens();
 
     std::vector<Token> properTokens;
-    properTokens.emplace_back(Token{TokenType::Num, "1"});
+    properTokens.emplace_back(Token{TokenType::Number, "1"});
     properTokens.emplace_back(Token{TokenType::GREATER, ">"});
-    properTokens.emplace_back(Token{TokenType::Num, "2"});
+    properTokens.emplace_back(Token{TokenType::Number, "2"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
@@ -427,10 +427,10 @@ TEST_CASE("Expression with using of comparison operator and negative values", "[
 
     std::vector<Token> properTokens;
     properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
-    properTokens.emplace_back(Token{TokenType::Num, "2"});
+    properTokens.emplace_back(Token{TokenType::Number, "2"});
     properTokens.emplace_back(Token{TokenType::LESS, "<"});
     properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
-    properTokens.emplace_back(Token{TokenType::Num, "1"});
+    properTokens.emplace_back(Token{TokenType::Number, "1"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
@@ -465,9 +465,9 @@ TEST_CASE("Bool Expression with using of operator LESS THAN and variable", "[Lex
     properTokens.emplace_back(Token{TokenType::Id, "a"});
     properTokens.emplace_back(Token{TokenType::LESS, "<"});
     properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_START, "("});
-    properTokens.emplace_back(Token{TokenType::Num, "2"});
+    properTokens.emplace_back(Token{TokenType::Number, "2"});
     properTokens.emplace_back(Token{TokenType::Add, "+"});
-    properTokens.emplace_back(Token{TokenType::Num, "5"});
+    properTokens.emplace_back(Token{TokenType::Number, "5"});
     properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_END, ")"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
@@ -485,9 +485,9 @@ TEST_CASE("Bool Expression with using of operator LESS THAN", "[Lexer]") {
     properTokens.emplace_back(Token{TokenType::Bool, "1"});
     properTokens.emplace_back(Token{TokenType::BoolAND, "&&"});
     properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_START, "("});
-    properTokens.emplace_back(Token{TokenType::Num, "2"});
+    properTokens.emplace_back(Token{TokenType::Number, "2"});
     properTokens.emplace_back(Token{TokenType::LESS, "<"});
-    properTokens.emplace_back(Token{TokenType::Num, "5"});
+    properTokens.emplace_back(Token{TokenType::Number, "5"});
     properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_END, ")"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
@@ -617,11 +617,11 @@ TEST_CASE("Id declare & assign math expression tokenizing", "[Lexer]") {
     properTokens.emplace_back(Token{TokenType::DeclareId, "var"});
     properTokens.emplace_back(Token{TokenType::Id, "a"});
     properTokens.emplace_back(Token{TokenType::Assign, "="});
-    properTokens.emplace_back(Token{TokenType::Num, "5"});
+    properTokens.emplace_back(Token{TokenType::Number, "5"});
     properTokens.emplace_back(Token{TokenType::Mul, "*"});
-    properTokens.emplace_back(Token{TokenType::Num, "10"});
+    properTokens.emplace_back(Token{TokenType::Number, "10"});
     properTokens.emplace_back(Token{TokenType::Div, "/"});
-    properTokens.emplace_back(Token{TokenType::Num, "25"});
+    properTokens.emplace_back(Token{TokenType::Number, "25"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
@@ -672,7 +672,36 @@ TEST_CASE("Expression with using of equal operator and variables", "[Lexer]") {
     std::vector<Token> properTokens;
     properTokens.emplace_back(Token{TokenType::Id, "a"});
     properTokens.emplace_back(Token{TokenType::Equal, "=="});
-    properTokens.emplace_back(Token{TokenType::Num, "2"});
+    properTokens.emplace_back(Token{TokenType::Number, "2"});
+    properTokens.emplace_back(Token{TokenType::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
+
+TEST_CASE("Tokenize simple if statement", "[Lexer]") {
+    std::string expr = "if (a > 0) {\n"
+                       "a = 5\n"
+                       "}\n";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenType::IfStmt, "if"});
+    properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_START, "("});
+    properTokens.emplace_back(Token{TokenType::Id, "a"});
+    properTokens.emplace_back(Token{TokenType::GREATER, ">"});
+    properTokens.emplace_back(Token{TokenType::Number, "0"});
+    properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_END, ")"});
+    properTokens.emplace_back(Token{TokenType::CURLY_BRACKET_START, "{"});
+    properTokens.emplace_back(Token{TokenType::NL, "\n"});
+    properTokens.emplace_back(Token{TokenType::Id, "a"});
+    properTokens.emplace_back(Token{TokenType::Assign, "="});
+    properTokens.emplace_back(Token{TokenType::Number, "5"});
+    properTokens.emplace_back(Token{TokenType::NL, "\n"});
+    properTokens.emplace_back(Token{TokenType::CURLY_BRACKET_END, "}"});
+    properTokens.emplace_back(Token{TokenType::NL, "\n"});
     properTokens.emplace_back(Token{TokenType::eof, "EOF"});
 
     matchTokens(tokens, properTokens);
