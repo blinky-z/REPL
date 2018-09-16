@@ -19,6 +19,7 @@ private:
 public:
     EvalResult handleExpression(const std::string src) {
         std::string expr = src;
+        expr.push_back('\n');
         expr.push_back(EOF);
 
         const TokenContainer& tokens = lexer.tokenize(expr);
@@ -813,4 +814,134 @@ TEST_CASE("Get error on comparison of incompatible Identifier value types [1]", 
     const EvalResult& result = expressionHandler.handleExpression(expr3);
 
     REQUIRE(result.error.errorCode == EvalError::INCOMPATIBLE_OPERAND_TYPES);
+}
+
+TEST_CASE("Evaluate if block statement (condition is true)", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "var a = 5";
+    std::string expr2 = "if (a > 0) {"
+                        "a\n"
+                        "}";
+
+    expressionHandler.handleExpression(expr1);
+
+    EvalResult result = expressionHandler.handleExpression(expr2);
+    REQUIRE(result.getResultType() == ValueType::Compound);
+
+    const std::vector<EvalResult> blockResult = result.getResultBlock();
+    REQUIRE(blockResult.size() == 1);
+    REQUIRE(blockResult[0].getResultDouble() == 5);
+}
+
+TEST_CASE("Do not evaluate if block statement (condition is false)", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "var a = 5";
+    std::string expr2 = "if (a == 10) {"
+                        "a\n"
+                        "}";
+
+    expressionHandler.handleExpression(expr1);
+
+    EvalResult result = expressionHandler.handleExpression(expr2);
+    REQUIRE(result.getResultType() == ValueType::Compound);
+    REQUIRE(result.getResultBlock().empty());
+}
+
+TEST_CASE("Evaluate variable using inside block scope, outer scope is global", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "var a = 5";
+    std::string expr2 = "if (a > 0 && a < 10) {"
+                        "var a = 150\n"
+                        "a\n"
+                        "}";
+
+    expressionHandler.handleExpression(expr1);
+
+    EvalResult result = expressionHandler.handleExpression(expr2);
+    REQUIRE(result.getResultType() == ValueType::Compound);
+
+    const std::vector<EvalResult> blockResult = result.getResultBlock();
+    REQUIRE(blockResult.size() == 2);
+    REQUIRE(blockResult[1].getResultDouble() == 150);
+}
+
+TEST_CASE("Evaluate variables using inside block scope, outer scope is block scope", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "var a = true";
+    std::string expr2 = "if (a) {"
+                        "var b = 755\n"
+                        "if (b == 755) {"
+                        "var b = 404\n"
+                        "b == 404\n"
+                        "}\n"
+                        "b == 755\n"
+                        "}";
+
+    expressionHandler.handleExpression(expr1);
+
+    EvalResult result = expressionHandler.handleExpression(expr2);
+    REQUIRE(result.getResultType() == ValueType::Compound);
+
+    const std::vector<EvalResult> mainBlock = result.getResultBlock();
+    const std::vector<EvalResult> innerBlock = mainBlock[1].getResultBlock();
+
+    REQUIRE(mainBlock.size() == 3);
+    REQUIRE(mainBlock[1].getResultType() == ValueType::Compound);
+    REQUIRE(mainBlock[2].getResultBool());
+
+    REQUIRE(innerBlock.size() == 2);
+    REQUIRE(innerBlock[1].getResultBool());
+}
+
+TEST_CASE("Assign value to variable in outer scope", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "var a = 705";
+    std::string expr2 = "if (a == 705) {"
+                        "a = 1\n"
+                        "}";
+    std::string expr3 = "a";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+
+    EvalResult result = expressionHandler.handleExpression(expr3);
+    REQUIRE(result.getResultDouble() == 1);
+}
+
+TEST_CASE("Assert variable destroying after it goes out of scope", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "if (true) {"
+                        "var a = 505\n"
+                        "}";
+    std::string expr2 = "a";
+
+    expressionHandler.handleExpression(expr1);
+
+    EvalResult result = expressionHandler.handleExpression(expr2);
+    REQUIRE(result.isError());
+    REQUIRE(result.error.errorCode == EvalError::UNDECLARED_VAR);
+}
+
+TEST_CASE("Assert variable destroying after it goes out of scope inside another block scope", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "if (true) {"
+                        "if (true) {"
+                        "var b = 400\n"
+                        "}\n"
+                        "b\n"
+                        "}";
+
+    EvalResult result = expressionHandler.handleExpression(expr);
+
+    const std::vector<EvalResult> mainBlock = result.getResultBlock();
+
+    REQUIRE(mainBlock[1].isError());
+    REQUIRE(mainBlock[1].error.errorCode == EvalError::UNDECLARED_VAR);
 }
