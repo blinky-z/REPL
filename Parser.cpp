@@ -2,6 +2,7 @@
 
 ASTNode* Parser::parseExpression() {
     std::queue<Token> exprTokens = convertToReversePolish();
+
     std::stack<ASTNode*> nodeStack;
 
     Token currentToken;
@@ -11,7 +12,7 @@ ASTNode* Parser::parseExpression() {
 
         if (!isOperator(currentToken)) {
             switch (currentToken.Type) {
-                case TokenType::Num: {
+                case TokenType::Number: {
                     nodeStack.push(createNumberNode(getNumTokenValue(currentToken)));
                     break;
                 }
@@ -24,7 +25,7 @@ ASTNode* Parser::parseExpression() {
                     break;
                 }
                 default: {
-                    throw std::runtime_error("Invalid syntax");
+                    errorExpected("Rvalue or Identifier", currentToken);
                 }
             }
         } else {
@@ -41,7 +42,7 @@ ASTNode* Parser::parseExpression() {
                     operand1 = nodeStack.top();
                     nodeStack.pop();
                 } else {
-                    throw std::runtime_error("Invalid Syntax");
+                    throw std::runtime_error("Invalid Syntax: Not enough operands for binary operation");
                 }
 
                 switch (currentToken.Type) {
@@ -96,7 +97,7 @@ ASTNode* Parser::parseExpression() {
                         break;
                     }
                     default: {
-                        throw std::runtime_error("Invalid syntax");
+                        errorExpected("Binary operator", currentToken);
                     }
                 }
             } else {
@@ -108,7 +109,7 @@ ASTNode* Parser::parseExpression() {
                     operand = nodeStack.top();
                     nodeStack.pop();
                 } else {
-                    throw std::runtime_error("Invalid Syntax");
+                    throw std::runtime_error("Invalid Syntax: Not enough operands for unary operation");
                 }
 
                 switch (currentToken.Type) {
@@ -118,17 +119,20 @@ ASTNode* Parser::parseExpression() {
                         break;
                     }
                     default: {
-                        throw std::runtime_error("Invalid syntax");
+                        errorExpected("Unary operator", currentToken);
                     }
                 }
             }
         }
     }
 
+    if (nodeStack.empty()) {
+        throw std::runtime_error("Expected expression");
+    }
     return nodeStack.top();
 }
 
-ASTNode* Parser::parseAssign() {
+BinOpNode* Parser::parseAssign() {
     const Token& id = tokens.getNextToken();
     const std::string& idName = id.Value;
 
@@ -141,10 +145,10 @@ ASTNode* Parser::parseAssign() {
     return createBinOpNode(BinOpType::OperatorAssign, idNode, expr);
 }
 
-ASTNode* Parser::parseDeclVar() {
+DeclVarNode* Parser::parseDeclVar() {
     ASTNode* expr = nullptr;
 
-    IdentifierNode* idNode = static_cast<IdentifierNode*>(parseId());
+    IdentifierNode* idNode = parseIdentifier();
 
     const Token& nextToken = tokens.getNextToken();
     if (nextToken.Type == TokenType::Assign) {
@@ -156,25 +160,54 @@ ASTNode* Parser::parseDeclVar() {
     return createDeclVarNode(idNode, expr);
 }
 
-ASTNode* Parser::parseId() {
+IdentifierNode* Parser::parseIdentifier() {
     const Token& token = tokens.getNextToken();
 
     if (token.Type != TokenType::Id) {
-        throw std::runtime_error("Expected identifier");
+        errorExpected("identifier", token);
+        throw;
     } else {
         return createIdentifierNode(token.Value);
     }
 }
 
-ASTNode* Parser::parseForLoop() {
+BlockStmtNode* Parser::parseBlockStmt() {
+    expect("{");
+
+    std::vector<ASTNode*> stmtList;
+    Token currentToken;
+    while ((currentToken = tokens.getNextToken()).Type != TokenType::CURLY_BRACKET_END &&
+           currentToken.Type != TokenType::eof) {
+        tokens.returnToken();
+        stmtList.emplace_back(parseStatement());
+    }
+    tokens.returnToken();
+
+    expect("}");
+
+    return createBlockStmtNode(stmtList);
+}
+
+IfStmtNode* Parser::parseIfStmt() {
+    expect("if");
+
+    expect("(");
+    tokens.returnToken();
+
+    ASTNode* condition = parseExpression();
+
+    BlockStmtNode* body = parseBlockStmt();
+
+    return createIfStmtNode(condition, body);
+}
+
+ForLoopNode* Parser::parseForLoop() {
     // TODO: имплементировать For Loop
 
     return createForLoopNode();
 }
 
-ASTNode* Parser::parse(const TokenContainer& tokenizedSourceData) {
-    tokens = tokenizedSourceData;
-
+ASTNode* Parser::parseStatement() {
     const Token& currentToken = tokens.getNextToken();
 
     ASTNode* parseResult;
@@ -192,7 +225,7 @@ ASTNode* Parser::parse(const TokenContainer& tokenizedSourceData) {
     } else if (currentToken.Type == TokenType::ROUND_BRACKET_START) {
         tokens.returnToken();
         parseResult = parseExpression();
-    } else if (currentToken.Type == TokenType::Num) {
+    } else if (currentToken.Type == TokenType::Number) {
         tokens.returnToken();
         parseResult = parseExpression();
     } else if (currentToken.Type == TokenType::Bool) {
@@ -206,15 +239,26 @@ ASTNode* Parser::parse(const TokenContainer& tokenizedSourceData) {
     } else if (currentToken.Type == TokenType::DeclareForLoop) {
         tokens.returnToken();
         parseResult = parseForLoop();
+    } else if (currentToken.Type == TokenType::IfStmt) {
+        tokens.returnToken();
+        parseResult = parseIfStmt();
     } else {
-        throw std::runtime_error("Invalid syntax");
+        errorExpected("Statement", currentToken);
+        throw;
     }
 
-    if (matchParseComplete()) {
-        return parseResult;
-    } else {
-        throw std::runtime_error("Invalid syntax");
-    }
+    matchParseComplete();
+    return parseResult;
+}
+
+ASTNode* Parser::parse(const TokenContainer& tokenizedSourceData) {
+    tokens = tokenizedSourceData;
+
+    ASTNode* ast = parseStatement();
+
+    expect("EOF");
+
+    return ast;
 }
 
 BinOpNode* Parser::createBinOpNode(BinOpType::ASTNodeBinOpType type, ASTNode* left, ASTNode* right) {
@@ -255,6 +299,21 @@ DeclVarNode* Parser::createDeclVarNode(IdentifierNode* id, ASTNode* expr) {
     return node;
 }
 
+BlockStmtNode* Parser::createBlockStmtNode(const std::vector<ASTNode*> statements) {
+    BlockStmtNode* node = new BlockStmtNode;
+    node->stmtList = statements;
+
+    return node;
+}
+
+IfStmtNode* Parser::createIfStmtNode(ASTNode* condition, BlockStmtNode* statement) {
+    IfStmtNode* node = new IfStmtNode;
+    node->condition = condition;
+    node->body = statement;
+
+    return node;
+}
+
 ForLoopNode* Parser::createForLoopNode() {
     ForLoopNode* node = new ForLoopNode;
 
@@ -269,13 +328,11 @@ bool Parser::getBoolTokenValue(const Token& boolToken) {
     return static_cast<bool>(std::stoi(boolToken.Value));
 }
 
-bool Parser::matchParseComplete() {
+void Parser::matchParseComplete() {
     const Token& currentToken = tokens.getNextToken();
 
-    if (currentToken.Type == TokenType::SEMICOLON) {
-        return tokens.getNextToken().Type == TokenType::eof;
-    } else {
-        return currentToken.Type == TokenType::eof;
+    if (currentToken.Type != TokenType::NL) {
+        errorExpected("newline", currentToken);
     }
 }
 
@@ -300,8 +357,9 @@ std::queue<Token> Parser::convertToReversePolish() {
 
     Token token;
 
-    while ((token = tokens.getNextToken()).Type != TokenType::eof) {
-        if (token.Type == TokenType::Num || token.Type == TokenType::Bool || token.Type == TokenType::Id) {
+    while ((token = tokens.getNextToken()).Type != TokenType::NL && token.Type != TokenType::CURLY_BRACKET_START &&
+           token.Type != TokenType::CURLY_BRACKET_END) {
+        if (token.Type == TokenType::Number || token.Type == TokenType::Bool || token.Type == TokenType::Id) {
             reversePolishExpr.push(token);
         } else if (isOperator(token)) {
             const Token& op1 = token;
@@ -352,10 +410,10 @@ std::queue<Token> Parser::convertToReversePolish() {
             if (topToken.Type == TokenType::ROUND_BRACKET_START) {
                 opStack.pop(); // remove left bracket
             } else {
-                throw std::runtime_error("Invalid syntax");
+                errorExpected("Left Round Bracket", topToken);
             }
         } else {
-            throw std::runtime_error("Invalid syntax");
+            throw std::runtime_error("Unexpected token: " + token.Value);
         }
     }
     tokens.returnToken();
@@ -363,6 +421,11 @@ std::queue<Token> Parser::convertToReversePolish() {
     while (!opStack.empty()) {
         const Token& topToken = opStack.top();
         opStack.pop();
+
+        if (topToken.Type == TokenType::ROUND_BRACKET_START) {
+            throw std::runtime_error("Expected Right Round Bracket");
+        }
+
         reversePolishExpr.push(topToken);
     }
 
@@ -382,4 +445,25 @@ bool Parser::isLeftAssociative(const Token& token) {
 
 bool Parser::isBinaryOperator(const Token& token) {
     return token.Type != TokenType::UnaryMinus;
+}
+
+void Parser::expect(const std::string& expected) {
+    const Token& currentToken = tokens.getNextToken();
+
+    if (currentToken.Value != expected) {
+        errorExpected(expected, currentToken);
+    }
+}
+
+void Parser::errorExpected(const std::string& expected, const Token& foundTok) {
+    std::string errMsg;
+
+    if (foundTok.Type == TokenType::NL) {
+        errMsg = "Expected " + expected + ", found newline";
+    } else if (foundTok.Type == TokenType::eof) {
+        errMsg = "Expected " + expected + ", found EOF";
+    } else {
+        errMsg = "Expected " + expected + ", found \"" + foundTok.Value + "\"";
+    }
+    throw std::runtime_error(errMsg);
 }

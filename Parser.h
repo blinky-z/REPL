@@ -26,6 +26,10 @@ private:
 
     DeclVarNode* createDeclVarNode(IdentifierNode* id, ASTNode* expr);
 
+    BlockStmtNode* createBlockStmtNode(const std::vector<ASTNode*> statements);
+
+    IfStmtNode* createIfStmtNode(ASTNode* condition, BlockStmtNode* statement);
+
     ForLoopNode* createForLoopNode();
 
     double getNumTokenValue(const Token& numToken);
@@ -34,13 +38,17 @@ private:
 
     ASTNode* parseExpression();
 
-    ASTNode* parseAssign();
+    BinOpNode* parseAssign();
 
-    ASTNode* parseDeclVar();
+    DeclVarNode* parseDeclVar();
 
-    ASTNode* parseId();
+    IdentifierNode* parseIdentifier();
 
-    ASTNode* parseForLoop();
+    BlockStmtNode* parseBlockStmt();
+
+    IfStmtNode* parseIfStmt();
+
+    ForLoopNode* parseForLoop();
 
     std::queue<Token> convertToReversePolish();
 
@@ -50,9 +58,15 @@ private:
 
     bool isLeftAssociative(const Token& token);
 
-    bool matchParseComplete();
+    void matchParseComplete();
+
+    void expect(const std::string& expected);
+
+    void errorExpected(const std::string& expected, const Token& foundTok);
 
     TokenContainer tokens;
+
+    ASTNode* parseStatement();
 public:
     ASTNode* parse(const TokenContainer& tokenizedSourceData);
 };
