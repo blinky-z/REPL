@@ -9,9 +9,9 @@ void SymbolTable::addNewIdentifier(const std::string& identifierName) {
 }
 
 void SymbolTable::setIdValueDouble(const std::string& identifierName, double value) {
-    if (symbolTable[identifierName].Type == IdentifierValueType::Undefined ||
-        symbolTable[identifierName].Type == IdentifierValueType::Number) {
-        symbolTable[identifierName].Type = IdentifierValueType::Number;
+    if (symbolTable[identifierName].Type == ValueType::Undefined ||
+        symbolTable[identifierName].Type == ValueType::Number) {
+        symbolTable[identifierName].Type = ValueType::Number;
         symbolTable[identifierName].NumValue = value;
     } else {
         IdentifierTypeStringNames typeStringNames;
@@ -25,9 +25,9 @@ double SymbolTable::getIdValueDouble(const std::string& identifierName) const {
 }
 
 void SymbolTable::setIdValueBool(const std::string& identifierName, bool value) {
-    if (symbolTable[identifierName].Type == IdentifierValueType::Undefined ||
-        symbolTable[identifierName].Type == IdentifierValueType::Bool) {
-        symbolTable[identifierName].Type = IdentifierValueType::Bool;
+    if (symbolTable[identifierName].Type == ValueType::Undefined ||
+        symbolTable[identifierName].Type == ValueType::Bool) {
+        symbolTable[identifierName].Type = ValueType::Bool;
         symbolTable[identifierName].BoolValue = value;
     } else {
         IdentifierTypeStringNames typeStringNames;
@@ -40,6 +40,6 @@ bool SymbolTable::getIdValueBool(const std::string& identifierName) const {
     return symbolTable.at(identifierName).BoolValue;
 }
 
-IdentifierValueType::ValueType SymbolTable::getIdType(const std::string& identifierName) const {
+ValueType::T SymbolTable::getIdValueType(const std::string& identifierName) const {
     return symbolTable.at(identifierName).Type;
 }

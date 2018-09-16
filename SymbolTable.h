@@ -20,7 +20,7 @@ public:
 
     bool getIdValueBool(const std::string& identifierName) const;
 
-    IdentifierValueType::ValueType getIdType(const std::string& identifierName) const;
+    ValueType::T getIdValueType(const std::string& identifierName) const;
 };
 
 
