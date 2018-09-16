@@ -4,11 +4,12 @@
 #include <string>
 #include <unordered_map>
 
-namespace IdentifierValueType {
-    enum ValueType {
+namespace ValueType {
+    enum T {
         Number,
         Bool,
         String,
+        Compound,
         Undefined
     };
 }
@@ -17,21 +18,22 @@ struct IdentifierTypeStringNames {
     std::unordered_map<int, std::string> idTypeStringNames;
 
     IdentifierTypeStringNames() {
-        idTypeStringNames[IdentifierValueType::Number] = "Number";
-        idTypeStringNames[IdentifierValueType::Bool] = "Bool";
-        idTypeStringNames[IdentifierValueType::String] = "String";
-        idTypeStringNames[IdentifierValueType::Undefined] = "Undefined";
+        idTypeStringNames[ValueType::Number] = "Number";
+        idTypeStringNames[ValueType::Bool] = "Bool";
+        idTypeStringNames[ValueType::String] = "String";
+        idTypeStringNames[ValueType::Compound] = "Compound Statement";
+        idTypeStringNames[ValueType::Undefined] = "Undefined";
     }
 };
 
 struct Identifier {
-    IdentifierValueType::ValueType Type;
+    ValueType::T Type;
     std::string StringValue;
     double NumValue;
     bool BoolValue;
 
     Identifier() {
-        Type = IdentifierValueType::Undefined;
+        Type = ValueType::Undefined;
     }
 };
 
