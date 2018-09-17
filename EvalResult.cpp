@@ -45,7 +45,7 @@ bool EvalResult::isError() const {
 }
 
 const std::string& EvalError::what() const {
-    static std::unordered_map<Error, std::string> errorMessage;
+    static std::map<Error, std::string> errorMessage;
 
     errorMessage[INVALID_AST] = "Invalid AST";
     errorMessage[INCOMPATIBLE_OPERAND_TYPES] = "Incompatible Operand Types";

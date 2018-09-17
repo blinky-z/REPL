@@ -2,7 +2,7 @@
 #define REPL_EVALRESULT_H
 
 #include "Identifier.h"
-#include <unordered_map>
+#include <map>
 #include <vector>
 
 class EvalError {
