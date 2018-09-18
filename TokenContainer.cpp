@@ -17,3 +17,7 @@ void TokenContainer::returnToken() {
 void TokenContainer::addNewToken(const Token& token) {
     tokens.emplace_back(token);
 }
+
+Token TokenContainer::lookNextToken() {
+    return tokens[currentTokenNum];
+}

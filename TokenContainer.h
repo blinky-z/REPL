@@ -14,6 +14,8 @@ public:
 
     Token getNextToken();
 
+    Token lookNextToken();
+
     void returnToken();
 
     void addNewToken(const Token& token);
