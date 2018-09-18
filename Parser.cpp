@@ -439,10 +439,6 @@ bool Parser::isOperator(const Token& token) {
            token.Type == TokenType::LESS || token.Type == TokenType::GREATER;
 }
 
-bool Parser::isLeftAssociative(const Token& token) {
-    return token.Type != TokenType::UnaryMinus && token.Type != TokenType::Assign;
-}
-
 bool Parser::isBinaryOperator(const Token& token) {
     return token.Type != TokenType::UnaryMinus;
 }

@@ -56,8 +56,6 @@ private:
 
     bool isBinaryOperator(const Token& token);
 
-    bool isLeftAssociative(const Token& token);
-
     void matchParseComplete();
 
     void expect(const std::string& expected);
