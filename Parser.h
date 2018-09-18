@@ -38,8 +38,6 @@ private:
 
     ASTNode* parseExpression();
 
-    BinOpNode* parseAssign();
-
     DeclVarNode* parseDeclVar();
 
     IdentifierNode* parseIdentifier();
@@ -59,6 +57,8 @@ private:
     void matchParseComplete();
 
     void expect(const std::string& expected);
+
+    void errorExpected(const std::string& expected);
 
     void errorExpected(const std::string& expected, const Token& foundTok);
 

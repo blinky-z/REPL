@@ -66,11 +66,6 @@ ASTNode* Parser::parseExpression() {
                         nodeStack.push(operationNode);
                         break;
                     }
-                    case TokenType::Assign: {
-                        operationNode = createBinOpNode(BinOpType::OperatorAssign, operand1, operand2);
-                        nodeStack.push(operationNode);
-                        break;
-                    }
                     case TokenType::BoolAND: {
                         operationNode = createBinOpNode(BinOpType::OperatorBoolAND, operand1, operand2);
                         nodeStack.push(operationNode);
@@ -93,6 +88,11 @@ ASTNode* Parser::parseExpression() {
                     }
                     case TokenType::GREATER: {
                         operationNode = createBinOpNode(BinOpType::OperatorGreater, operand1, operand2);
+                        nodeStack.push(operationNode);
+                        break;
+                    }
+                    case TokenType::Assign: {
+                        operationNode = createBinOpNode(BinOpType::OperatorAssign, operand1, operand2);
                         nodeStack.push(operationNode);
                         break;
                     }
@@ -127,28 +127,20 @@ ASTNode* Parser::parseExpression() {
     }
 
     if (nodeStack.empty()) {
-        throw std::runtime_error("Expected expression");
+        errorExpected("Expression");
     }
+    if (nodeStack.size() > 1) {
+        throw std::runtime_error("Invalid expression");
+    }
+
     return nodeStack.top();
 }
 
-BinOpNode* Parser::parseAssign() {
-    const Token& id = tokens.getNextToken();
-    const std::string& idName = id.Value;
-
-    // skip '=' token
-    tokens.getNextToken();
-
-    IdentifierNode* idNode = createIdentifierNode(idName);
-    ASTNode* expr = parseExpression();
-
-    return createBinOpNode(BinOpType::OperatorAssign, idNode, expr);
-}
-
 DeclVarNode* Parser::parseDeclVar() {
-    ASTNode* expr = nullptr;
+    expect("var");
 
-    IdentifierNode* idNode = parseIdentifier();
+    IdentifierNode* id = parseIdentifier();
+    ASTNode* expr = nullptr;
 
     const Token& nextToken = tokens.getNextToken();
     if (nextToken.Type == TokenType::Assign) {
@@ -157,7 +149,7 @@ DeclVarNode* Parser::parseDeclVar() {
         tokens.returnToken();
     }
 
-    return createDeclVarNode(idNode, expr);
+    return createDeclVarNode(id, expr);
 }
 
 IdentifierNode* Parser::parseIdentifier() {
@@ -165,23 +157,19 @@ IdentifierNode* Parser::parseIdentifier() {
 
     if (token.Type != TokenType::Id) {
         errorExpected("identifier", token);
-        throw;
-    } else {
-        return createIdentifierNode(token.Value);
     }
+    return createIdentifierNode(token.Value);
 }
 
 BlockStmtNode* Parser::parseBlockStmt() {
     expect("{");
 
     std::vector<ASTNode*> stmtList;
-    Token currentToken;
-    while ((currentToken = tokens.getNextToken()).Type != TokenType::CURLY_BRACKET_END &&
-           currentToken.Type != TokenType::eof) {
-        tokens.returnToken();
+    Token nextToken;
+    while ((nextToken = tokens.lookNextToken()).Type != TokenType::CURLY_BRACKET_END &&
+           nextToken.Type != TokenType::eof) {
         stmtList.emplace_back(parseStatement());
     }
-    tokens.returnToken();
 
     expect("}");
 
@@ -192,8 +180,10 @@ IfStmtNode* Parser::parseIfStmt() {
     expect("if");
 
     expect("(");
-    tokens.returnToken();
 
+    // need to return left round bracket for proper parsing of expression with convertToReversePolish() func
+    // convertToReversePolish() will match both left and right round and checks if they are missed
+    tokens.returnToken();
     ASTNode* condition = parseExpression();
 
     BlockStmtNode* body = parseBlockStmt();
@@ -208,43 +198,34 @@ ForLoopNode* Parser::parseForLoop() {
 }
 
 ASTNode* Parser::parseStatement() {
-    const Token& currentToken = tokens.getNextToken();
-
     ASTNode* parseResult;
 
-    if (currentToken.Type == TokenType::Id) {
-        const Token& nextToken = tokens.getNextToken();
-        tokens.returnToken();
-        tokens.returnToken();
-
-        if (nextToken.Type == TokenType::Assign) {
-            parseResult = parseAssign();
-        } else {
+    const Token& currentToken = tokens.lookNextToken();
+    switch (currentToken.Type) {
+        case TokenType::Id:
+        case TokenType::ROUND_BRACKET_START:
+        case TokenType::Number:
+        case TokenType::Bool:
+        case TokenType::UnaryMinus: {
             parseResult = parseExpression();
+            break;
         }
-    } else if (currentToken.Type == TokenType::ROUND_BRACKET_START) {
-        tokens.returnToken();
-        parseResult = parseExpression();
-    } else if (currentToken.Type == TokenType::Number) {
-        tokens.returnToken();
-        parseResult = parseExpression();
-    } else if (currentToken.Type == TokenType::Bool) {
-        tokens.returnToken();
-        parseResult = parseExpression();
-    } else if (currentToken.Type == TokenType::UnaryMinus) {
-        tokens.returnToken();
-        parseResult = parseExpression();
-    } else if (currentToken.Type == TokenType::DeclareId) {
-        parseResult = parseDeclVar();
-    } else if (currentToken.Type == TokenType::DeclareForLoop) {
-        tokens.returnToken();
-        parseResult = parseForLoop();
-    } else if (currentToken.Type == TokenType::IfStmt) {
-        tokens.returnToken();
-        parseResult = parseIfStmt();
-    } else {
-        errorExpected("Statement", currentToken);
-        throw;
+        case TokenType::DeclareId: {
+            parseResult = parseDeclVar();
+            break;
+        }
+        case TokenType::DeclareForLoop: {
+            parseResult = parseForLoop();
+            break;
+        }
+        case TokenType::IfStmt: {
+            parseResult = parseIfStmt();
+            break;
+        }
+        default: {
+            errorExpected("Statement", currentToken);
+            throw;
+        }
     }
 
     matchParseComplete();
@@ -356,16 +337,15 @@ std::queue<Token> Parser::convertToReversePolish() {
     std::queue<Token> reversePolishExpr;
 
     Token token;
-
     while ((token = tokens.getNextToken()).Type != TokenType::NL && token.Type != TokenType::CURLY_BRACKET_START &&
            token.Type != TokenType::CURLY_BRACKET_END) {
         if (token.Type == TokenType::Number || token.Type == TokenType::Bool || token.Type == TokenType::Id) {
             reversePolishExpr.push(token);
         } else if (isOperator(token)) {
-            const Token& op1 = token;
+            const Token& curOp = token;
 
             while (!opStack.empty() && isOperator(opStack.top())) {
-                const Token& op2 = opStack.top();
+                const Token& topOp = opStack.top();
 
                 // из стека нужно вытолкнуть те операторы, которые имеют приоритет выше или равный текущему оператору
                 // иначе нарушится порядок выполнения операций
@@ -390,7 +370,7 @@ std::queue<Token> Parser::convertToReversePolish() {
                 // и наоборот: если текущий оператор имеет приоритет выше, чем лежаший наверху стека операторов, то
                 // данный оператор должен ложиться наверх стека, не выталкивая со стека ничего, чтобы данный оператор
                 // был вычислен первее (ведь он будет вытолкнут со стека первее)
-                if (opPrecedence[op1.Value] <= opPrecedence[op2.Value]) {
+                if (opPrecedence[curOp.Value] <= opPrecedence[topOp.Value]) {
                     reversePolishExpr.push(opStack.top());
                     opStack.pop();
                     continue;
@@ -410,7 +390,7 @@ std::queue<Token> Parser::convertToReversePolish() {
             if (topToken.Type == TokenType::ROUND_BRACKET_START) {
                 opStack.pop(); // remove left bracket
             } else {
-                errorExpected("Left Round Bracket", topToken);
+                errorExpected("Left Round Bracket");
             }
         } else {
             throw std::runtime_error("Unexpected token: " + token.Value);
@@ -423,7 +403,7 @@ std::queue<Token> Parser::convertToReversePolish() {
         opStack.pop();
 
         if (topToken.Type == TokenType::ROUND_BRACKET_START) {
-            throw std::runtime_error("Expected Right Round Bracket");
+            errorExpected("Right Round Bracket");
         }
 
         reversePolishExpr.push(topToken);
@@ -461,5 +441,11 @@ void Parser::errorExpected(const std::string& expected, const Token& foundTok) {
     } else {
         errMsg = "Expected " + expected + ", found \"" + foundTok.Value + "\"";
     }
+    throw std::runtime_error(errMsg);
+}
+
+void Parser::errorExpected(const std::string& expected) {
+    std::string errMsg = "Expected " + expected + "\n";
+
     throw std::runtime_error(errMsg);
 }
