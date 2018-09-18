@@ -258,7 +258,7 @@ EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* id, ASTNode* expr) {
                                     "Assignment to undeclared variable '" + id->name + "'");
         }
     } else {
-        result.error = newError(EvalError::INVALID_LVALUE, "Invalid Lvalue in assignment statement");
+        result.error = newError(EvalError::INVALID_LVALUE, "Expression is not assignable");
     }
 
     return result;
