@@ -8,16 +8,16 @@ bool isInputForLoop(const std::string& input) {
     return input.find("for") != std::string::npos;
 }
 
-bool isIfStmt(const std::string& input) {
+bool isInputIfStmt(const std::string& input) {
     return input.find("if") != std::string::npos;
 }
 
-std::string readIfStmt(const std::string& input) {
-    std::string ifStmt = input;
+std::string readCompoundStatement(const std::string& input) {
+    std::string stmt = input;
 
-    if (ifStmt[ifStmt.size() - 1] == '}') {
-        ifStmt.push_back('\n');
-        return ifStmt;
+    if (stmt[stmt.size() - 1] == '}') {
+        stmt.push_back('\n');
+        return stmt;
     }
 
     std::string currentInput;
@@ -29,43 +29,22 @@ std::string readIfStmt(const std::string& input) {
         }
 
         if (currentInput[currentInput.size() - 1] == '}') {
-            ifStmt += currentInput;
-            ifStmt.push_back('\n');
+            stmt += currentInput;
+            stmt.push_back('\n');
             break;
         }
 
-        if (isIfStmt(currentInput)) {
-            ifStmt += readIfStmt(currentInput);
+        if (isInputIfStmt(currentInput) || isInputForLoop(currentInput)) {
+            stmt += readCompoundStatement(currentInput);
         } else if (currentInput.empty()) {
             continue;
         } else {
             currentInput.push_back('\n');
-            ifStmt += currentInput;
+            stmt += currentInput;
         }
     }
-    return ifStmt;
-}
 
-std::string readForLoop(const std::string& input) {
-    std::string forLoop = input;
-    forLoop.push_back('\n');
-
-    std::string currentInput;
-    while (true) {
-        getline(std::cin, currentInput);
-
-        if (std::cin.eof()) {
-            exit(EXIT_SUCCESS);
-        }
-        if (currentInput.empty()) {
-            break;
-        }
-
-        currentInput += "\n";
-        forLoop += currentInput;
-    }
-
-    return forLoop;
+    return stmt;
 }
 
 void printResult(const EvalResult& result, int tabCount = 0) {
@@ -107,10 +86,8 @@ int main() {
         }
 
         if (input.size() != 0) {
-            if (isInputForLoop(input)) {
-                input = readForLoop(input);
-            } else if (isIfStmt(input)) {
-                input = readIfStmt(input);
+            if (isInputIfStmt(input) || isInputForLoop(input)) {
+                input = readCompoundStatement(input);
             }
 
             if (input.back() != '\n') {
