@@ -151,6 +151,9 @@ const Token Lexer::tokenizeStringLiteral() {
     } else if (strLiteral == "if") {
         token.Type = TokenType::IfStmt;
         token.Value = strLiteral;
+    } else if (strLiteral == "for") {
+        token.Type = TokenType::ForLoopStmt;
+        token.Value = strLiteral;
     } else {
         token.Type = TokenType::Id;
         token.Value = strLiteral;
