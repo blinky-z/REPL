@@ -28,9 +28,9 @@ private:
 
     BlockStmtNode* createBlockStmtNode(const std::vector<ASTNode*> statements);
 
-    IfStmtNode* createIfStmtNode(ASTNode* condition, BlockStmtNode* statement);
+    IfStmtNode* createIfStmtNode(ASTNode* condition, BlockStmtNode* stmtList);
 
-    ForLoopNode* createForLoopNode();
+    ForLoopNode* createForLoopNode(ASTNode* init, ASTNode* cond, ASTNode* inc, BlockStmtNode* stmtList);
 
     double getNumTokenValue(const Token& numToken);
 
@@ -45,6 +45,8 @@ private:
     BlockStmtNode* parseBlockStmt();
 
     IfStmtNode* parseIfStmt();
+
+    ASTNode* parseForLoopInit();
 
     ForLoopNode* parseForLoop();
 
@@ -65,6 +67,8 @@ private:
     TokenContainer tokens;
 
     ASTNode* parseStatement();
+
+    bool parenthesesControl;
 public:
     ASTNode* parse(const TokenContainer& tokenizedSourceData);
 };

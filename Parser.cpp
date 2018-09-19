@@ -178,23 +178,66 @@ BlockStmtNode* Parser::parseBlockStmt() {
 
 IfStmtNode* Parser::parseIfStmt() {
     expect("if");
-
     expect("(");
 
-    // need to return left round bracket for proper parsing of expression with convertToReversePolish() func
-    // convertToReversePolish() will match both left and right round and checks if they are missed
     tokens.returnToken();
     ASTNode* condition = parseExpression();
-
     BlockStmtNode* body = parseBlockStmt();
 
     return createIfStmtNode(condition, body);
 }
 
-ForLoopNode* Parser::parseForLoop() {
-    // TODO: имплементировать For Loop
+ASTNode* Parser::parseForLoopInit() {
+    ASTNode* init;
 
-    return createForLoopNode();
+    const Token& currentToken = tokens.getNextToken();
+    switch (currentToken.Type) {
+        case TokenType::DeclareId: {
+            tokens.returnToken();
+            init = parseDeclVar();
+            break;
+        }
+        case TokenType::Id: {
+            const Token& nextOp = tokens.lookNextToken();
+            if (nextOp.Type != TokenType::SEMICOLON && nextOp.Type != TokenType::Assign) {
+                errorExpected("Identifier or variable declaration/assignment");
+            }
+            tokens.returnToken();
+            init = parseExpression();
+            break;
+        }
+        case TokenType::SEMICOLON: {
+            tokens.returnToken();
+            init = nullptr;
+            break;
+        }
+        default: {
+            errorExpected("Identifier or variable declaration/assignment");
+            throw;
+        }
+    }
+
+    return init;
+}
+
+ForLoopNode* Parser::parseForLoop() {
+    expect("for");
+    expect("(");
+
+    ASTNode* init = parseForLoopInit();
+    expect(";");
+
+    ASTNode* condition = parseExpression();
+    expect(";");
+
+    bool oldParenthesesControl = parenthesesControl;
+    parenthesesControl = true;
+    ASTNode* inc = parseExpression();
+    parenthesesControl = oldParenthesesControl;
+
+    BlockStmtNode* body = parseBlockStmt();
+
+    return createForLoopNode(init, condition, inc, body);
 }
 
 ASTNode* Parser::parseStatement() {
@@ -234,6 +277,7 @@ ASTNode* Parser::parseStatement() {
 
 ASTNode* Parser::parse(const TokenContainer& tokenizedSourceData) {
     tokens = tokenizedSourceData;
+    parenthesesControl = false;
 
     ASTNode* ast = parseStatement();
 
@@ -287,16 +331,20 @@ BlockStmtNode* Parser::createBlockStmtNode(const std::vector<ASTNode*> statement
     return node;
 }
 
-IfStmtNode* Parser::createIfStmtNode(ASTNode* condition, BlockStmtNode* statement) {
+IfStmtNode* Parser::createIfStmtNode(ASTNode* condition, BlockStmtNode* stmtList) {
     IfStmtNode* node = new IfStmtNode;
     node->condition = condition;
-    node->body = statement;
+    node->body = stmtList;
 
     return node;
 }
 
-ForLoopNode* Parser::createForLoopNode() {
+ForLoopNode* Parser::createForLoopNode(ASTNode* init, ASTNode* cond, ASTNode* inc, BlockStmtNode* stmtList) {
     ForLoopNode* node = new ForLoopNode;
+    node->init = init;
+    node->condition = cond;
+    node->inc = inc;
+    node->body = stmtList;
 
     return node;
 }
@@ -336,9 +384,13 @@ std::queue<Token> Parser::convertToReversePolish() {
     std::stack<Token> opStack;
     std::queue<Token> expr;
 
+    if (parenthesesControl) {
+        opStack.push(Token{TokenType::ROUND_BRACKET_START, "("});
+    }
+
     Token token;
     while ((token = tokens.getNextToken()).Type != TokenType::NL && token.Type != TokenType::CURLY_BRACKET_START &&
-           token.Type != TokenType::CURLY_BRACKET_END) {
+           token.Type != TokenType::CURLY_BRACKET_END && token.Type != TokenType::SEMICOLON) {
         if (token.Type == TokenType::Number || token.Type == TokenType::Bool || token.Type == TokenType::Id) {
             expr.push(token);
         } else if (isOperator(token)) {
@@ -405,7 +457,6 @@ std::queue<Token> Parser::convertToReversePolish() {
         if (topToken.Type == TokenType::ROUND_BRACKET_START) {
             errorExpected("Right Round Bracket");
         }
-
         expr.push(topToken);
     }
 
