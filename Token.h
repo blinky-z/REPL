@@ -13,7 +13,7 @@ namespace TokenType {
         DeclareId,
         DeclareFunc,
         IfStmt,
-        DeclareForLoop, // not implemented
+        ForLoopStmt, // not implemented
         Id,
         ROUND_BRACKET_START,
         ROUND_BRACKET_END,

@@ -214,7 +214,7 @@ ASTNode* Parser::parseStatement() {
             parseResult = parseDeclVar();
             break;
         }
-        case TokenType::DeclareForLoop: {
+        case TokenType::ForLoopStmt: {
             parseResult = parseForLoop();
             break;
         }
