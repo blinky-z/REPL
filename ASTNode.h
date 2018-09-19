@@ -234,6 +234,10 @@ struct IfStmtNode : ASTNode {
 };
 
 struct ForLoopNode : ASTNode {
+    ASTNode* init;
+    ASTNode* condition;
+    ASTNode* inc;
+    BlockStmtNode* body;
 
     ForLoopNode() {
         type = NodeType::ForLoop;
