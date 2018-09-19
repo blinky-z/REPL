@@ -334,13 +334,13 @@ std::queue<Token> Parser::convertToReversePolish() {
     };
 
     std::stack<Token> opStack;
-    std::queue<Token> reversePolishExpr;
+    std::queue<Token> expr;
 
     Token token;
     while ((token = tokens.getNextToken()).Type != TokenType::NL && token.Type != TokenType::CURLY_BRACKET_START &&
            token.Type != TokenType::CURLY_BRACKET_END) {
         if (token.Type == TokenType::Number || token.Type == TokenType::Bool || token.Type == TokenType::Id) {
-            reversePolishExpr.push(token);
+            expr.push(token);
         } else if (isOperator(token)) {
             const Token& curOp = token;
 
@@ -371,7 +371,7 @@ std::queue<Token> Parser::convertToReversePolish() {
                 // данный оператор должен ложиться наверх стека, не выталкивая со стека ничего, чтобы данный оператор
                 // был вычислен первее (ведь он будет вытолкнут со стека первее)
                 if (opPrecedence[curOp.Value] <= opPrecedence[topOp.Value]) {
-                    reversePolishExpr.push(opStack.top());
+                    expr.push(opStack.top());
                     opStack.pop();
                     continue;
                 }
@@ -384,7 +384,7 @@ std::queue<Token> Parser::convertToReversePolish() {
             Token topToken;
             while (!opStack.empty() && ((topToken = opStack.top()).Type != TokenType::ROUND_BRACKET_START)) {
                 opStack.pop();
-                reversePolishExpr.push(topToken);
+                expr.push(topToken);
             }
 
             if (topToken.Type == TokenType::ROUND_BRACKET_START) {
@@ -406,10 +406,10 @@ std::queue<Token> Parser::convertToReversePolish() {
             errorExpected("Right Round Bracket");
         }
 
-        reversePolishExpr.push(topToken);
+        expr.push(topToken);
     }
 
-    return reversePolishExpr;
+    return expr;
 }
 
 bool Parser::isOperator(const Token& token) {
