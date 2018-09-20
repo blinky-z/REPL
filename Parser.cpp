@@ -203,7 +203,7 @@ ASTNode* Parser::parseForLoopInit() {
         case TokenType::Id: {
             const Token& nextOp = tokens.lookNextToken();
             if (nextOp.Type != TokenType::SEMICOLON && nextOp.Type != TokenType::Assign) {
-                errorExpected("Identifier or variable declaration/assignment");
+                errorExpected("Variable declaration/assignment");
             }
             tokens.returnToken();
             init = parseExpression();
@@ -215,7 +215,7 @@ ASTNode* Parser::parseForLoopInit() {
             break;
         }
         default: {
-            errorExpected("Identifier or variable declaration/assignment");
+            errorExpected("Variable declaration/assignment");
             throw;
         }
     }
@@ -227,16 +227,32 @@ ForLoopNode* Parser::parseForLoop() {
     expect("for");
     expect("(");
 
-    ASTNode* init = parseForLoopInit();
+    ASTNode* init;
+    ASTNode* condition;
+    ASTNode* inc;
+
+    if (tokens.lookNextToken().Type != TokenType::SEMICOLON) {
+        init = parseForLoopInit();
+    } else {
+        init = nullptr;
+    }
     expect(";");
 
-    ASTNode* condition = parseExpression();
+    if (tokens.lookNextToken().Type != TokenType::SEMICOLON) {
+        condition = parseExpression();
+    } else {
+        condition = nullptr;
+    }
     expect(";");
 
-    bool oldParenthesesControl = parenthesesControl;
-    parenthesesControl = true;
-    ASTNode* inc = parseExpression();
-    parenthesesControl = oldParenthesesControl;
+    if (tokens.lookNextToken().Type != TokenType::SEMICOLON) {
+        bool oldParenthesesControl = parenthesesControl;
+        parenthesesControl = true;
+        inc = parseExpression();
+        parenthesesControl = oldParenthesesControl;
+    } else {
+        inc = nullptr;
+    }
 
     BlockStmtNode* body = parseBlockStmt();
 
