@@ -706,3 +706,45 @@ TEST_CASE("Tokenize simple if statement", "[Lexer]") {
 
     matchTokens(tokens, properTokens);
 }
+
+TEST_CASE("Tokenize simple for statement", "[Lexer]") {
+    std::string expr = "for (var i = 0; i < 10; i = i + 1) {\n"
+                       "a = a + 1\n"
+                       "}\n";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenType::ForLoopStmt, "for"});
+    properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_START, "("});
+    properTokens.emplace_back(Token{TokenType::DeclareId, "var"});
+    properTokens.emplace_back(Token{TokenType::Id, "i"});
+    properTokens.emplace_back(Token{TokenType::Assign, "="});
+    properTokens.emplace_back(Token{TokenType::Number, "0"});
+    properTokens.emplace_back(Token{TokenType::SEMICOLON, ";"});
+    properTokens.emplace_back(Token{TokenType::Id, "i"});
+    properTokens.emplace_back(Token{TokenType::LESS, "<"});
+    properTokens.emplace_back(Token{TokenType::Number, "10"});
+    properTokens.emplace_back(Token{TokenType::SEMICOLON, ";"});
+    properTokens.emplace_back(Token{TokenType::Id, "i"});
+    properTokens.emplace_back(Token{TokenType::Assign, "="});
+    properTokens.emplace_back(Token{TokenType::Id, "i"});
+    properTokens.emplace_back(Token{TokenType::Add, "+"});
+    properTokens.emplace_back(Token{TokenType::Number, "1"});
+    properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_END, ")"});
+    properTokens.emplace_back(Token{TokenType::CURLY_BRACKET_START, "{"});
+    properTokens.emplace_back(Token{TokenType::NL, "\n"});
+    properTokens.emplace_back(Token{TokenType::Id, "a"});
+    properTokens.emplace_back(Token{TokenType::Assign, "="});
+    properTokens.emplace_back(Token{TokenType::Id, "a"});
+    properTokens.emplace_back(Token{TokenType::Add, "+"});
+    properTokens.emplace_back(Token{TokenType::Number, "1"});
+    properTokens.emplace_back(Token{TokenType::NL, "\n"});
+    properTokens.emplace_back(Token{TokenType::CURLY_BRACKET_END, "}"});
+    properTokens.emplace_back(Token{TokenType::NL, "\n"});
+    properTokens.emplace_back(Token{TokenType::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}
