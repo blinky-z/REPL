@@ -180,8 +180,11 @@ IfStmtNode* Parser::parseIfStmt() {
     expect("if");
     expect("(");
 
-    tokens.returnToken();
+    bool oldParenthesesControl = parenthesesControl;
+    parenthesesControl = true;
     ASTNode* condition = parseExpression();
+    parenthesesControl = oldParenthesesControl;
+
     BlockStmtNode* body = parseBlockStmt();
 
     return createIfStmtNode(condition, body);
