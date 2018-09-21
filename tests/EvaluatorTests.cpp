@@ -913,7 +913,7 @@ TEST_CASE("Assign value to variable in outer scope", "[Evaluator]") {
     REQUIRE(result.getResultDouble() == 1);
 }
 
-TEST_CASE("Assert variable destroying after it goes out of scope", "[Evaluator]") {
+TEST_CASE("Assert variable destroying after it goes out of if statement scope", "[Evaluator]") {
     ExpressionHandler expressionHandler;
 
     std::string expr1 = "if (true) {"
@@ -928,15 +928,16 @@ TEST_CASE("Assert variable destroying after it goes out of scope", "[Evaluator]"
     REQUIRE(result.error.errorCode == EvalError::UNDECLARED_VAR);
 }
 
-TEST_CASE("Assert variable destroying after it goes out of scope inside another block scope", "[Evaluator]") {
+TEST_CASE("Assert variable destroying after it goes out of scope inside another if statement block scope",
+          "[Evaluator]") {
     ExpressionHandler expressionHandler;
 
     std::string expr = "if (true) {"
-                        "if (true) {"
-                        "var b = 400\n"
-                        "}\n"
-                        "b\n"
-                        "}";
+                       "if (true) {"
+                       "var b = 400\n"
+                       "}\n"
+                       "b\n"
+                       "}";
 
     EvalResult result = expressionHandler.handleExpression(expr);
 
@@ -944,4 +945,182 @@ TEST_CASE("Assert variable destroying after it goes out of scope inside another 
 
     REQUIRE(mainBlock[1].isError());
     REQUIRE(mainBlock[1].error.errorCode == EvalError::UNDECLARED_VAR);
+}
+
+TEST_CASE("Evaluate for statement declaring loop control variable in for initialization", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "for (var i = 0; i < 5; i = i + 1) {"
+                       "i\n"
+                       "}";
+
+    EvalResult result = expressionHandler.handleExpression(expr);
+    REQUIRE(result.getResultType() == ValueType::Compound);
+
+    const std::vector<EvalResult> blockResult = result.getResultBlock();
+    REQUIRE(blockResult.size() == 5);
+    REQUIRE(blockResult[0].getResultBlock()[0].getResultDouble() == 0.0);
+    REQUIRE(blockResult[1].getResultBlock()[0].getResultDouble() == 1);
+    REQUIRE(blockResult[2].getResultBlock()[0].getResultDouble() == 2);
+    REQUIRE(blockResult[3].getResultBlock()[0].getResultDouble() == 3);
+    REQUIRE(blockResult[4].getResultBlock()[0].getResultDouble() == 4);
+}
+
+TEST_CASE("Evaluate for statement declaring loop control variable out of for initialization", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "var i = 0";
+    std::string expr2 = "for (; i < 5; i = i + 1) {"
+                        "i\n"
+                        "}";
+
+    expressionHandler.handleExpression(expr1);
+
+    EvalResult result = expressionHandler.handleExpression(expr2);
+    REQUIRE(result.getResultType() == ValueType::Compound);
+
+    const std::vector<EvalResult> blockResult = result.getResultBlock();
+    REQUIRE(blockResult.size() == 5);
+    REQUIRE(blockResult[0].getResultBlock()[0].getResultDouble() == 0.0);
+    REQUIRE(blockResult[1].getResultBlock()[0].getResultDouble() == 1);
+    REQUIRE(blockResult[2].getResultBlock()[0].getResultDouble() == 2);
+    REQUIRE(blockResult[3].getResultBlock()[0].getResultDouble() == 3);
+    REQUIRE(blockResult[4].getResultBlock()[0].getResultDouble() == 4);
+}
+
+TEST_CASE("Evaluate for statement declaring loop control variable out of for initialization but assign in it",
+          "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "var i";
+    std::string expr2 = "for (i = 0; i < 5; i = i + 1) {"
+                        "i\n"
+                        "}";
+
+    expressionHandler.handleExpression(expr1);
+
+    EvalResult result = expressionHandler.handleExpression(expr2);
+    REQUIRE(result.getResultType() == ValueType::Compound);
+
+    const std::vector<EvalResult> blockResult = result.getResultBlock();
+    REQUIRE(blockResult.size() == 5);
+    REQUIRE(blockResult[0].getResultBlock()[0].getResultDouble() == 0.0);
+    REQUIRE(blockResult[1].getResultBlock()[0].getResultDouble() == 1);
+    REQUIRE(blockResult[2].getResultBlock()[0].getResultDouble() == 2);
+    REQUIRE(blockResult[3].getResultBlock()[0].getResultDouble() == 3);
+    REQUIRE(blockResult[4].getResultBlock()[0].getResultDouble() == 4);
+}
+
+TEST_CASE("Evaluate empty for block statement", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "for (var i = 0; i < 5; i = i + 1) {}";
+
+    EvalResult result = expressionHandler.handleExpression(expr);
+    const std::vector<EvalResult> blockResult = result.getResultBlock();
+    REQUIRE(blockResult.size() == 5);
+    REQUIRE(blockResult[0].getResultBlock().size() == 0);
+    REQUIRE(blockResult[1].getResultBlock().size() == 0);
+    REQUIRE(blockResult[2].getResultBlock().size() == 0);
+    REQUIRE(blockResult[3].getResultBlock().size() == 0);
+    REQUIRE(blockResult[4].getResultBlock().size() == 0);
+}
+
+TEST_CASE("Assert using of local loop control variable in for statement but not variable in out of scope",
+          "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "var i = 10";
+    std::string expr = "for (var i = -5; i < 0; i = i + 1) {"
+                       "i\n"
+                       "}";
+
+    EvalResult result = expressionHandler.handleExpression(expr);
+    REQUIRE(result.getResultType() == ValueType::Compound);
+
+    const std::vector<EvalResult> blockResult = result.getResultBlock();
+    REQUIRE(blockResult.size() == 5);
+    REQUIRE(blockResult[0].getResultBlock()[0].getResultDouble() == -5);
+    REQUIRE(blockResult[1].getResultBlock()[0].getResultDouble() == -4);
+    REQUIRE(blockResult[2].getResultBlock()[0].getResultDouble() == -3);
+    REQUIRE(blockResult[3].getResultBlock()[0].getResultDouble() == -2);
+    REQUIRE(blockResult[4].getResultBlock()[0].getResultDouble() == -1);
+}
+
+TEST_CASE("Evaluate for statement inside another for statement", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "for (var i = 55; i < 56; i = i + 1) {"
+                       "i\n"
+                       "for (var i = 100; i < 101; i = i + 1) {"
+                       "i\n"
+                       "}\n"
+                       "}";
+
+    EvalResult result = expressionHandler.handleExpression(expr);
+    REQUIRE(result.getResultType() == ValueType::Compound);
+
+    const std::vector<EvalResult> blockResult = result.getResultBlock();
+    REQUIRE(blockResult[0].getResultBlock().size() == 2);
+    REQUIRE(blockResult[0].getResultBlock()[0].getResultType() == ValueType::Number);
+    REQUIRE(blockResult[0].getResultBlock()[0].getResultDouble() == 55);
+    REQUIRE(blockResult[0].getResultBlock()[1].getResultType() == ValueType::Compound);
+    REQUIRE(blockResult[0].getResultBlock()[1].getResultBlock()[0].getResultBlock()[0].getResultType() ==
+            ValueType::Number);
+    REQUIRE(blockResult[0].getResultBlock()[1].getResultBlock()[0].getResultBlock()[0].getResultDouble() == 100);
+}
+
+TEST_CASE("Get error on using of undeclared loop control variable in for initialization", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "for (i = 0; i < 5; i = i + 1) {}";
+
+    EvalResult result = expressionHandler.handleExpression(expr);
+    REQUIRE(result.error.errorCode == EvalError::UNDECLARED_VAR);
+}
+
+TEST_CASE("Get error on using of undeclared loop control variable in for condition", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "for (; i < 5; i = i + 1) {}";
+
+    EvalResult result = expressionHandler.handleExpression(expr);
+    REQUIRE(result.error.errorCode == EvalError::UNDECLARED_VAR);
+}
+
+TEST_CASE("Get error on using of undeclared loop control variable in for increase", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "for (; ; i = i + 1) {}";
+
+    EvalResult result = expressionHandler.handleExpression(expr);
+    REQUIRE(result.error.errorCode == EvalError::UNDECLARED_VAR);
+}
+
+TEST_CASE("Assert loop control variable declared in initialization destroying after it goes out of for statement scope",
+          "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "for (i = 0; i < 5; i = i + 1) {}";
+    std::string expr2 = "i";
+
+    expressionHandler.handleExpression(expr1);
+
+    EvalResult result = expressionHandler.handleExpression(expr2);
+    REQUIRE(result.error.errorCode == EvalError::UNDECLARED_VAR);
+}
+
+TEST_CASE("Assert variable declared in block statement destroying after it goes out of for statement scope",
+          "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "for (var i = 0; i < 1; i = i + 1) {"
+                        "var a = 10\n"
+                        "}";
+    std::string expr2 = "a";
+
+    expressionHandler.handleExpression(expr1);
+
+    EvalResult result = expressionHandler.handleExpression(expr2);
+    REQUIRE(result.error.errorCode == EvalError::UNDECLARED_VAR);
 }
