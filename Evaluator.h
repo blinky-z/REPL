@@ -29,7 +29,11 @@ private:
 
     EvalResult EvaluateComparison(BinOpNode* subtree);
 
+    EvalResult EvaluateBlockStmt(BlockStmtNode* subtree);
+
     EvalResult EvaluateIfStmt(IfStmtNode* subtree);
+
+    EvalResult EvaluateForLoopStmt(ForLoopNode* subtree);
 
     double EvaluateIdDouble(Scope* scope, IdentifierNode* id);
 

@@ -344,6 +344,20 @@ EvalResult Evaluator::EvaluateComparison(BinOpNode* subtree) {
     return result;
 }
 
+EvalResult Evaluator::EvaluateBlockStmt(BlockStmtNode* subtree) {
+    EvalResult result;
+
+    std::vector<EvalResult> stmtResults;
+
+    for (auto currentStatement : subtree->stmtList) {
+        stmtResults.emplace_back(Evaluate(currentStatement));
+    }
+
+    result.setBlockResult(stmtResults);
+
+    return result;
+}
+
 EvalResult Evaluator::EvaluateIfStmt(IfStmtNode* subtree) {
     EvalResult result;
 
@@ -355,15 +369,49 @@ EvalResult Evaluator::EvaluateIfStmt(IfStmtNode* subtree) {
 
     openScope();
 
-    std::vector<EvalResult> blockStmtResults;
-    BlockStmtNode* blockStmt = subtree->body;
     if (conditionResult.getResultBool()) {
-        for (auto currentStatement : blockStmt->stmtList) {
-            blockStmtResults.emplace_back(Evaluate(currentStatement));
+        result = EvaluateBlockStmt(subtree->body);
+    } else {
+        result.setBlockResult(std::vector<EvalResult>{});
+    }
+
+    closeScope();
+
+    return result;
+}
+
+EvalResult Evaluator::EvaluateForLoopStmt(ForLoopNode* subtree) {
+    EvalResult result;
+
+    openScope();
+
+    if (subtree->init != nullptr) {
+        const EvalResult& initResult = Evaluate(subtree->init);
+        if (initResult.isError()) {
+            return initResult;
         }
     }
-    result.setBlockResult(blockStmtResults);
 
+    std::vector<EvalResult> blockStmtResults;
+
+    EvalResult conditionResult;
+    while (subtree->condition == nullptr ||
+           (!(conditionResult = EvaluateBoolExpr(subtree->condition)).isError() && conditionResult.getResultBool())) {
+        EvalResult currentBlockResult = EvaluateBlockStmt(subtree->body);
+        blockStmtResults.emplace_back(currentBlockResult);
+
+        if (subtree->inc != nullptr) {
+            const EvalResult& increaseResult = Evaluate(subtree->inc);
+            if (increaseResult.isError()) {
+                return increaseResult;
+            }
+        }
+    }
+    if (subtree->condition != nullptr && conditionResult.isError()) {
+        return conditionResult;
+    }
+
+    result.setBlockResult(blockStmtResults);
     closeScope();
 
     return result;
@@ -461,6 +509,14 @@ EvalResult Evaluator::Evaluate(ASTNode* root) {
             result = EvaluateIfStmt(node);
         } else {
             result.error = newError(EvalError::INVALID_AST, "Invalid If Statement Node");
+        }
+    } else if (root->type == NodeType::ForLoop) {
+        ForLoopNode* node = dynamic_cast<ForLoopNode*>(root);
+
+        if (node != nullptr) {
+            result = EvaluateForLoopStmt(node);
+        } else {
+            result.error = newError(EvalError::INVALID_AST, "Invalid For Loop Statement Node");
         }
     } else {
         result.error = newError(EvalError::INVALID_AST);
