@@ -203,7 +203,7 @@ ASTNode* Parser::parseForLoopInit() {
         case TokenType::Id: {
             const Token& nextOp = tokens.lookNextToken();
             if (nextOp.Type != TokenType::SEMICOLON && nextOp.Type != TokenType::Assign) {
-                errorExpected("Variable declaration/assignment");
+                errorExpected("Variable declaration/assignment or empty initialization");
             }
             tokens.returnToken();
             init = parseExpression();
@@ -215,7 +215,7 @@ ASTNode* Parser::parseForLoopInit() {
             break;
         }
         default: {
-            errorExpected("Variable declaration/assignment");
+            errorExpected("Variable declaration/assignment or empty initialization");
             throw;
         }
     }
@@ -245,12 +245,13 @@ ForLoopNode* Parser::parseForLoop() {
     }
     expect(";");
 
-    if (tokens.lookNextToken().Type != TokenType::SEMICOLON) {
+    if (tokens.lookNextToken().Type != TokenType::ROUND_BRACKET_END) {
         bool oldParenthesesControl = parenthesesControl;
         parenthesesControl = true;
         inc = parseExpression();
         parenthesesControl = oldParenthesesControl;
     } else {
+        tokens.getNextToken();
         inc = nullptr;
     }
 
