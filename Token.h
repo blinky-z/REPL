@@ -9,11 +9,10 @@ namespace TokenType {
         NL,
         Number,
         Bool,
-        String,
         DeclareId,
         DeclareFunc,
         IfStmt,
-        ForLoopStmt, // not implemented
+        ForLoopStmt,
         Id,
         ROUND_BRACKET_START,
         ROUND_BRACKET_END,
@@ -29,10 +28,7 @@ namespace TokenType {
         Sub,
         Mul,
         Div,
-        Mod, // not implemented
         UnaryMinus,
-        Inc, // not implemented
-        Dec, // not implemented
         BoolAND,
         BoolOR,
         Equal
