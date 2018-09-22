@@ -47,6 +47,8 @@ struct TypesStringNames {
         nodeTypeStringNames[NodeType::NumberValue] = "Number";
         nodeTypeStringNames[NodeType::BoolValue] = "Bool";
         nodeTypeStringNames[NodeType::IfStmt] = "If Statement";
+        nodeTypeStringNames[NodeType::ForLoop] = "For loop Statement";
+        nodeTypeStringNames[NodeType::CompoundStmt] = "Compound Statement";
 
         binOpTypeStringNames[BinOpType::OperatorAssign] = "Operator Assign";
         binOpTypeStringNames[BinOpType::OperatorPlus] = "Operator Plus";
