@@ -31,22 +31,10 @@ const TokenContainer Lexer::tokenize(const std::string& src) {
                 token.Value = "=";
             }
         } else if (*currentChar == '+') {
-            if (*(currentChar + 1) == '+') {
-                currentChar++;
-
-                token.Type = TokenType::Inc;
-                token.Value = "++";
-            } else {
-                token.Type = TokenType::Add;
-                token.Value = "+";
-            }
+            token.Type = TokenType::Add;
+            token.Value = "+";
         } else if (*currentChar == '-') {
-            if (*(currentChar + 1) == '-') {
-                currentChar++;
-
-                token.Type = TokenType::Dec;
-                token.Value = "--";
-            } else if (tokens.size() == 0) {
+            if (tokens.size() == 0) {
                 token.Type = TokenType::UnaryMinus;
                 token.Value = "u-";
             } else {
@@ -70,9 +58,6 @@ const TokenContainer Lexer::tokenize(const std::string& src) {
         } else if (*currentChar == '/') {
             token.Type = TokenType::Div;
             token.Value = "/";
-        } else if (*currentChar == '%') {
-            token.Type = TokenType::Mod;
-            token.Value = "%";
         } else if (*currentChar == '&' && *(currentChar + 1) == '&') {
             token.Type = TokenType::BoolAND;
             token.Value = "&&";
