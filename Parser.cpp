@@ -202,8 +202,8 @@ ASTNode* Parser::parseForLoopInit() {
         }
         case TokenType::Id: {
             const Token& nextOp = tokens.lookNextToken();
-            if (nextOp.Type != TokenType::SEMICOLON && nextOp.Type != TokenType::Assign) {
-                errorExpected("Variable declaration/assignment or empty initialization");
+            if (nextOp.Type != TokenType::Assign) {
+                throw std::runtime_error("Invalid for loop initialization expression");
             }
             tokens.returnToken();
             init = parseExpression();
