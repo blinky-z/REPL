@@ -102,7 +102,7 @@ struct BinOpNode : ASTNode {
 
         std::cout << std::endl;
         std::cout << "[Type]: " << typeString.nodeTypeStringNames[type] << std::endl
-                  << "[Binary operation type]: " << typeString.binOpTypeStringNames[binOpType] << std::endl
+                  << "[Binary operator]: " << typeString.binOpTypeStringNames[binOpType] << std::endl
                   << "[Left value info]: " << std::endl;
         left->print();
         std::cout << "[Right value info]: " << std::endl;
@@ -207,8 +207,12 @@ struct BlockStmtNode : ASTNode {
         std::cout << std::endl;
         std::cout << "[Type]: " << typeString.nodeTypeStringNames[type] << std::endl;
         std::cout << "Statements:" << std::endl;
-        for (const auto& currentStmt : stmtList) {
-            currentStmt->print();
+        if (!stmtList.empty()) {
+            for (const auto& currentStmt : stmtList) {
+                currentStmt->print();
+            }
+        } else {
+            std::cout << "Empty body" << std::endl;
         }
         std::cout << std::endl;
     }
@@ -231,6 +235,8 @@ struct IfStmtNode : ASTNode {
         std::cout << "[Type]: " << typeString.nodeTypeStringNames[type] << std::endl;
         std::cout << "Condition: " << std::endl;
         condition->print();
+        std::cout << "Body: " << std::endl;
+        body->print();
         std::cout << std::endl;
     }
 };
@@ -246,7 +252,25 @@ struct ForLoopNode : ASTNode {
     }
 
     void print() override {
+        TypesStringNames typeString;
 
+        std::cout << std::endl;
+        std::cout << "[Type]: " << typeString.nodeTypeStringNames[type] << std::endl;
+        std::cout << "Initialization expression: " << std::endl;
+        if (init != nullptr) {
+            init->print();
+        } else {
+            std::cout << "Empty expr" << std::endl;
+        }
+        std::cout << "Condition: " << std::endl;
+        if (condition != nullptr) {
+            condition->print();
+        } else {
+            std::cout << "Empty expr" << std::endl;
+        }
+        std::cout << "Body: " << std::endl;
+        body->print();
+        std::cout << std::endl;
     }
 };
 
