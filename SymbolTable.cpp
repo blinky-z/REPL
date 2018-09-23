@@ -1,4 +1,5 @@
 #include "SymbolTable.h"
+#include "ASTNode.h"
 
 bool SymbolTable::isIdExist(const std::string& identifierName) const {
     return symbolTable.find(identifierName) != symbolTable.end();
@@ -42,4 +43,24 @@ bool SymbolTable::getIdValueBool(const std::string& identifierName) const {
 
 ValueType::Type SymbolTable::getIdValueType(const std::string& identifierName) const {
     return symbolTable.at(identifierName).Type;
+}
+
+void SymbolTable::addNewFunc(DeclFuncNode* funcDecl) {
+    Function function;
+    function.argsSize = funcDecl->argsSize;
+
+    for (const auto& currentId : funcDecl->args) {
+        function.args.emplace_back(currentId->name);
+    }
+    function.body = funcDecl->body;
+
+    funcSymbolTable.emplace(funcDecl->name, function);
+}
+
+Function SymbolTable::getFunc(const std::string funcName) const {
+    return funcSymbolTable.at(funcName);
+}
+
+bool SymbolTable::isFuncExist(const std::string funcName) {
+    return funcSymbolTable.find(funcName) != funcSymbolTable.end();
 }

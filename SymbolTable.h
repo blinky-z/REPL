@@ -2,11 +2,15 @@
 #define REPL_SYMBOLTABLE_H
 
 #include <unordered_map>
+#include "ASTNode.h"
 #include "Identifier.h"
+#include "Function.h"
 
 class SymbolTable {
 private:
     std::unordered_map<std::string, Identifier> symbolTable;
+
+    std::unordered_map<std::string, Function> funcSymbolTable;
 public:
     bool isIdExist(const std::string& identifierName) const;
 
@@ -21,6 +25,12 @@ public:
     bool getIdValueBool(const std::string& identifierName) const;
 
     ValueType::Type getIdValueType(const std::string& identifierName) const;
+
+    void addNewFunc(DeclFuncNode* funcDecl);
+
+    Function getFunc(const std::string funcName) const;
+
+    bool isFuncExist(const std::string funcName);
 };
 
 
