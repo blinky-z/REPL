@@ -18,7 +18,11 @@ public:
         UNINITIALIZED_VAR,
         INVALID_OPERATION,
         INVALID_VALUE_TYPE,
-        VAR_REDEFINITION
+        VAR_REDEFINITION,
+        FUNC_REDEFINITION,
+        FUNC_DEFINITION_IS_NOT_ALLOWED,
+        UNDECLARED_FUNC,
+        NO_MATCHING_FUNC
     };
 
     const std::string& what() const;

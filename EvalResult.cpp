@@ -55,6 +55,10 @@ const std::string& EvalError::what() const {
     errorMessage[INVALID_OPERATION] = "Invalid Operation";
     errorMessage[INVALID_VALUE_TYPE] = "Invalid value type";
     errorMessage[VAR_REDEFINITION] = "Variable Redefinition";
+    errorMessage[FUNC_REDEFINITION] = "Function Redefinition";
+    errorMessage[FUNC_DEFINITION_IS_NOT_ALLOWED] = "Function definition is not allowed here";
+    errorMessage[UNDECLARED_FUNC] = "Use of undeclared function";
+    errorMessage[NO_MATCHING_FUNC] = "No matching function to call";
     errorMessage[null] = "No Error";
 
     if (message.empty()) {
