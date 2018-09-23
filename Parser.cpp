@@ -161,6 +161,96 @@ IdentifierNode* Parser::parseIdentifier() {
     return createIdentifierNode(token.Value);
 }
 
+std::string Parser::parseFuncName() {
+    const Token& token = tokens.getNextToken();
+
+    if (token.Type != TokenType::FuncCall) {
+        errorExpected("Function name", token);
+    }
+    return token.Value;
+}
+
+std::vector<IdentifierNode*> Parser::parseDeclFuncParams() {
+    std::vector<IdentifierNode*> args;
+
+    Token nextToken;
+    while ((nextToken = tokens.lookNextToken()).Type != TokenType::ROUND_BRACKET_END &&
+           nextToken.Type != TokenType::eof && nextToken.Type != TokenType::NL) {
+        expect("var");
+        IdentifierNode* id = parseIdentifier();
+        args.emplace_back(id);
+        if (tokens.lookNextToken().Type != TokenType::ROUND_BRACKET_END) {
+            expect(",");
+        }
+    }
+
+    return args;
+}
+
+std::vector<ASTNode*> Parser::parseFuncCallParams() {
+    std::vector<ASTNode*> args;
+
+    Token nextToken;
+    while ((nextToken = tokens.lookNextToken()).Type != TokenType::ROUND_BRACKET_END &&
+           nextToken.Type != TokenType::eof && nextToken.Type != TokenType::NL) {
+        ASTNode* arg = parseExpression();
+        if (arg->type != NodeType::NumberValue && arg->type != NodeType::BoolValue && arg->type != NodeType::Id &&
+            arg->type != NodeType::BinOp) {
+            throw std::runtime_error("Invalid parameter");
+        }
+        if (arg->type == NodeType::BinOp) {
+            BinOpNode* binOpNode = static_cast<BinOpNode*>(arg);
+            if (binOpNode->binOpType != BinOpType::OperatorPlus &&
+                binOpNode->binOpType != BinOpType::OperatorMinus &&
+                binOpNode->binOpType != BinOpType::OperatorMul &&
+                binOpNode->binOpType != BinOpType::OperatorDiv &&
+                binOpNode->binOpType != BinOpType::OperatorEqual &&
+                binOpNode->binOpType != BinOpType::OperatorBoolAND &&
+                binOpNode->binOpType != BinOpType::OperatorBoolOR &&
+                binOpNode->binOpType != BinOpType::OperatorLess &&
+                binOpNode->binOpType != BinOpType::OperatorGreater) {
+                throw std::runtime_error("Invalid parameter");
+            }
+        }
+
+        args.emplace_back(arg);
+        if (tokens.lookNextToken().Type != TokenType::ROUND_BRACKET_END) {
+            expect(",");
+        }
+    }
+
+
+    return args;
+}
+
+FuncCallNode* Parser::parseFuncCall() {
+    const std::string name = parseFuncName();
+    expect("(");
+
+    bool oldParenthesesControl = parenthesesControl;
+    parenthesesControl = true;
+
+    const std::vector<ASTNode*> args = parseFuncCallParams();
+
+    parenthesesControl = oldParenthesesControl;
+
+    expect(")");
+
+    return createFuncCallNode(name, args);
+}
+
+DeclFuncNode* Parser::parseDeclFunc() {
+    expect("func");
+    const std::string& funcName = parseFuncName();
+    expect("(");
+    const std::vector<IdentifierNode*>& args = parseDeclFuncParams();
+    expect(")");
+
+    BlockStmtNode* body = parseBlockStmt();
+
+    return createDeclFuncNode(funcName, args, body);
+}
+
 BlockStmtNode* Parser::parseBlockStmt() {
     expect("{");
 
@@ -184,6 +274,8 @@ IfStmtNode* Parser::parseIfStmt() {
     parenthesesControl = true;
     ASTNode* condition = parseExpression();
     parenthesesControl = oldParenthesesControl;
+
+    expect(")");
 
     BlockStmtNode* body = parseBlockStmt();
 
@@ -251,9 +343,10 @@ ForLoopNode* Parser::parseForLoop() {
         inc = parseExpression();
         parenthesesControl = oldParenthesesControl;
     } else {
-        tokens.getNextToken();
         inc = nullptr;
     }
+
+    expect(")");
 
     BlockStmtNode* body = parseBlockStmt();
 
@@ -283,6 +376,14 @@ ASTNode* Parser::parseStatement() {
         }
         case TokenType::IfStmt: {
             parseResult = parseIfStmt();
+            break;
+        }
+        case TokenType::DeclareFunc: {
+            parseResult = parseDeclFunc();
+            break;
+        }
+        case TokenType::FuncCall: {
+            parseResult = parseFuncCall();
             break;
         }
         default: {
@@ -332,6 +433,26 @@ BoolNode* Parser::createBoolNode(bool value) {
 IdentifierNode* Parser::createIdentifierNode(std::string name) {
     IdentifierNode* node = new IdentifierNode;
     node->name = name;
+
+    return node;
+}
+
+FuncCallNode* Parser::createFuncCallNode(const std::string name, std::vector<ASTNode*> args) {
+    FuncCallNode* node = new FuncCallNode;
+    node->name = name;
+    node->args = args;
+    node->argsSize = args.size();
+
+    return node;
+}
+
+DeclFuncNode* Parser::createDeclFuncNode(
+        const std::string name, std::vector<IdentifierNode*> args, BlockStmtNode* body) {
+    DeclFuncNode* node = new DeclFuncNode;
+    node->name = name;
+    node->args = args;
+    node->argsSize = args.size();
+    node->body = body;
 
     return node;
 }
@@ -404,13 +525,10 @@ std::queue<Token> Parser::convertToReversePolish() {
     std::stack<Token> opStack;
     std::queue<Token> expr;
 
-    if (parenthesesControl) {
-        opStack.push(Token{TokenType::ROUND_BRACKET_START, "("});
-    }
-
     Token token;
     while ((token = tokens.getNextToken()).Type != TokenType::NL && token.Type != TokenType::CURLY_BRACKET_START &&
-           token.Type != TokenType::CURLY_BRACKET_END && token.Type != TokenType::SEMICOLON) {
+           token.Type != TokenType::CURLY_BRACKET_END && token.Type != TokenType::SEMICOLON &&
+           token.Type != TokenType::Comma) {
         if (token.Type == TokenType::Number || token.Type == TokenType::Bool || token.Type == TokenType::Id) {
             expr.push(token);
         } else if (isOperator(token)) {
@@ -438,7 +556,11 @@ std::queue<Token> Parser::convertToReversePolish() {
             if (topToken.Type == TokenType::ROUND_BRACKET_START) {
                 opStack.pop(); // remove left bracket
             } else {
-                errorExpected("Left Round Bracket");
+                if (parenthesesControl) {
+                    break;
+                } else {
+                    errorExpected("Left Round Bracket");
+                }
             }
         } else {
             throw std::runtime_error("Unexpected token: " + token.Value);

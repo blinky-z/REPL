@@ -24,6 +24,10 @@ private:
 
     IdentifierNode* createIdentifierNode(std::string name);
 
+    FuncCallNode* createFuncCallNode(const std::string name, std::vector<ASTNode*> args);
+
+    DeclFuncNode* createDeclFuncNode(const std::string name, std::vector<IdentifierNode*> args, BlockStmtNode* body);
+
     DeclVarNode* createDeclVarNode(IdentifierNode* id, ASTNode* expr);
 
     BlockStmtNode* createBlockStmtNode(const std::vector<ASTNode*> statements);
@@ -41,6 +45,16 @@ private:
     DeclVarNode* parseDeclVar();
 
     IdentifierNode* parseIdentifier();
+
+    std::string parseFuncName();
+
+    std::vector<IdentifierNode*> parseDeclFuncParams();
+
+    DeclFuncNode* parseDeclFunc();
+
+    std::vector<ASTNode*> parseFuncCallParams();
+
+    FuncCallNode* parseFuncCall();
 
     BlockStmtNode* parseBlockStmt();
 
