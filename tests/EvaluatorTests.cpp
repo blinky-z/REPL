@@ -1124,3 +1124,395 @@ TEST_CASE("Assert variable declared in block statement destroying after it goes 
     EvalResult result = expressionHandler.handleExpression(expr2);
     REQUIRE(result.error.errorCode == EvalError::UNDECLARED_VAR);
 }
+
+TEST_CASE("Evaluate simple print function [0]. Pass call param that have similar name with decl param", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func print(var a) {"
+                        "a\n"
+                        "}";
+    std::string expr2 = "var a = 10";
+    std::string expr3 = "print(a)";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+
+    EvalResult result = expressionHandler.handleExpression(expr3);
+    REQUIRE(result.getResultType() == ValueType::Compound);
+
+    const auto& funcResult = result.getResultBlock();
+
+    REQUIRE(funcResult[0].getResultType() == ValueType::Number);
+    REQUIRE(funcResult[0].getResultDouble() == 10);
+}
+
+TEST_CASE("Evaluate simple print function [1]. Pass call param that have non similar name with decl param",
+          "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func print(var a) {"
+                        "a\n"
+                        "}";
+    std::string expr2 = "var b = 10";
+    std::string expr3 = "print(b)";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+
+    EvalResult result = expressionHandler.handleExpression(expr3);
+    REQUIRE(result.getResultType() == ValueType::Compound);
+
+    const auto& funcResult = result.getResultBlock();
+    REQUIRE(funcResult[0].getResultType() == ValueType::Number);
+    REQUIRE(funcResult[0].getResultDouble() == 10);
+}
+
+TEST_CASE("Evaluate simple print function [2]. Call function that have similar name with variable", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func a(var b) {"
+                        "b\n"
+                        "}";
+    std::string expr2 = "var a = 10";
+    std::string expr3 = "a(a)";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+
+    EvalResult result = expressionHandler.handleExpression(expr3);
+    REQUIRE(result.getResultType() == ValueType::Compound);
+
+    const auto& funcResult = result.getResultBlock();
+    REQUIRE(funcResult[0].getResultType() == ValueType::Number);
+    REQUIRE(funcResult[0].getResultDouble() == 10);
+}
+
+TEST_CASE("Pass multiple parameters to function", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func mul(var n, var m) {"
+                        "n * m\n"
+                        "}";
+    std::string expr2 = "var a = 10";
+    std::string expr3 = "var b = 50";
+    std::string expr4 = "mul(a, b)";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+    expressionHandler.handleExpression(expr3);
+
+    EvalResult result = expressionHandler.handleExpression(expr4);
+    REQUIRE(result.getResultType() == ValueType::Compound);
+
+    const auto& funcResult = result.getResultBlock();
+    REQUIRE(funcResult[0].getResultType() == ValueType::Number);
+    REQUIRE(funcResult[0].getResultDouble() == 10 * 50);
+}
+
+TEST_CASE("Get error on passing not enough params to function", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func mul(var n, var m) {"
+                        "n * m\n"
+                        "}";
+    std::string expr2 = "var a = 10";
+    std::string expr3 = "mul(a)";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+
+    EvalResult result = expressionHandler.handleExpression(expr3);
+    REQUIRE(result.error.errorCode == EvalError::NO_MATCHING_FUNC);
+}
+
+TEST_CASE("Get error on passing too many params to function", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func mul(var n, var m) {"
+                        "n * m\n"
+                        "}";
+    std::string expr2 = "var a = 10";
+    std::string expr3 = "var b = 50";
+    std::string expr4 = "var c = 100";
+    std::string expr5 = "mul(a, b, c)";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+    expressionHandler.handleExpression(expr3);
+    expressionHandler.handleExpression(expr4);
+
+    EvalResult result = expressionHandler.handleExpression(expr5);
+    REQUIRE(result.error.errorCode == EvalError::NO_MATCHING_FUNC);
+}
+
+TEST_CASE("Get error on passing undeclared variable to function", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func mul(var n, var m) {"
+                        "n * m\n"
+                        "}";
+    std::string expr2 = "var a = 10";
+    std::string expr3 = "mul(a, b)";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+
+    EvalResult result = expressionHandler.handleExpression(expr3);
+    result.error.what();
+    REQUIRE(result.error.errorCode == EvalError::UNDECLARED_VAR);
+}
+
+TEST_CASE("Use variable declared in global scope in function", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func add() {"
+                        "a + b\n"
+                        "}";
+    std::string expr2 = "var a = 10";
+    std::string expr3 = "var b = 50";
+    std::string expr4 = "add()";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+    expressionHandler.handleExpression(expr3);
+
+    EvalResult result = expressionHandler.handleExpression(expr4);
+    REQUIRE(result.getResultType() == ValueType::Compound);
+
+    const auto& funcResult = result.getResultBlock();
+    REQUIRE(funcResult[0].getResultType() == ValueType::Number);
+    REQUIRE(funcResult[0].getResultDouble() == 10 + 50);
+}
+
+TEST_CASE("Pass rvalue to function [0]. Pass number value", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func print(var a) {"
+                        "a\n"
+                        "}";
+    std::string expr2 = "print(5)";
+
+    expressionHandler.handleExpression(expr1);
+
+    EvalResult result = expressionHandler.handleExpression(expr2);
+
+    const auto& blockResult = result.getResultBlock();
+    REQUIRE(blockResult[0].getResultType() == ValueType::Number);
+    REQUIRE(blockResult[0].getResultDouble() == 5);
+}
+
+TEST_CASE("Pass rvalue to function [1]. Pass bool value", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func print(var a) {"
+                        "a\n"
+                        "}";
+    std::string expr2 = "print(true)";
+
+    expressionHandler.handleExpression(expr1);
+
+    EvalResult result = expressionHandler.handleExpression(expr2);
+
+    const auto& blockResult = result.getResultBlock();
+    REQUIRE(blockResult[0].getResultType() == ValueType::Bool);
+    REQUIRE(blockResult[0].getResultBool() == true);
+}
+
+TEST_CASE("Pass rvalue to function [1]. Pass multiple values", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func print(var a, var b) {"
+                        "a\n"
+                        "b\n"
+                        "}";
+    std::string expr2 = "print(10, false)";
+
+    expressionHandler.handleExpression(expr1);
+
+    EvalResult result = expressionHandler.handleExpression(expr2);
+
+    const auto& blockResult = result.getResultBlock();
+    REQUIRE(blockResult[0].getResultType() == ValueType::Number);
+    REQUIRE(blockResult[0].getResultDouble() == 10);
+    REQUIRE(blockResult[1].getResultType() == ValueType::Bool);
+    REQUIRE(blockResult[1].getResultBool() == false);
+}
+
+TEST_CASE("Pass math expression to function", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func print(var a) {"
+                        "a\n"
+                        "}";
+    std::string expr2 = "print(100 * 500)";
+
+    expressionHandler.handleExpression(expr1);
+
+    EvalResult result = expressionHandler.handleExpression(expr2);
+
+    const auto& blockResult = result.getResultBlock();
+    REQUIRE(blockResult[0].getResultType() == ValueType::Number);
+    REQUIRE(blockResult[0].getResultDouble() == 100 * 500);
+}
+
+TEST_CASE("Pass bool expression to function", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func print(var a) {"
+                        "a\n"
+                        "}";
+    std::string expr2 = "var a = true";
+    std::string expr3 = "var b = false";
+    std::string expr4 = "print(a || b)";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+    expressionHandler.handleExpression(expr3);
+
+    EvalResult result = expressionHandler.handleExpression(expr4);
+
+    const auto& blockResult = result.getResultBlock();
+    REQUIRE(blockResult[0].getResultType() == ValueType::Bool);
+    REQUIRE(blockResult[0].getResultBool() == true);
+}
+
+TEST_CASE("Assert that function declaration allowed only in global scope [0]. Declare func in if statement",
+          "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "if (true) {"
+                        "func add() {"
+                        "a + b\n"
+                        "}\n"
+                        "}";
+
+    EvalResult result = expressionHandler.handleExpression(expr1);
+
+    const auto& blockResult = result.getResultBlock();
+    REQUIRE(blockResult[0].error.errorCode == EvalError::FUNC_DEFINITION_IS_NOT_ALLOWED);
+}
+
+TEST_CASE("Assert that function declaration allowed only in global scope [1]. Declare func in for statement",
+          "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "for (var i = 0; i < 1; i = i + 1) {"
+                        "func add() {"
+                        "a + b\n"
+                        "}\n"
+                        "}";
+
+    EvalResult result = expressionHandler.handleExpression(expr1);
+
+    const auto& blockResult = result.getResultBlock();
+    REQUIRE(blockResult[0].getResultBlock()[0].error.errorCode == EvalError::FUNC_DEFINITION_IS_NOT_ALLOWED);
+}
+
+TEST_CASE("Assert that function declaration allowed only in global scope [1]. Declare func inside another function",
+          "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func add() {"
+                        "func mul() {"
+                        "}\n"
+                        "}";
+
+    EvalResult result = expressionHandler.handleExpression(expr1);
+
+    const auto& blockResult = result.getResultBlock();
+    REQUIRE(result.error.errorCode == EvalError::FUNC_DEFINITION_IS_NOT_ALLOWED);
+}
+
+TEST_CASE("Call function in if statement", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func print(var a) {"
+                        "a\n"
+                        "}";
+    std::string expr2 = "if (true) {"
+                        "var a = 50\n"
+                        "print(a)\n"
+                        "}";
+
+    expressionHandler.handleExpression(expr1);
+
+    EvalResult result = expressionHandler.handleExpression(expr2);
+
+    const auto& blockResult = result.getResultBlock();
+    REQUIRE(blockResult[1].getResultBlock()[0].getResultDouble() == 50);
+}
+
+TEST_CASE("Call function in for statement", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func print(var a) {"
+                        "a\n"
+                        "}";
+    std::string expr2 = "for (var i = 0; i < 10; i = i + 1) {"
+                        "print(i)\n"
+                        "}";
+
+    expressionHandler.handleExpression(expr1);
+
+    EvalResult result = expressionHandler.handleExpression(expr2);
+
+    const auto& blockResult = result.getResultBlock();
+
+    for (int i = 0; i < 10; i++) {
+        REQUIRE(blockResult[i].getResultBlock()[0].getResultBlock()[0].getResultDouble() == i);
+    }
+}
+
+TEST_CASE("Call function inside another function", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func print(var a) {"
+                        "a\n"
+                        "}";
+    std::string expr2 = "func add(var n, var m) {"
+                        "var add = n + m\n"
+                        "print(add)\n"
+                        "}";
+    std::string expr3 = "add(5, 10)";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+
+    EvalResult result = expressionHandler.handleExpression(expr3);
+
+    REQUIRE(result.getResultType() == ValueType::Compound);
+
+    const auto& blockResult = result.getResultBlock();
+
+    REQUIRE(blockResult[1].getResultType() == ValueType::Compound);
+    REQUIRE(blockResult[1].getResultBlock()[0].getResultType() == ValueType::Number);
+    REQUIRE(blockResult[1].getResultBlock()[0].getResultDouble() == 15);
+}
+
+TEST_CASE("Assert that parameter is passed by value", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func assign(var a, var b) {"
+                        "a = b\n"
+                        "}";
+    std::string expr2 = "var a = 5";
+    std::string expr3 = "assign(a, 10)";
+    std::string expr4 = "a";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+    expressionHandler.handleExpression(expr3);
+
+    EvalResult result = expressionHandler.handleExpression(expr4);
+
+    REQUIRE(result.getResultDouble() == 5);
+}
+
+TEST_CASE("Get error on calling undeclared function", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "add()";
+
+    EvalResult result = expressionHandler.handleExpression(expr1);
+    REQUIRE(result.error.errorCode == EvalError::UNDECLARED_FUNC);
+}
