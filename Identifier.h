@@ -28,7 +28,6 @@ struct IdentifierTypeStringNames {
 
 struct Identifier {
     ValueType::Type Type;
-    std::string StringValue;
     double NumValue;
     bool BoolValue;
 
