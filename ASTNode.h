@@ -11,6 +11,8 @@ namespace NodeType {
         Undefined,
         DeclVar,
         Id,
+        DeclFunc,
+        FuncCall,
         BinOp,
         NumberValue,
         BoolValue,
@@ -201,6 +203,12 @@ struct BlockStmtNode : ASTNode {
         type = NodeType::CompoundStmt;
     }
 
+    ~BlockStmtNode() {
+        for (const auto& currentStmt : stmtList) {
+            delete currentStmt;
+        }
+    }
+
     void print() override {
         TypesStringNames typeString;
 
@@ -221,11 +229,14 @@ struct BlockStmtNode : ASTNode {
 struct IfStmtNode : ASTNode {
     ASTNode* condition;
     BlockStmtNode* body;
-    ASTNode* elseStmt;
 
     IfStmtNode() {
         type = NodeType::IfStmt;
-        elseStmt = nullptr;
+    }
+
+    ~IfStmtNode() {
+        delete condition;
+        delete body;
     }
 
     void print() override {
@@ -251,6 +262,13 @@ struct ForLoopNode : ASTNode {
         type = NodeType::ForLoop;
     }
 
+    ~ForLoopNode() {
+        delete init;
+        delete condition;
+        delete inc;
+        delete body;
+    }
+
     void print() override {
         TypesStringNames typeString;
 
@@ -271,6 +289,48 @@ struct ForLoopNode : ASTNode {
         std::cout << "Body: " << std::endl;
         body->print();
         std::cout << std::endl;
+    }
+};
+
+struct DeclFuncNode : ASTNode {
+    std::string name;
+    std::vector<IdentifierNode*> args;
+    unsigned long argsSize;
+    BlockStmtNode* body;
+
+    DeclFuncNode() {
+        type = NodeType::DeclFunc;
+    }
+
+    ~DeclFuncNode() {
+        for (const auto currentId : args) {
+            delete currentId;
+        }
+//        delete body;
+    }
+
+    void print() override {
+
+    }
+};
+
+struct FuncCallNode : ASTNode {
+    std::string name;
+    std::vector<ASTNode*> args;
+    unsigned long argsSize;
+
+    FuncCallNode() {
+        type = NodeType::FuncCall;
+    }
+
+    ~FuncCallNode() {
+        for (const auto currentId : args) {
+            delete currentId;
+        }
+    }
+
+    void print() override {
+
     }
 };
 
