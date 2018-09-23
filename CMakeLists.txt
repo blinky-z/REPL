@@ -14,4 +14,5 @@ add_executable(REPL
         TokenContainer.cpp TokenContainer.h
         SymbolTable.cpp SymbolTable.h
         EvalResult.cpp EvalResult.h
+        Function.h
         )
