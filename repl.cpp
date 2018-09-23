@@ -12,6 +12,10 @@ bool isInputIfStmt(const std::string& input) {
     return input.find("if") != std::string::npos;
 }
 
+bool isInputFuncDecl(const std::string& input) {
+    return input.find("func") != std::string::npos;
+}
+
 std::string readCompoundStatement(const std::string& input) {
     std::string stmt = input;
 
@@ -34,7 +38,7 @@ std::string readCompoundStatement(const std::string& input) {
             break;
         }
 
-        if (isInputIfStmt(currentInput) || isInputForLoop(currentInput)) {
+        if (isInputIfStmt(currentInput) || isInputForLoop(currentInput) || isInputFuncDecl(currentInput)) {
             stmt += readCompoundStatement(currentInput);
         } else if (currentInput.empty()) {
             continue;
@@ -82,11 +86,11 @@ int main() {
         getline(std::cin, input);
 
         if (std::cin.eof()) {
-            exit(EXIT_SUCCESS);
+            break;
         }
 
         if (input.size() != 0) {
-            if (isInputIfStmt(input) || isInputForLoop(input)) {
+            if (isInputIfStmt(input) || isInputForLoop(input) || isInputFuncDecl(input)) {
                 input = readCompoundStatement(input);
             }
 
@@ -104,4 +108,6 @@ int main() {
             delete root;
         }
     }
+
+    return 0;
 }
