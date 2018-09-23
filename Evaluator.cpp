@@ -18,7 +18,7 @@ EvalResult Evaluator::EvaluateMathExpr(ASTNode* subtree) {
         if (id != nullptr) {
             Scope* curScope;
 
-            if ((curScope = lookTopId(id->name))) {
+            if ((curScope = lookTopIdScope(id->name))) {
                 ValueType::Type idType = curScope->symbolTable.getIdValueType(id->name);
 
                 switch (idType) {
@@ -100,7 +100,7 @@ EvalResult Evaluator::EvaluateBoolExpr(ASTNode* subtree) {
         if (id != nullptr) {
             Scope* curScope;
 
-            if ((curScope = lookTopId(id->name))) {
+            if ((curScope = lookTopIdScope(id->name))) {
                 ValueType::Type idType = curScope->symbolTable.getIdValueType(id->name);
 
                 if (idType == ValueType::Bool) {
@@ -163,7 +163,7 @@ EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* id, ASTNode* expr) {
     if (id != nullptr) {
         Scope* curScope;
 
-        if ((curScope = lookTopId(id->name))) {
+        if ((curScope = lookTopIdScope(id->name))) {
             BinOpNode* binOpExpr = dynamic_cast<BinOpNode*>(expr);
             IdentifierNode* idExpr = dynamic_cast<IdentifierNode*>(expr);
             NumberNode* numberConst = dynamic_cast<NumberNode*>(expr);
@@ -209,7 +209,7 @@ EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* id, ASTNode* expr) {
             } else if (idExpr != nullptr) {
                 Scope* rhsIdScope;
 
-                if ((rhsIdScope = lookTopId(idExpr->name))) {
+                if ((rhsIdScope = lookTopIdScope(idExpr->name))) {
                     int idExprType = rhsIdScope->symbolTable.getIdValueType(idExpr->name);
 
                     if (idExprType == ValueType::Number) {
@@ -261,6 +261,103 @@ EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* id, ASTNode* expr) {
         result.error = newError(EvalError::INVALID_LVALUE, "Expression is not assignable");
     }
 
+    return result;
+}
+
+EvalResult Evaluator::EvaluateFuncCall(FuncCallNode* funcCall) {
+    EvalResult result;
+
+    const std::string& funcName = funcCall->name;
+
+    if (functions->symbolTable.isFuncExist(funcName)) {
+        const Function& func = functions->symbolTable.getFunc(funcName);
+
+        // evaluate parameters
+        std::vector<EvalResult> callParamsValues;
+        for (const auto& currentParam : funcCall->args) {
+            const EvalResult& currentParamValue = Evaluate(currentParam);
+            if (currentParamValue.isError()) {
+                return currentParamValue;
+            }
+            callParamsValues.emplace_back(currentParamValue);
+        }
+
+        openScope();
+
+        if (funcCall->argsSize == func.argsSize) {
+            for (unsigned long currentId = 0; currentId != func.argsSize; currentId++) {
+                const std::string declVar = func.args[currentId];
+                const EvalResult& callParamValue = callParamsValues[currentId];
+
+                // add param to function scope
+                topScope->symbolTable.addNewIdentifier(declVar);
+
+                switch (callParamValue.getResultType()) {
+                    case ValueType::Number: {
+                        topScope->symbolTable.setIdValueDouble(declVar, callParamValue.getResultDouble());
+                        break;
+                    }
+                    case ValueType::Bool: {
+                        topScope->symbolTable.setIdValueBool(declVar, callParamValue.getResultBool());
+                        break;
+                    }
+                    default: {
+                        result.error = newError(EvalError::INVALID_VALUE_TYPE);
+                        return result;
+                    }
+                }
+            }
+        } else {
+            result.error = newError(EvalError::NO_MATCHING_FUNC);
+            return result;
+        }
+
+        // since function can see variables in its own scope and also in global scope,
+        // make outer scope is global scope,
+        // so the func lookTopIdScope() will look for variables only in function scope and in global (outer) scope
+        Scope* oldOuterScope = topScope->outer;
+        topScope->outer = globalScope;
+
+        result = EvaluateBlockStmt(func.body);
+
+        topScope->outer = oldOuterScope;
+        closeScope();
+    } else {
+        result.error = newError(EvalError::UNDECLARED_FUNC, "Use of undeclared function '" + funcName + "'");
+    }
+
+    return result;
+}
+
+EvalResult Evaluator::EvaluateDeclFunc(DeclFuncNode* subtree) {
+    EvalResult result;
+
+    const std::string& funcName = subtree->name;
+
+    if (topScope->outer == nullptr) { // check if func declaring in global scope
+        if (!functions->symbolTable.isFuncExist(funcName)) {
+            // check for not allowed statements in function body
+            for (const auto& currentStatement : subtree->body->stmtList) {
+                if (currentStatement->type == NodeType::DeclFunc) {
+
+                    DeclFuncNode* declFuncNode = static_cast<DeclFuncNode*>(currentStatement);
+                    result.error = newError(EvalError::FUNC_DEFINITION_IS_NOT_ALLOWED,
+                                            "Definition of function '" + declFuncNode->name + "' is not allowed here");
+                    return result;
+                }
+            }
+
+            functions->symbolTable.addNewFunc(subtree);
+        } else {
+            result.error = newError(EvalError::FUNC_REDEFINITION, "Redefinition of function '" + funcName + "'");
+        }
+    } else {
+        result.error = newError(EvalError::FUNC_DEFINITION_IS_NOT_ALLOWED,
+                                "Definition of function '" + funcName + "' is not allowed here");
+        return result;
+    }
+
+    result.setValueString("Declare func");
     return result;
 }
 
@@ -474,7 +571,7 @@ EvalResult Evaluator::Evaluate(ASTNode* root) {
 
         if (id != nullptr) {
             Scope* curScope;
-            if ((curScope = lookTopId(id->name))) {
+            if ((curScope = lookTopIdScope(id->name))) {
                 ValueType::Type idValueType = curScope->symbolTable.getIdValueType(id->name);
 
                 switch (idValueType) {
@@ -518,6 +615,22 @@ EvalResult Evaluator::Evaluate(ASTNode* root) {
         } else {
             result.error = newError(EvalError::INVALID_AST, "Invalid For Loop Statement Node");
         }
+    } else if (root->type == NodeType::DeclFunc) {
+        DeclFuncNode* node = dynamic_cast<DeclFuncNode*>(root);
+
+        if (node != nullptr) {
+            result = EvaluateDeclFunc(node);
+        } else {
+            result.error = newError(EvalError::INVALID_AST, "Invalid Function Declaration Node");
+        }
+    } else if (root->type == NodeType::FuncCall) {
+        FuncCallNode* node = dynamic_cast<FuncCallNode*>(root);
+
+        if (node != nullptr) {
+            result = EvaluateFuncCall(node);
+        } else {
+            result.error = newError(EvalError::INVALID_AST, "Invalid Function Call Node");
+        }
     } else {
         result.error = newError(EvalError::INVALID_AST);
     }
@@ -554,10 +667,12 @@ void Evaluator::openScope() {
 }
 
 void Evaluator::closeScope() {
+    Scope* oldScope = topScope;
     topScope = topScope->outer;
+    delete oldScope;
 }
 
-Evaluator::Scope* Evaluator::lookTopId(const std::string& idName) {
+Evaluator::Scope* Evaluator::lookTopIdScope(const std::string& idName) {
     Scope* currentScope = topScope;
 
     while (currentScope != nullptr) {

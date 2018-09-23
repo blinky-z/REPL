@@ -23,6 +23,10 @@ private:
 
     EvalResult EvaluateAssignValue(IdentifierNode* id, ASTNode* expr);
 
+    EvalResult EvaluateFuncCall(FuncCallNode* funcCall);
+
+    EvalResult EvaluateDeclFunc(DeclFuncNode* subtree);
+
     EvalResult EvaluateDeclVar(DeclVarNode* subtree);
 
     EvalResult EvaluateEqual(BinOpNode* subtree);
@@ -47,17 +51,32 @@ private:
 
     EvalError newError(EvalError::Error err, const std::string errMessage);
 
-    Scope* lookTopId(const std::string& idName);
+    Scope* lookTopIdScope(const std::string& idName);
 
     Scope* topScope;
+
+    Scope* globalScope;
+
+    Scope* functions;
 
     void openScope();
 
     void closeScope();
-
 public:
     Evaluator() {
-        topScope = new Scope(nullptr);
+        globalScope = new Scope(nullptr);
+        topScope = globalScope;
+        functions = new Scope(nullptr);
+    }
+
+    ~Evaluator() {
+        delete functions;
+
+        while (topScope != nullptr) {
+            Scope* oldScope = topScope;
+            topScope = topScope->outer;
+            delete oldScope;
+        }
     }
 
     EvalResult Evaluate(ASTNode* root);
