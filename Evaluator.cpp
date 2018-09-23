@@ -303,12 +303,14 @@ EvalResult Evaluator::EvaluateFuncCall(FuncCallNode* funcCall) {
                     }
                     default: {
                         result.error = newError(EvalError::INVALID_VALUE_TYPE);
+                        closeScope();
                         return result;
                     }
                 }
             }
         } else {
             result.error = newError(EvalError::NO_MATCHING_FUNC);
+            closeScope();
             return result;
         }
 
@@ -334,7 +336,7 @@ EvalResult Evaluator::EvaluateDeclFunc(DeclFuncNode* subtree) {
 
     const std::string& funcName = subtree->name;
 
-    if (topScope->outer == nullptr) { // check if func declaring in global scope
+    if (topScope == globalScope) { // check if func is declaring in global scope
         if (!functions->symbolTable.isFuncExist(funcName)) {
             // check for not allowed statements in function body
             for (const auto& currentStatement : subtree->body->stmtList) {
@@ -485,6 +487,7 @@ EvalResult Evaluator::EvaluateForLoopStmt(ForLoopNode* subtree) {
     if (subtree->init != nullptr) {
         const EvalResult& initResult = Evaluate(subtree->init);
         if (initResult.isError()) {
+            closeScope();
             return initResult;
         }
     }
@@ -500,11 +503,13 @@ EvalResult Evaluator::EvaluateForLoopStmt(ForLoopNode* subtree) {
         if (subtree->inc != nullptr) {
             const EvalResult& increaseResult = Evaluate(subtree->inc);
             if (increaseResult.isError()) {
+                closeScope();
                 return increaseResult;
             }
         }
     }
     if (subtree->condition != nullptr && conditionResult.isError()) {
+        closeScope();
         return conditionResult;
     }
 

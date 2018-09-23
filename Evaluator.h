@@ -71,12 +71,7 @@ public:
 
     ~Evaluator() {
         delete functions;
-
-        while (topScope != nullptr) {
-            Scope* oldScope = topScope;
-            topScope = topScope->outer;
-            delete oldScope;
-        }
+        delete topScope;
     }
 
     EvalResult Evaluate(ASTNode* root);
