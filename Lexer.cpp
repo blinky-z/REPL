@@ -89,6 +89,9 @@ const TokenContainer Lexer::tokenize(const std::string& src) {
         } else if (*currentChar == ';') {
             token.Type = TokenType::SEMICOLON;
             token.Value = ";";
+        } else if (*currentChar == ',') {
+            token.Type = TokenType::Comma;
+            token.Value = ",";
         } else if (*currentChar == '<') {
             token.Type = TokenType::LESS;
             token.Value = "<";
@@ -125,6 +128,9 @@ const Token Lexer::tokenizeStringLiteral() {
     if (strLiteral == "var") {
         token.Type = TokenType::DeclareId;
         token.Value = "var";
+    } else if (strLiteral == "func") {
+        token.Type = TokenType::DeclareFunc;
+        token.Value = "func";
     } else if (strLiteral == "false" || strLiteral == "true") {
         token.Type = TokenType::Bool;
 
@@ -140,7 +146,11 @@ const Token Lexer::tokenizeStringLiteral() {
         token.Type = TokenType::ForLoopStmt;
         token.Value = strLiteral;
     } else {
-        token.Type = TokenType::Id;
+        if (*(currentChar + 1) == '(') {
+            token.Type = TokenType::FuncCall;
+        } else {
+            token.Type = TokenType::Id;
+        }
         token.Value = strLiteral;
     }
 
