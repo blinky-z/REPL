@@ -19,7 +19,6 @@ private:
 public:
     EvalResult handleExpression(const std::string src) {
         std::string expr = src;
-        expr.push_back('\n');
         expr.push_back(EOF);
 
         const TokenContainer& tokens = lexer.tokenize(expr);
@@ -816,7 +815,7 @@ TEST_CASE("Get error on comparison of incompatible Identifier value types [1]", 
     REQUIRE(result.error.errorCode == EvalError::INCOMPATIBLE_OPERAND_TYPES);
 }
 
-TEST_CASE("Evaluate if block statement (condition is true)", "[Evaluator]") {
+TEST_CASE("Evaluate if statement (condition is true)", "[Evaluator]") {
     ExpressionHandler expressionHandler;
 
     std::string expr1 = "var a = 5";
@@ -834,7 +833,88 @@ TEST_CASE("Evaluate if block statement (condition is true)", "[Evaluator]") {
     REQUIRE(blockResult[0].getResultDouble() == 5);
 }
 
-TEST_CASE("Do not evaluate if block statement (condition is false)", "[Evaluator]") {
+TEST_CASE("Evaluate if-else functions call statement (condition is true)", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func add() {"
+                        "a + b\n"
+                        "}";
+    std::string expr2 = "func mul() {"
+                        "a * b\n"
+                        "}";
+    std::string expr3 = "var a = 5";
+    std::string expr4 = "var b = 10";
+    std::string expr5 = "if (1 == 1) {"
+                        "add()\n"
+                        "} else {"
+                        "mul()\n"
+                        "}";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+    expressionHandler.handleExpression(expr3);
+    expressionHandler.handleExpression(expr4);
+
+    EvalResult result = expressionHandler.handleExpression(expr5);
+    REQUIRE(result.getResultType() == ValueType::Compound);
+
+    const std::vector<EvalResult> blockResult = result.getResultBlock();
+    REQUIRE(blockResult[0].getResultBlock()[0].getResultType() == ValueType::Number);
+    REQUIRE(blockResult[0].getResultBlock()[0].getResultDouble() == 15);
+}
+
+TEST_CASE("Evaluate if-else functions call statement (condition is false)", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func add() {"
+                        "a + b\n"
+                        "}";
+    std::string expr2 = "func mul() {"
+                        "a * b\n"
+                        "}";
+    std::string expr3 = "var a = 5";
+    std::string expr4 = "var b = 10";
+    std::string expr5 = "if (true && false) {"
+                        "add()\n"
+                        "} else {"
+                        "mul()\n"
+                        "}";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+    expressionHandler.handleExpression(expr3);
+    expressionHandler.handleExpression(expr4);
+
+    EvalResult result = expressionHandler.handleExpression(expr5);
+    REQUIRE(result.getResultType() == ValueType::Compound);
+
+    const std::vector<EvalResult> blockResult = result.getResultBlock();
+    REQUIRE(blockResult[0].getResultBlock()[0].getResultType() == ValueType::Number);
+    REQUIRE(blockResult[0].getResultBlock()[0].getResultDouble() == 50);
+}
+
+TEST_CASE("Evaluate if-else assign statement (condition is false)", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "var a";
+    std::string expr2 = "var b = false";
+    std::string expr3 = "if (b) {"
+                        "a = 5\n"
+                        "} else {"
+                        "a = 3\n"
+                        "}";
+    std::string expr4 = "a";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+    expressionHandler.handleExpression(expr3);
+
+    EvalResult result = expressionHandler.handleExpression(expr4);
+    REQUIRE(result.getResultType() == ValueType::Number);
+    REQUIRE(result.getResultDouble() == 3);
+}
+
+TEST_CASE("Do not evaluate if statement (condition is false)", "[Evaluator]") {
     ExpressionHandler expressionHandler;
 
     std::string expr1 = "var a = 5";
