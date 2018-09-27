@@ -229,6 +229,7 @@ struct BlockStmtNode : ASTNode {
 struct IfStmtNode : ASTNode {
     ASTNode* condition;
     BlockStmtNode* body;
+    BlockStmtNode* elseBody;
 
     IfStmtNode() {
         type = NodeType::IfStmt;
@@ -237,6 +238,7 @@ struct IfStmtNode : ASTNode {
     ~IfStmtNode() {
         delete condition;
         delete body;
+        delete elseBody;
     }
 
     void print() override {
@@ -247,6 +249,8 @@ struct IfStmtNode : ASTNode {
         std::cout << "Condition: " << std::endl;
         condition->print();
         std::cout << "Body: " << std::endl;
+        body->print();
+        std::cout << "Else Body: " << std::endl;
         body->print();
         std::cout << std::endl;
     }
