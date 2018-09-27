@@ -32,7 +32,7 @@ private:
 
     BlockStmtNode* createBlockStmtNode(const std::vector<ASTNode*> statements);
 
-    IfStmtNode* createIfStmtNode(ASTNode* condition, BlockStmtNode* stmtList);
+    IfStmtNode* createIfStmtNode(ASTNode* condition, BlockStmtNode* stmtList, BlockStmtNode* elseStmtList);
 
     ForLoopNode* createForLoopNode(ASTNode* init, ASTNode* cond, ASTNode* inc, BlockStmtNode* stmtList);
 
@@ -69,8 +69,6 @@ private:
     bool isOperator(const Token& token);
 
     bool isBinaryOperator(const Token& token);
-
-    void matchParseComplete();
 
     void expect(const std::string& expected);
 

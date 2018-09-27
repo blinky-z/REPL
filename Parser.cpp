@@ -259,6 +259,10 @@ BlockStmtNode* Parser::parseBlockStmt() {
     while ((nextToken = tokens.lookNextToken()).Type != TokenType::CURLY_BRACKET_END &&
            nextToken.Type != TokenType::eof) {
         stmtList.emplace_back(parseStatement());
+
+        if (tokens.lookNextToken().Type != TokenType::CURLY_BRACKET_END) {
+            expect("\n");
+        }
     }
 
     expect("}");
@@ -278,8 +282,13 @@ IfStmtNode* Parser::parseIfStmt() {
     expect(")");
 
     BlockStmtNode* body = parseBlockStmt();
+    BlockStmtNode* elseBody = nullptr;
+    if (tokens.lookNextToken().Type == TokenType::ElseStmt) {
+        tokens.getNextToken();
+        elseBody = parseBlockStmt();
+    }
 
-    return createIfStmtNode(condition, body);
+    return createIfStmtNode(condition, body, elseBody);
 }
 
 ASTNode* Parser::parseForLoopInit() {
@@ -392,7 +401,6 @@ ASTNode* Parser::parseStatement() {
         }
     }
 
-    matchParseComplete();
     return parseResult;
 }
 
@@ -472,10 +480,11 @@ BlockStmtNode* Parser::createBlockStmtNode(const std::vector<ASTNode*> statement
     return node;
 }
 
-IfStmtNode* Parser::createIfStmtNode(ASTNode* condition, BlockStmtNode* stmtList) {
+IfStmtNode* Parser::createIfStmtNode(ASTNode* condition, BlockStmtNode* stmtList, BlockStmtNode* elseStmtList) {
     IfStmtNode* node = new IfStmtNode;
     node->condition = condition;
     node->body = stmtList;
+    node->elseBody = elseStmtList;
 
     return node;
 }
@@ -496,14 +505,6 @@ double Parser::getNumTokenValue(const Token& numToken) {
 
 bool Parser::getBoolTokenValue(const Token& boolToken) {
     return static_cast<bool>(std::stoi(boolToken.Value));
-}
-
-void Parser::matchParseComplete() {
-    const Token& currentToken = tokens.getNextToken();
-
-    if (currentToken.Type != TokenType::NL) {
-        errorExpected("newline", currentToken);
-    }
 }
 
 std::queue<Token> Parser::convertToReversePolish() {
@@ -528,7 +529,7 @@ std::queue<Token> Parser::convertToReversePolish() {
     Token token;
     while ((token = tokens.getNextToken()).Type != TokenType::NL && token.Type != TokenType::CURLY_BRACKET_START &&
            token.Type != TokenType::CURLY_BRACKET_END && token.Type != TokenType::SEMICOLON &&
-           token.Type != TokenType::Comma) {
+           token.Type != TokenType::Comma && token.Type != TokenType::eof) {
         if (token.Type == TokenType::Number || token.Type == TokenType::Bool || token.Type == TokenType::Id) {
             expr.push(token);
         } else if (isOperator(token)) {
