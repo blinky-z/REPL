@@ -14,6 +14,7 @@ namespace TokenType {
         DeclareId,
         DeclareFunc,
         IfStmt,
+        ElseStmt,
         ForLoopStmt,
         Id,
         FuncCall,
