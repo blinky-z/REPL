@@ -9,36 +9,43 @@ bool isInputForLoop(const std::string& input) {
 }
 
 bool isInputIfStmt(const std::string& input) {
-    return input.find("if") != std::string::npos;
+    return input.find("if") != std::string::npos || input.find("else") != std::string::npos;
 }
 
 bool isInputFuncDecl(const std::string& input) {
     return input.find("func") != std::string::npos;
 }
 
+int compoundCnt;
+
 std::string readCompoundStatement(const std::string& input) {
     std::string stmt = input;
 
-    if (stmt[stmt.size() - 1] == '}') {
-        stmt.push_back('\n');
+    if (stmt.find('}') != std::string::npos) {
+        compoundCnt--;
+    }
+
+    if (compoundCnt == 0) {
         return stmt;
     }
 
     std::string currentInput;
     while (true) {
+        if (compoundCnt == 0) {
+            break;
+        }
+
         getline(std::cin, currentInput);
 
         if (std::cin.eof()) {
             exit(EXIT_SUCCESS);
         }
 
-        if (currentInput[currentInput.size() - 1] == '}') {
+        if (currentInput.find('}') != std::string::npos) {
             stmt += currentInput;
-            stmt.push_back('\n');
-            break;
-        }
-
-        if (isInputIfStmt(currentInput) || isInputForLoop(currentInput) || isInputFuncDecl(currentInput)) {
+            compoundCnt--;
+        } else if (isInputIfStmt(currentInput) || isInputForLoop(currentInput) || isInputFuncDecl(currentInput)) {
+            compoundCnt++;
             stmt += readCompoundStatement(currentInput);
         } else if (currentInput.empty()) {
             continue;
@@ -81,6 +88,9 @@ int main() {
     Parser parser;
     Evaluator evaluator;
 
+    // TODO: сделать возвращение значений у функций (типо return 5, return true)
+    // TODO: сделать возможность использовать вызов функций как параметр: print(add(5, 10))
+
     while (true) {
         std::string input;
         getline(std::cin, input);
@@ -91,11 +101,8 @@ int main() {
 
         if (input.size() != 0) {
             if (isInputIfStmt(input) || isInputForLoop(input) || isInputFuncDecl(input)) {
+                compoundCnt = 1;
                 input = readCompoundStatement(input);
-            }
-
-            if (input.back() != '\n') {
-                input.push_back('\n');
             }
             input.push_back(EOF);
 
