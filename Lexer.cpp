@@ -142,6 +142,9 @@ const Token Lexer::tokenizeStringLiteral() {
     } else if (strLiteral == "if") {
         token.Type = TokenType::IfStmt;
         token.Value = strLiteral;
+    } else if (strLiteral == "else") {
+        token.Type = TokenType::ElseStmt;
+        token.Value = strLiteral;
     } else if (strLiteral == "for") {
         token.Type = TokenType::ForLoopStmt;
         token.Value = strLiteral;
