@@ -471,7 +471,11 @@ EvalResult Evaluator::EvaluateIfStmt(IfStmtNode* subtree) {
     if (conditionResult.getResultBool()) {
         result = EvaluateBlockStmt(subtree->body);
     } else {
-        result.setBlockResult(std::vector<EvalResult>{});
+        if (subtree->elseBody) {
+            result = EvaluateBlockStmt(subtree->elseBody);
+        } else {
+            result.setBlockResult(std::vector<EvalResult>{});
+        }
     }
 
     closeScope();

@@ -62,6 +62,7 @@ private:
     void openScope();
 
     void closeScope();
+
 public:
     Evaluator() {
         globalScope = new Scope(nullptr);
