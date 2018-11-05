@@ -364,6 +364,7 @@ EvalResult Evaluator::EvaluateDeclFunc(DeclFuncNode* subtree) {
                     ReturnValueNode* returnValueNode = static_cast<ReturnValueNode*>(currentStatement);
                     if (subtree->returnType == ValueType::Void && returnValueNode->expression != nullptr) {
                         result.error = newError(EvalError::INVALID_RETURN, "Void function can't return values");
+                        return result;
                     }
                 }
             }
