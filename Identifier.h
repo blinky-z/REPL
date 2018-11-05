@@ -10,6 +10,7 @@ namespace ValueType {
         Bool,
         String,
         Compound,
+        Void,
         Undefined
     };
 }

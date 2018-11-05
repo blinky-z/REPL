@@ -131,7 +131,20 @@ const Token Lexer::tokenizeStringLiteral() {
     } else if (strLiteral == "func") {
         token.Type = TokenType::DeclareFunc;
         token.Value = "func";
-    } else if (strLiteral == "false" || strLiteral == "true") {
+    } else if (strLiteral == "bool") {
+        token.Type = TokenType::FuncReturnBool;
+        token.Value = strLiteral;
+    } else if (strLiteral == "int") {
+        token.Type = TokenType::FuncReturnInt;
+        token.Value = strLiteral;
+    } else if (strLiteral == "void") {
+        token.Type = TokenType::FuncReturnVoid;
+        token.Value = strLiteral;
+    } else if (strLiteral == "return") {
+        token.Type = TokenType::Return;
+        token.Value = strLiteral;
+    }
+    else if (strLiteral == "false" || strLiteral == "true") {
         token.Type = TokenType::Bool;
 
         if (strLiteral == "false") {

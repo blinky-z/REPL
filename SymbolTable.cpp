@@ -47,12 +47,13 @@ ValueType::Type SymbolTable::getIdValueType(const std::string& identifierName) c
 
 void SymbolTable::addNewFunc(DeclFuncNode* funcDecl) {
     Function function;
+    function.returnType = funcDecl->returnType;
     function.argsSize = funcDecl->argsSize;
 
     for (const auto& currentId : funcDecl->args) {
         function.args.emplace_back(currentId->name);
     }
-    function.body = funcDecl->body;
+    function.body = funcDecl->body; // TODO: сделать копирование тела
 
     funcSymbolTable.emplace(funcDecl->name, function);
 }

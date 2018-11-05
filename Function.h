@@ -4,6 +4,7 @@
 #include "ASTNode.h"
 
 struct Function {
+    ValueType::Type returnType;
     std::vector<std::string> args;
     unsigned long argsSize;
     BlockStmtNode* body;

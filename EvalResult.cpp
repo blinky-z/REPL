@@ -40,6 +40,10 @@ void EvalResult::setBlockResult(const std::vector<EvalResult> results) {
     resultBlock = results;
 }
 
+void EvalResult::setVoidResult() {
+    resultType = ValueType::Void;
+}
+
 bool EvalResult::isError() const {
     return error.errorCode != EvalError::null;
 }
@@ -59,6 +63,8 @@ const std::string& EvalError::what() const {
     errorMessage[FUNC_DEFINITION_IS_NOT_ALLOWED] = "Function definition is not allowed here";
     errorMessage[UNDECLARED_FUNC] = "Use of undeclared function";
     errorMessage[NO_MATCHING_FUNC] = "No matching function to call";
+    errorMessage[INVALID_RETURN] = "Lack of or invalid return statement";
+
     errorMessage[null] = "No Error";
 
     if (message.empty()) {

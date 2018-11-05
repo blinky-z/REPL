@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
+#include "Identifier.h"
 
 namespace NodeType {
     enum ASTNodeType {
@@ -18,7 +19,8 @@ namespace NodeType {
         BoolValue,
         IfStmt,
         ForLoop,
-        CompoundStmt
+        CompoundStmt,
+        ReturnValue
     };
 }
 
@@ -296,8 +298,21 @@ struct ForLoopNode : ASTNode {
     }
 };
 
+struct ReturnValueNode : ASTNode {
+    ASTNode* expression;
+
+    ReturnValueNode() {
+        type = NodeType::ReturnValue;
+    }
+
+    ~ReturnValueNode() {
+        delete expression;
+    }
+};
+
 struct DeclFuncNode : ASTNode {
     std::string name;
+    ValueType::Type returnType;
     std::vector<IdentifierNode*> args;
     unsigned long argsSize;
     BlockStmtNode* body;

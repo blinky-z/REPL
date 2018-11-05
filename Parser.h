@@ -22,15 +22,19 @@ private:
 
     BoolNode* createBoolNode(bool value);
 
-    IdentifierNode* createIdentifierNode(std::string name);
+    IdentifierNode* createIdentifierNode(const std::string& name);
 
-    FuncCallNode* createFuncCallNode(const std::string name, std::vector<ASTNode*> args);
+    ReturnValueNode* createReturnValueNode(ASTNode* expr);
 
-    DeclFuncNode* createDeclFuncNode(const std::string name, std::vector<IdentifierNode*> args, BlockStmtNode* body);
+    FuncCallNode* createFuncCallNode(const std::string& name, const std::vector<ASTNode*>& args);
+
+    DeclFuncNode* createDeclFuncNode(const std::string& name,
+                                     ValueType::Type returnType, const std::vector<IdentifierNode*>& args,
+                                     BlockStmtNode* body);
 
     DeclVarNode* createDeclVarNode(IdentifierNode* id, ASTNode* expr);
 
-    BlockStmtNode* createBlockStmtNode(const std::vector<ASTNode*> statements);
+    BlockStmtNode* createBlockStmtNode(const std::vector<ASTNode*>& statements);
 
     IfStmtNode* createIfStmtNode(ASTNode* condition, BlockStmtNode* stmtList, BlockStmtNode* elseStmtList);
 
@@ -48,6 +52,8 @@ private:
 
     std::string parseFuncName();
 
+    ValueType::Type parseDeclFuncReturnType();
+
     std::vector<IdentifierNode*> parseDeclFuncParams();
 
     DeclFuncNode* parseDeclFunc();
@@ -57,6 +63,8 @@ private:
     FuncCallNode* parseFuncCall();
 
     BlockStmtNode* parseBlockStmt();
+
+    ASTNode* parseReturnStmt();
 
     IfStmtNode* parseIfStmt();
 

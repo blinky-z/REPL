@@ -22,7 +22,8 @@ public:
         FUNC_REDEFINITION,
         FUNC_DEFINITION_IS_NOT_ALLOWED,
         UNDECLARED_FUNC,
-        NO_MATCHING_FUNC
+        NO_MATCHING_FUNC,
+        INVALID_RETURN
     };
 
     const std::string& what() const;
@@ -68,7 +69,9 @@ public:
 
     void setValueString(const std::string value);
 
-    void setBlockResult(const std::vector<EvalResult> results);
+    void setBlockResult(const std::vector<EvalResult> results);\
+
+    void setVoidResult();
 
     EvalResult() {
         resultType = ValueType::Undefined;

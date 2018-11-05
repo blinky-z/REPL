@@ -180,7 +180,7 @@ EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* id, ASTNode* expr) {
                         try {
                             curScope->symbolTable.setIdValueDouble(id->name, exprResult.getResultDouble());
                             result.setValueString("Assign value");
-                        } catch (std::runtime_error e) {
+                        } catch (std::runtime_error& e) {
                             result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
                         }
                     } else {
@@ -197,7 +197,7 @@ EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* id, ASTNode* expr) {
                         try {
                             curScope->symbolTable.setIdValueBool(id->name, exprResult.getResultBool());
                             result.setValueString("Assign value");
-                        } catch (std::runtime_error e) {
+                        } catch (std::runtime_error& e) {
                             result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
                         }
                     } else {
@@ -216,14 +216,14 @@ EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* id, ASTNode* expr) {
                         try {
                             rhsIdScope->symbolTable.setIdValueDouble(id->name, EvaluateIdDouble(rhsIdScope, idExpr));
                             result.setValueString("Assign value");
-                        } catch (std::runtime_error e) {
+                        } catch (std::runtime_error& e) {
                             result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
                         }
                     } else if (idExprType == ValueType::Bool) {
                         try {
                             rhsIdScope->symbolTable.setIdValueBool(id->name, EvaluateIdBool(rhsIdScope, idExpr));
                             result.setValueString("Assign value");
-                        } catch (std::runtime_error e) {
+                        } catch (std::runtime_error& e) {
                             result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
                         }
                     } else if (idExprType == ValueType::Undefined) {
@@ -240,14 +240,14 @@ EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* id, ASTNode* expr) {
                 try {
                     curScope->symbolTable.setIdValueDouble(id->name, EvaluateNumberConstant(numberConst));
                     result.setValueString("Assign value");
-                } catch (std::runtime_error e) {
+                } catch (std::runtime_error& e) {
                     result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
                 }
             } else if (boolConst != nullptr) {
                 try {
                     curScope->symbolTable.setIdValueBool(id->name, EvaluateBoolConstant(boolConst));
                     result.setValueString("Assign value");
-                } catch (std::runtime_error e) {
+                } catch (std::runtime_error& e) {
                     result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
                 }
             } else {
@@ -261,6 +261,17 @@ EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* id, ASTNode* expr) {
         result.error = newError(EvalError::INVALID_LVALUE, "Expression is not assignable");
     }
 
+    return result;
+}
+
+EvalResult Evaluator::EvaluateReturnStmt(ReturnValueNode* subtree) {
+    EvalResult result;
+
+    if (subtree->expression != nullptr) {
+        result = Evaluate(subtree->expression);
+    } else {
+        result.setVoidResult();
+    }
     return result;
 }
 
@@ -291,7 +302,6 @@ EvalResult Evaluator::EvaluateFuncCall(FuncCallNode* funcCall) {
 
                 // add param to function scope
                 topScope->symbolTable.addNewIdentifier(declVar);
-
                 switch (callParamValue.getResultType()) {
                     case ValueType::Number: {
                         topScope->symbolTable.setIdValueDouble(declVar, callParamValue.getResultDouble());
@@ -316,11 +326,15 @@ EvalResult Evaluator::EvaluateFuncCall(FuncCallNode* funcCall) {
 
         // since function can see variables in its own scope and also in global scope,
         // make outer scope is global scope,
-        // so the func lookTopIdScope() will look for variables only in function scope and in global (outer) scope
+        // so the func lookTopIdScope() will look for variables only in function scope and in global scope
         Scope* oldOuterScope = topScope->outer;
         topScope->outer = globalScope;
 
         result = EvaluateBlockStmt(func.body);
+
+        if (!result.isError() && result.getResultType() != func.returnType) {
+            result.error = newError(EvalError::INVALID_RETURN);
+        }
 
         topScope->outer = oldOuterScope;
         closeScope();
@@ -336,7 +350,7 @@ EvalResult Evaluator::EvaluateDeclFunc(DeclFuncNode* subtree) {
 
     const std::string& funcName = subtree->name;
 
-    if (topScope == globalScope) { // check if func is declaring in global scope
+    if (topScope == globalScope) { // func can be declared only in global scope
         if (!functions->symbolTable.isFuncExist(funcName)) {
             // check for not allowed statements in function body
             for (const auto& currentStatement : subtree->body->stmtList) {
@@ -346,6 +360,11 @@ EvalResult Evaluator::EvaluateDeclFunc(DeclFuncNode* subtree) {
                     result.error = newError(EvalError::FUNC_DEFINITION_IS_NOT_ALLOWED,
                                             "Definition of function '" + declFuncNode->name + "' is not allowed here");
                     return result;
+                } else if (currentStatement->type == NodeType::ReturnValue) {
+                    ReturnValueNode* returnValueNode = static_cast<ReturnValueNode*>(currentStatement);
+                    if (subtree->returnType == ValueType::Void && returnValueNode->expression != nullptr) {
+                        result.error = newError(EvalError::INVALID_RETURN, "Void function can't return values");
+                    }
                 }
             }
 
@@ -445,15 +464,22 @@ EvalResult Evaluator::EvaluateComparison(BinOpNode* subtree) {
 
 EvalResult Evaluator::EvaluateBlockStmt(BlockStmtNode* subtree) {
     EvalResult result;
+    EvalResult returnStmt;
 
     std::vector<EvalResult> stmtResults;
-
     for (auto currentStatement : subtree->stmtList) {
-        stmtResults.emplace_back(Evaluate(currentStatement));
+        const EvalResult& currentResult = Evaluate(currentStatement);
+        if (currentResult.isError()) {
+            return currentResult;
+        }
+
+        if (currentStatement->type == NodeType::ReturnValue) {
+            return currentResult;
+        }
+        stmtResults.emplace_back(currentResult);
     }
 
     result.setBlockResult(stmtResults);
-
     return result;
 }
 
@@ -467,6 +493,24 @@ EvalResult Evaluator::EvaluateIfStmt(IfStmtNode* subtree) {
     }
 
     openScope();
+
+//    // check for not allowed statements
+//    for (const auto currentStatement : subtree->body->stmtList) {
+//        if (currentStatement->type == NodeType::ReturnValue) {
+//            result.error = newError(EvalError::INVALID_OPERATION, "Return statement allowed only in functions");
+//            closeScope();
+//            return result;
+//        }
+//    }
+//    if (subtree->elseBody) {
+//        for (const auto currentStatement : subtree->elseBody->stmtList) {
+//            if (currentStatement->type == NodeType::ReturnValue) {
+//                result.error = newError(EvalError::INVALID_OPERATION, "Return statement allowed only in functions");
+//                closeScope();
+//                return result;
+//            }
+//        }
+//    }
 
     if (conditionResult.getResultBool()) {
         result = EvaluateBlockStmt(subtree->body);
@@ -497,6 +541,15 @@ EvalResult Evaluator::EvaluateForLoopStmt(ForLoopNode* subtree) {
     }
 
     std::vector<EvalResult> blockStmtResults;
+
+//    // check for not allowed statements
+//    for (const auto currentStatement : subtree->body->stmtList) {
+//        if (currentStatement->type == NodeType::ReturnValue) {
+//            result.error = newError(EvalError::INVALID_OPERATION, "Return statement allowed only in functions");
+//            closeScope();
+//            return result;
+//        }
+//    }
 
     EvalResult conditionResult;
     while (subtree->condition == nullptr ||
@@ -639,6 +692,14 @@ EvalResult Evaluator::Evaluate(ASTNode* root) {
             result = EvaluateFuncCall(node);
         } else {
             result.error = newError(EvalError::INVALID_AST, "Invalid Function Call Node");
+        }
+    } else if (root->type == NodeType::ReturnValue) {
+        ReturnValueNode* node = dynamic_cast<ReturnValueNode*>(root);
+
+        if (node != nullptr) {
+            result = EvaluateReturnStmt(node);
+        } else {
+            result.error = newError(EvalError::INVALID_AST, "Invalid Return Value Node");
         }
     } else {
         result.error = newError(EvalError::INVALID_AST);

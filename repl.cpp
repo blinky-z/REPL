@@ -16,18 +16,26 @@ bool isInputFuncDecl(const std::string& input) {
     return input.find("func") != std::string::npos;
 }
 
-int compoundCnt;
+long compoundCnt;
+
+void countOpenBrackets(const std::string stmt) {
+    for (const auto& currentCh : stmt) {
+        if (currentCh == '{') {
+            compoundCnt++;
+        }
+    }
+}
+
+void countEndBrackets(const std::string stmt) {
+    for (const auto& currentCh : stmt) {
+        if (currentCh == '}') {
+            compoundCnt--;
+        }
+    }
+}
 
 std::string readCompoundStatement(const std::string& input) {
     std::string stmt = input;
-
-    if (stmt.find('}') != std::string::npos) {
-        compoundCnt--;
-    }
-
-    if (compoundCnt == 0) {
-        return stmt;
-    }
 
     std::string currentInput;
     while (true) {
@@ -36,21 +44,20 @@ std::string readCompoundStatement(const std::string& input) {
         }
 
         getline(std::cin, currentInput);
-
         if (std::cin.eof()) {
             exit(EXIT_SUCCESS);
         }
+        countOpenBrackets(currentInput);
+        countEndBrackets(currentInput);
 
-        if (currentInput.find('}') != std::string::npos) {
-            stmt += currentInput;
-            compoundCnt--;
-        } else if (isInputIfStmt(currentInput) || isInputForLoop(currentInput) || isInputFuncDecl(currentInput)) {
-            compoundCnt++;
+        if (isInputIfStmt(currentInput) || isInputForLoop(currentInput) || isInputFuncDecl(currentInput)) {
             stmt += readCompoundStatement(currentInput);
         } else if (currentInput.empty()) {
             continue;
         } else {
-            currentInput.push_back('\n');
+            if (compoundCnt) {
+                currentInput.push_back('\n');
+            }
             stmt += currentInput;
         }
     }
@@ -88,9 +95,6 @@ int main() {
     Parser parser;
     Evaluator evaluator;
 
-    // TODO: сделать возвращение значений у функций (типо return 5, return true)
-    // TODO: сделать возможность использовать вызов функций как параметр: print(add(5, 10))
-
     while (true) {
         std::string input;
         getline(std::cin, input);
@@ -101,7 +105,8 @@ int main() {
 
         if (input.size() != 0) {
             if (isInputIfStmt(input) || isInputForLoop(input) || isInputFuncDecl(input)) {
-                compoundCnt = 1;
+                countOpenBrackets(input);
+                countEndBrackets(input);
                 input = readCompoundStatement(input);
             }
             input.push_back(EOF);

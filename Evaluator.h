@@ -23,6 +23,8 @@ private:
 
     EvalResult EvaluateAssignValue(IdentifierNode* id, ASTNode* expr);
 
+    EvalResult EvaluateReturnStmt(ReturnValueNode* subtree);
+
     EvalResult EvaluateFuncCall(FuncCallNode* funcCall);
 
     EvalResult EvaluateDeclFunc(DeclFuncNode* subtree);

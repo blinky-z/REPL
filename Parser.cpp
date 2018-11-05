@@ -170,23 +170,6 @@ std::string Parser::parseFuncName() {
     return token.Value;
 }
 
-std::vector<IdentifierNode*> Parser::parseDeclFuncParams() {
-    std::vector<IdentifierNode*> args;
-
-    Token nextToken;
-    while ((nextToken = tokens.lookNextToken()).Type != TokenType::ROUND_BRACKET_END &&
-           nextToken.Type != TokenType::eof && nextToken.Type != TokenType::NL) {
-        expect("var");
-        IdentifierNode* id = parseIdentifier();
-        args.emplace_back(id);
-        if (tokens.lookNextToken().Type != TokenType::ROUND_BRACKET_END) {
-            expect(",");
-        }
-    }
-
-    return args;
-}
-
 std::vector<ASTNode*> Parser::parseFuncCallParams() {
     std::vector<ASTNode*> args;
 
@@ -239,16 +222,62 @@ FuncCallNode* Parser::parseFuncCall() {
     return createFuncCallNode(name, args);
 }
 
+ValueType::Type Parser::parseDeclFuncReturnType() {
+    const Token& token = tokens.getNextToken();
+
+    if (token.Value == "int") {
+        return ValueType::Number;
+    } else if (token.Value == "bool") {
+        return ValueType::Bool;
+    } else if (token.Value == "void") {
+        return ValueType::Void;
+    } else {
+        errorExpected("Function return type");
+        throw;
+    }
+}
+
+std::vector<IdentifierNode*> Parser::parseDeclFuncParams() {
+    std::vector<IdentifierNode*> args;
+
+    Token nextToken;
+    while ((nextToken = tokens.lookNextToken()).Type != TokenType::ROUND_BRACKET_END &&
+           nextToken.Type != TokenType::eof && nextToken.Type != TokenType::NL) {
+        expect("var");
+        IdentifierNode* id = parseIdentifier();
+        args.emplace_back(id);
+        if (tokens.lookNextToken().Type != TokenType::ROUND_BRACKET_END) {
+            expect(",");
+        }
+    }
+
+    return args;
+}
+
 DeclFuncNode* Parser::parseDeclFunc() {
     expect("func");
+
+    ValueType::Type returnType = parseDeclFuncReturnType();
     const std::string& funcName = parseFuncName();
+
     expect("(");
     const std::vector<IdentifierNode*>& args = parseDeclFuncParams();
     expect(")");
 
     BlockStmtNode* body = parseBlockStmt();
 
-    return createDeclFuncNode(funcName, args, body);
+    return createDeclFuncNode(funcName, returnType, args, body);
+}
+
+ASTNode* Parser::parseReturnStmt() {
+    expect("return");
+
+    ASTNode* expr = nullptr;
+    if (tokens.lookNextToken().Type != TokenType::NL) {
+        expr = parseExpression();
+    }
+
+    return createReturnValueNode(expr);
 }
 
 BlockStmtNode* Parser::parseBlockStmt() {
@@ -395,6 +424,10 @@ ASTNode* Parser::parseStatement() {
             parseResult = parseFuncCall();
             break;
         }
+        case TokenType::Return: {
+            parseResult = parseReturnStmt();
+            break;
+        }
         default: {
             errorExpected("Statement", currentToken);
             throw;
@@ -438,14 +471,21 @@ BoolNode* Parser::createBoolNode(bool value) {
     return node;
 }
 
-IdentifierNode* Parser::createIdentifierNode(std::string name) {
+ReturnValueNode* Parser::createReturnValueNode(ASTNode* expr) {
+    ReturnValueNode* node = new ReturnValueNode;
+    node->expression = expr;
+
+    return node;
+}
+
+IdentifierNode* Parser::createIdentifierNode(const std::string& name) {
     IdentifierNode* node = new IdentifierNode;
     node->name = name;
 
     return node;
 }
 
-FuncCallNode* Parser::createFuncCallNode(const std::string name, std::vector<ASTNode*> args) {
+FuncCallNode* Parser::createFuncCallNode(const std::string& name, const std::vector<ASTNode*>& args) {
     FuncCallNode* node = new FuncCallNode;
     node->name = name;
     node->args = args;
@@ -454,10 +494,13 @@ FuncCallNode* Parser::createFuncCallNode(const std::string name, std::vector<AST
     return node;
 }
 
-DeclFuncNode* Parser::createDeclFuncNode(
-        const std::string name, std::vector<IdentifierNode*> args, BlockStmtNode* body) {
+DeclFuncNode* Parser::createDeclFuncNode(const std::string& name,
+                                         ValueType::Type returnType,
+                                         const std::vector<IdentifierNode*>& args,
+                                         BlockStmtNode* body) {
     DeclFuncNode* node = new DeclFuncNode;
     node->name = name;
+    node->returnType = returnType;
     node->args = args;
     node->argsSize = args.size();
     node->body = body;
@@ -473,7 +516,7 @@ DeclVarNode* Parser::createDeclVarNode(IdentifierNode* id, ASTNode* expr) {
     return node;
 }
 
-BlockStmtNode* Parser::createBlockStmtNode(const std::vector<ASTNode*> statements) {
+BlockStmtNode* Parser::createBlockStmtNode(const std::vector<ASTNode*>& statements) {
     BlockStmtNode* node = new BlockStmtNode;
     node->stmtList = statements;
 
@@ -530,7 +573,8 @@ std::queue<Token> Parser::convertToReversePolish() {
     while ((token = tokens.getNextToken()).Type != TokenType::NL && token.Type != TokenType::CURLY_BRACKET_START &&
            token.Type != TokenType::CURLY_BRACKET_END && token.Type != TokenType::SEMICOLON &&
            token.Type != TokenType::Comma && token.Type != TokenType::eof) {
-        if (token.Type == TokenType::Number || token.Type == TokenType::Bool || token.Type == TokenType::Id) {
+        if (token.Type == TokenType::Number || token.Type == TokenType::Bool || token.Type == TokenType::Id ||
+            token.Type == TokenType::FuncCall) {
             expr.push(token);
         } else if (isOperator(token)) {
             const Token& curOp = token;
@@ -603,13 +647,18 @@ void Parser::expect(const std::string& expected) {
 
 void Parser::errorExpected(const std::string& expected, const Token& foundTok) {
     std::string errMsg;
+    std::string formatExpected = expected;
+
+    if (expected == "\n") {
+        formatExpected = "newline";
+    }
 
     if (foundTok.Type == TokenType::NL) {
-        errMsg = "Expected " + expected + ", found newline";
+        errMsg = "Expected " + formatExpected + ", found newline";
     } else if (foundTok.Type == TokenType::eof) {
-        errMsg = "Expected " + expected + ", found EOF";
+        errMsg = "Expected " + formatExpected + ", found EOF";
     } else {
-        errMsg = "Expected " + expected + ", found \"" + foundTok.Value + "\"";
+        errMsg = "Expected " + formatExpected + ", found \"" + foundTok.Value + "\"";
     }
     throw std::runtime_error(errMsg);
 }
