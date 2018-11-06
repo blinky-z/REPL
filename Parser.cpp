@@ -277,7 +277,7 @@ DeclFuncNode* Parser::parseDeclFunc() {
     return createDeclFuncNode(funcName, returnType, args, body);
 }
 
-ASTNode* Parser::parseReturnStmt() {
+ReturnStmtNode* Parser::parseReturnStmt() {
     expect("return");
 
     ASTNode* expr = nullptr;
@@ -285,7 +285,12 @@ ASTNode* Parser::parseReturnStmt() {
         expr = parseExpression();
     }
 
-    return createReturnValueNode(expr);
+    return createReturnStmtNode(expr);
+}
+
+BreakStmtNode* Parser::parseBreakStmt() {
+    tokens.getNextToken();
+    return createBreakStmtNode();
 }
 
 BlockStmtNode* Parser::parseBlockStmt() {
@@ -433,6 +438,10 @@ ASTNode* Parser::parseStatement() {
             parseResult = parseReturnStmt();
             break;
         }
+        case TokenType::Break: {
+            parseResult = parseBreakStmt();
+            break;
+        }
         default: {
             errorExpected("Statement", currentToken);
             throw;
@@ -476,10 +485,15 @@ BoolNode* Parser::createBoolNode(bool value) {
     return node;
 }
 
-ReturnValueNode* Parser::createReturnValueNode(ASTNode* expr) {
-    ReturnValueNode* node = new ReturnValueNode;
+ReturnStmtNode* Parser::createReturnStmtNode(ASTNode* expr) {
+    ReturnStmtNode* node = new ReturnStmtNode;
     node->expression = expr;
 
+    return node;
+}
+
+BreakStmtNode* Parser::createBreakStmtNode() {
+    BreakStmtNode* node = new BreakStmtNode;
     return node;
 }
 

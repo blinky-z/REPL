@@ -38,7 +38,8 @@ namespace TokenType {
         UnaryMinus,
         BoolAND,
         BoolOR,
-        Equal
+        Equal,
+        Break
     };
 }
 

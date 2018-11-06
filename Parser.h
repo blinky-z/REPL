@@ -24,7 +24,9 @@ private:
 
     IdentifierNode* createIdentifierNode(const std::string& name);
 
-    ReturnValueNode* createReturnValueNode(ASTNode* expr);
+    ReturnStmtNode* createReturnStmtNode(ASTNode* expr);
+
+    BreakStmtNode* createBreakStmtNode();
 
     FuncCallNode* createFuncCallNode(const std::string& name, const std::vector<ASTNode*>& args);
 
@@ -64,7 +66,9 @@ private:
 
     BlockStmtNode* parseBlockStmt();
 
-    ASTNode* parseReturnStmt();
+    ReturnStmtNode* parseReturnStmt();
+
+    BreakStmtNode* parseBreakStmt();
 
     IfStmtNode* parseIfStmt();
 

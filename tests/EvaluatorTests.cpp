@@ -1371,8 +1371,7 @@ TEST_CASE("Assert that function declaration allowed only in global scope [1]. De
 
     EvalResult result = expressionHandler.handleExpression(expr1);
 
-    const auto& blockResult = result.getResultBlock();
-    REQUIRE(blockResult[0].error.errorCode == EvalError::FUNC_DEFINITION_IS_NOT_ALLOWED);
+    REQUIRE(result.error.errorCode == EvalError::FUNC_DEFINITION_IS_NOT_ALLOWED);
 }
 
 TEST_CASE(
@@ -1610,4 +1609,101 @@ TEST_CASE("Get error on assigning mismatched result type to variable", "[Evaluat
 
     REQUIRE(result.isError());
     REQUIRE(result.error.errorCode == EvalError::INVALID_VALUE_TYPE);
+}
+
+TEST_CASE("Assert break statement stops for loop evaluating", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "for (var i = 0; i < 10; i = i + 1) {"
+                       "i\n"
+                       "break\n"
+                       "}";
+
+    EvalResult result = expressionHandler.handleExpression(expr);
+
+    REQUIRE(!result.isError());
+    REQUIRE(result.getResultType() == ValueType::Compound);
+
+    const std::vector<EvalResult> blockResult = result.getResultBlock();
+    REQUIRE(blockResult.size() == 1);
+}
+
+TEST_CASE("Assert break statement stops for loop evaluating inside block", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "for (var i = 0; i < 10; i = i + 1) {"
+                       "i\n"
+                       "if (i == 5) {"
+                       "var b = 3 * i\n"
+                       "if (b == 15) {"
+                       "break\n"
+                       "}"
+                       "}"
+                       "}";
+
+    EvalResult result = expressionHandler.handleExpression(expr);
+
+    REQUIRE(!result.isError());
+    REQUIRE(result.getResultType() == ValueType::Compound);
+
+    const std::vector<EvalResult> blockResult = result.getResultBlock();
+    REQUIRE(blockResult.size() == 6);
+}
+
+TEST_CASE("Assert break statement stops nested for loop", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "for (var i = 0; i < 5; i = i + 1) {"
+                       "i\n"
+                       "for (var i1 = 10; i1 < 25; i1 = i1 + 1) {"
+                       "i1\n"
+                       "if (i1 == 20) {"
+                       "break\n"
+                       "}"
+                       "}"
+                       "}";
+
+    EvalResult result = expressionHandler.handleExpression(expr);
+
+    REQUIRE(!result.isError());
+    const std::vector<EvalResult> blockResult = result.getResultBlock();
+    REQUIRE(blockResult.size() == 5);
+
+    for (unsigned long i = 0; i < blockResult.size(); i++) {
+        REQUIRE(blockResult[i].getResultBlock()[1].getResultBlock().size() == 11);
+    }
+}
+
+TEST_CASE("Assert that break statement is allowed only in for loops - use in if statement", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "if (true) {"
+                       "break\n"
+                       "}";
+
+    EvalResult result = expressionHandler.handleExpression(expr);
+
+    REQUIRE(result.error.errorCode == EvalError::INVALID_OPERATION);
+}
+
+TEST_CASE("Assert that break statement is allowed only in for loops - use in global scope", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "break";
+
+    EvalResult result = expressionHandler.handleExpression(expr);
+
+    REQUIRE(result.error.errorCode == EvalError::INVALID_OPERATION);
+}
+
+TEST_CASE("Assert that break statement is allowed only in for loops - use in function", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "func void do() {"
+                       "break\n"
+                       "}";
+
+    EvalResult result = expressionHandler.handleExpression(expr);
+
+    REQUIRE(result.error.errorCode == EvalError::INVALID_OPERATION);
 }

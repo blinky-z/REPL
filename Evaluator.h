@@ -23,7 +23,7 @@ private:
 
     EvalResult EvaluateAssignValue(IdentifierNode* id, ASTNode* expr);
 
-    EvalResult EvaluateReturnStmt(ReturnValueNode* subtree);
+    EvalResult EvaluateReturnStmt(ReturnStmtNode* subtree);
 
     EvalResult EvaluateFuncCall(FuncCallNode* funcCall);
 
@@ -65,14 +65,17 @@ private:
 
     void closeScope();
 
-    bool funcBodyEval;
+    bool funcEval;
+
+    bool forLoopEval;
 public:
     Evaluator() {
         globalScope = new Scope(nullptr);
         topScope = globalScope;
         functions = new Scope(nullptr);
         
-        funcBodyEval = false;
+        funcEval = false;
+        forLoopEval = false;
     }
 
     ~Evaluator() {

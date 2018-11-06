@@ -143,8 +143,10 @@ const Token Lexer::tokenizeStringLiteral() {
     } else if (strLiteral == "return") {
         token.Type = TokenType::Return;
         token.Value = strLiteral;
-    }
-    else if (strLiteral == "false" || strLiteral == "true") {
+    } else if (strLiteral == "break") {
+        token.Type = TokenType::Break;
+        token.Value = strLiteral;
+    } else if (strLiteral == "false" || strLiteral == "true") {
         token.Type = TokenType::Bool;
 
         if (strLiteral == "false") {

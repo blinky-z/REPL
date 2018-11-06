@@ -74,12 +74,7 @@ void printResult(const EvalResult& result, int tabCount = 0) {
         } else if (resultType == ValueType::Bool) {
             std::cout << (result.getResultBool() ? "true" : "false") << std::endl;
         } else if (resultType == ValueType::Compound) {
-            std::cout << "Block Statement Result:" << std::endl;
-            tabCount++;
             for (const auto& currentResult : result.getResultBlock()) {
-                for (int i = 0; i < tabCount; i++) {
-                    std::cout << "\t";
-                }
                 printResult(currentResult, tabCount);
             }
         } else if (resultType == ValueType::String) {
