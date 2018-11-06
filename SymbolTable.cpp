@@ -10,15 +10,8 @@ void SymbolTable::addNewIdentifier(const std::string& identifierName) {
 }
 
 void SymbolTable::setIdValueDouble(const std::string& identifierName, double value) {
-    if (symbolTable[identifierName].Type == ValueType::Undefined ||
-        symbolTable[identifierName].Type == ValueType::Number) {
-        symbolTable[identifierName].Type = ValueType::Number;
-        symbolTable[identifierName].NumValue = value;
-    } else {
-        IdentifierTypeStringNames typeStringNames;
-        throw std::runtime_error("Can not assign integer value to the variable '" + identifierName + "' of type " +
-                                 typeStringNames.idTypeStringNames[symbolTable[identifierName].Type]);
-    }
+    symbolTable[identifierName].Type = ValueType::Number;
+    symbolTable[identifierName].NumValue = value;
 }
 
 double SymbolTable::getIdValueDouble(const std::string& identifierName) const {
@@ -26,15 +19,8 @@ double SymbolTable::getIdValueDouble(const std::string& identifierName) const {
 }
 
 void SymbolTable::setIdValueBool(const std::string& identifierName, bool value) {
-    if (symbolTable[identifierName].Type == ValueType::Undefined ||
-        symbolTable[identifierName].Type == ValueType::Bool) {
-        symbolTable[identifierName].Type = ValueType::Bool;
-        symbolTable[identifierName].BoolValue = value;
-    } else {
-        IdentifierTypeStringNames typeStringNames;
-        throw std::runtime_error("Can not assign bool value to the variable '" + identifierName + "' of type " +
-                                 typeStringNames.idTypeStringNames[symbolTable[identifierName].Type]);
-    }
+    symbolTable[identifierName].Type = ValueType::Bool;
+    symbolTable[identifierName].BoolValue = value;
 }
 
 bool SymbolTable::getIdValueBool(const std::string& identifierName) const {

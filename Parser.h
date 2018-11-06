@@ -72,9 +72,11 @@ private:
 
     ForLoopNode* parseForLoop();
 
-    std::queue<Token> convertToReversePolish();
+    std::pair<std::queue<Token>, std::queue<ASTNode*>> convertToReversePolish();
 
     bool isOperator(const Token& token);
+
+    bool isOpLeftAssociative(const Token& token);
 
     bool isBinaryOperator(const Token& token);
 
