@@ -65,11 +65,14 @@ private:
 
     void closeScope();
 
+    bool funcBodyEval;
 public:
     Evaluator() {
         globalScope = new Scope(nullptr);
         topScope = globalScope;
         functions = new Scope(nullptr);
+        
+        funcBodyEval = false;
     }
 
     ~Evaluator() {

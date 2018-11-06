@@ -1,7 +1,10 @@
 #include "Parser.h"
 
 ASTNode* Parser::parseExpression() {
-    std::queue<Token> exprTokens = convertToReversePolish();
+    std::pair<std::queue<Token>, std::queue<ASTNode*>> expr = convertToReversePolish();
+
+    std::queue<Token>& exprTokens = expr.first;
+    std::queue<ASTNode*>& funcCallNodes = expr.second;
 
     std::stack<ASTNode*> nodeStack;
 
@@ -24,12 +27,17 @@ ASTNode* Parser::parseExpression() {
                     nodeStack.push(createIdentifierNode(currentToken.Value));
                     break;
                 }
+                case TokenType::FuncCall: {
+                    nodeStack.push(funcCallNodes.front());
+                    funcCallNodes.pop();
+                    break;
+                }
                 default: {
                     errorExpected("Rvalue or Identifier", currentToken);
                 }
             }
         } else {
-            if (isBinaryOperator(currentToken)) {
+            if (isBinaryOperator(currentToken)) { // binary operator
                 ASTNode* operationNode;
 
                 // since stack is LIFO need to get 2nd operand first to not break the order of operands
@@ -100,7 +108,7 @@ ASTNode* Parser::parseExpression() {
                         errorExpected("Binary operator", currentToken);
                     }
                 }
-            } else {
+            } else { // unary operator
                 ASTNode* operationNode;
 
                 ASTNode* operand;
@@ -273,7 +281,7 @@ ASTNode* Parser::parseReturnStmt() {
     expect("return");
 
     ASTNode* expr = nullptr;
-    if (tokens.lookNextToken().Type != TokenType::NL) {
+    if (tokens.lookNextToken().Type != TokenType::NL && tokens.lookNextToken().Type != TokenType::CURLY_BRACKET_END) {
         expr = parseExpression();
     }
 
@@ -397,6 +405,7 @@ ASTNode* Parser::parseStatement() {
     const Token& currentToken = tokens.lookNextToken();
     switch (currentToken.Type) {
         case TokenType::Id:
+        case TokenType::FuncCall:
         case TokenType::ROUND_BRACKET_START:
         case TokenType::Number:
         case TokenType::Bool:
@@ -418,10 +427,6 @@ ASTNode* Parser::parseStatement() {
         }
         case TokenType::DeclareFunc: {
             parseResult = parseDeclFunc();
-            break;
-        }
-        case TokenType::FuncCall: {
-            parseResult = parseFuncCall();
             break;
         }
         case TokenType::Return: {
@@ -550,7 +555,7 @@ bool Parser::getBoolTokenValue(const Token& boolToken) {
     return static_cast<bool>(std::stoi(boolToken.Value));
 }
 
-std::queue<Token> Parser::convertToReversePolish() {
+std::pair<std::queue<Token>, std::queue<ASTNode*>> Parser::convertToReversePolish() {
     // TODO: написать тесты на данный алгоритм
     static std::unordered_map<std::string, int> opPrecedence = {
             std::pair<std::string, int>("=", 1),
@@ -568,6 +573,7 @@ std::queue<Token> Parser::convertToReversePolish() {
 
     std::stack<Token> opStack;
     std::queue<Token> expr;
+    std::queue<ASTNode*> funcCallNodes;
 
     Token token;
     while ((token = tokens.getNextToken()).Type != TokenType::NL && token.Type != TokenType::CURLY_BRACKET_START &&
@@ -576,12 +582,17 @@ std::queue<Token> Parser::convertToReversePolish() {
         if (token.Type == TokenType::Number || token.Type == TokenType::Bool || token.Type == TokenType::Id ||
             token.Type == TokenType::FuncCall) {
             expr.push(token);
+            if (token.Type == TokenType::FuncCall) {
+                tokens.returnToken();
+                funcCallNodes.push(parseFuncCall());
+            }
         } else if (isOperator(token)) {
             const Token& curOp = token;
 
             while (!opStack.empty() && isOperator(opStack.top())) {
                 const Token& topOp = opStack.top();
-                if (opPrecedence[curOp.Value] <= opPrecedence[topOp.Value]) {
+                if ((opPrecedence[curOp.Value] == opPrecedence[topOp.Value] && isOpLeftAssociative(topOp)) ||
+                        (opPrecedence[curOp.Value] < opPrecedence[topOp.Value])) {
                     expr.push(opStack.top());
                     opStack.pop();
                     continue;
@@ -623,7 +634,7 @@ std::queue<Token> Parser::convertToReversePolish() {
         expr.push(topToken);
     }
 
-    return expr;
+    return std::make_pair(expr, funcCallNodes);
 }
 
 bool Parser::isOperator(const Token& token) {
@@ -635,6 +646,10 @@ bool Parser::isOperator(const Token& token) {
 
 bool Parser::isBinaryOperator(const Token& token) {
     return token.Type != TokenType::UnaryMinus;
+}
+
+bool Parser::isOpLeftAssociative(const Token& token) {
+    return token.Type != TokenType::Assign && token.Type != TokenType::UnaryMinus;
 }
 
 void Parser::expect(const std::string& expected) {

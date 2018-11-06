@@ -33,6 +33,7 @@ EvalResult Evaluator::EvaluateMathExpr(ASTNode* subtree) {
                     }
                     default: {
                         result.error = newError(EvalError::INCOMPATIBLE_OPERAND_TYPES);
+                        break;
                     }
                 }
             } else {
@@ -41,6 +42,24 @@ EvalResult Evaluator::EvaluateMathExpr(ASTNode* subtree) {
             }
         } else {
             result.error = newError(EvalError::INVALID_AST, "Invalid Identifier Node");
+        }
+    } else if (subtree->type == NodeType::FuncCall) {
+        FuncCallNode* node = dynamic_cast<FuncCallNode*>(subtree);
+
+        if (node != nullptr) {
+            const EvalResult& funcCallResult = EvaluateFuncCall(node);
+
+            if (!funcCallResult.isError()) {
+                if (funcCallResult.getResultType() == ValueType::Number) {
+                    result = funcCallResult;
+                } else {
+                    result.error = newError(EvalError::INCOMPATIBLE_OPERAND_TYPES);
+                }
+            } else {
+                return funcCallResult;
+            }
+        } else {
+            result.error = newError(EvalError::INVALID_AST, "Invalid Function Call Node");
         }
     } else if (subtree->type == NodeType::BinOp) {
         BinOpNode* node = dynamic_cast<BinOpNode*>(subtree);
@@ -69,7 +88,7 @@ EvalResult Evaluator::EvaluateMathExpr(ASTNode* subtree) {
                     result.setValueDouble(leftValue.getResultDouble() / rightValue.getResultDouble());
                     break;
                 default:
-                    result.error = newError(EvalError::INCOMPATIBLE_OPERAND_TYPES);
+                    result.error = newError(EvalError::INVALID_OPERATION);
             }
         } else {
             result.error = newError(EvalError::INVALID_AST, "Invalid Binary Operation Node");
@@ -118,6 +137,24 @@ EvalResult Evaluator::EvaluateBoolExpr(ASTNode* subtree) {
         } else {
             result.error = newError(EvalError::INVALID_AST, "Invalid Identifier Node");
         }
+    } else if (subtree->type == NodeType::FuncCall) {
+        FuncCallNode* node = dynamic_cast<FuncCallNode*>(subtree);
+
+        if (node != nullptr) {
+            const EvalResult& funcCallResult = EvaluateFuncCall(node);
+
+            if (!funcCallResult.isError()) {
+                if (funcCallResult.getResultType() == ValueType::Bool) {
+                    result = funcCallResult;
+                } else {
+                    result.error = newError(EvalError::INCOMPATIBLE_OPERAND_TYPES);
+                }
+            } else {
+                return funcCallResult;
+            }
+        } else {
+            result.error = newError(EvalError::INVALID_AST, "Invalid Function Call Node");
+        }
     } else if (subtree->type == NodeType::BinOp) {
         BinOpNode* binOp = dynamic_cast<BinOpNode*>(subtree);
 
@@ -160,105 +197,135 @@ EvalResult Evaluator::EvaluateBoolExpr(ASTNode* subtree) {
 EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* id, ASTNode* expr) {
     EvalResult result;
 
-    if (id != nullptr) {
-        Scope* curScope;
+    Scope* lhsIdScope;
 
-        if ((curScope = lookTopIdScope(id->name))) {
-            BinOpNode* binOpExpr = dynamic_cast<BinOpNode*>(expr);
-            IdentifierNode* idExpr = dynamic_cast<IdentifierNode*>(expr);
-            NumberNode* numberConst = dynamic_cast<NumberNode*>(expr);
-            BoolNode* boolConst = dynamic_cast<BoolNode*>(expr);
+    if ((lhsIdScope = lookTopIdScope(id->name))) {
+        BinOpNode* binOpExpr = dynamic_cast<BinOpNode*>(expr);
+        IdentifierNode* idExpr = dynamic_cast<IdentifierNode*>(expr);
+        NumberNode* numberConst = dynamic_cast<NumberNode*>(expr);
+        BoolNode* boolConst = dynamic_cast<BoolNode*>(expr);
+        FuncCallNode* funcCallExpr = dynamic_cast<FuncCallNode*>(expr);
 
-            if (binOpExpr != nullptr) {
-                if (binOpExpr->binOpType == BinOpType::OperatorPlus ||
-                    binOpExpr->binOpType == BinOpType::OperatorMinus ||
-                    binOpExpr->binOpType == BinOpType::OperatorMul ||
-                    binOpExpr->binOpType == BinOpType::OperatorDiv) {
-                    EvalResult exprResult = EvaluateMathExpr(binOpExpr);
+        ValueType::Type lhsIdType = lhsIdScope->symbolTable.getIdValueType(id->name);
 
-                    if (!exprResult.isError()) {
-                        try {
-                            curScope->symbolTable.setIdValueDouble(id->name, exprResult.getResultDouble());
-                            result.setValueString("Assign value");
-                        } catch (std::runtime_error& e) {
-                            result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
-                        }
+        if (binOpExpr != nullptr) {
+            if (binOpExpr->binOpType == BinOpType::OperatorPlus ||
+                binOpExpr->binOpType == BinOpType::OperatorMinus ||
+                binOpExpr->binOpType == BinOpType::OperatorMul ||
+                binOpExpr->binOpType == BinOpType::OperatorDiv) {
+                EvalResult exprResult = EvaluateMathExpr(binOpExpr);
+
+                if (!exprResult.isError()) {
+                    if (lhsIdType == ValueType::Number || lhsIdType == ValueType::Undefined) {
+                        lhsIdScope->symbolTable.setIdValueDouble(id->name, exprResult.getResultDouble());
+                        result.setValueString("Assign value");
                     } else {
-                        return exprResult;
-                    }
-                } else if (binOpExpr->binOpType == BinOpType::OperatorBoolAND ||
-                           binOpExpr->binOpType == BinOpType::OperatorBoolOR ||
-                           binOpExpr->binOpType == BinOpType::OperatorEqual ||
-                           binOpExpr->binOpType == BinOpType::OperatorLess ||
-                           binOpExpr->binOpType == BinOpType::OperatorGreater) {
-                    EvalResult exprResult = EvaluateBoolExpr(binOpExpr);
-
-                    if (!exprResult.isError()) {
-                        try {
-                            curScope->symbolTable.setIdValueBool(id->name, exprResult.getResultBool());
-                            result.setValueString("Assign value");
-                        } catch (std::runtime_error& e) {
-                            result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
-                        }
-                    } else {
-                        return exprResult;
+                        result.error = newError(EvalError::INVALID_VALUE_TYPE, "Invalid RHS Value type");
                     }
                 } else {
-                    result.error = newError(EvalError::INVALID_OPERATION, "Unknown or not allowed binary operation");
+                    return exprResult;
                 }
-            } else if (idExpr != nullptr) {
-                Scope* rhsIdScope;
+            } else if (binOpExpr->binOpType == BinOpType::OperatorBoolAND ||
+                       binOpExpr->binOpType == BinOpType::OperatorBoolOR ||
+                       binOpExpr->binOpType == BinOpType::OperatorEqual ||
+                       binOpExpr->binOpType == BinOpType::OperatorLess ||
+                       binOpExpr->binOpType == BinOpType::OperatorGreater) {
+                EvalResult exprResult = EvaluateBoolExpr(binOpExpr);
 
-                if ((rhsIdScope = lookTopIdScope(idExpr->name))) {
-                    int idExprType = rhsIdScope->symbolTable.getIdValueType(idExpr->name);
-
-                    if (idExprType == ValueType::Number) {
-                        try {
-                            rhsIdScope->symbolTable.setIdValueDouble(id->name, EvaluateIdDouble(rhsIdScope, idExpr));
-                            result.setValueString("Assign value");
-                        } catch (std::runtime_error& e) {
-                            result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
-                        }
-                    } else if (idExprType == ValueType::Bool) {
-                        try {
-                            rhsIdScope->symbolTable.setIdValueBool(id->name, EvaluateIdBool(rhsIdScope, idExpr));
-                            result.setValueString("Assign value");
-                        } catch (std::runtime_error& e) {
-                            result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
-                        }
-                    } else if (idExprType == ValueType::Undefined) {
-                        result.error = newError(EvalError::UNINITIALIZED_VAR,
-                                                "Use of uninitialized identifier '" + idExpr->name + "'");
+                if (!exprResult.isError()) {
+                    if (lhsIdType == ValueType::Bool || lhsIdType == ValueType::Undefined) {
+                        lhsIdScope->symbolTable.setIdValueBool(id->name, exprResult.getResultBool());
+                        result.setValueString("Assign value");
                     } else {
-                        result.error = newError(EvalError::INVALID_VALUE_TYPE);
+                        result.error = newError(EvalError::INVALID_VALUE_TYPE, "Invalid RHS Value type");
                     }
                 } else {
-                    result.error = newError(EvalError::UNDECLARED_VAR,
-                                            "Use of undeclared identifier '" + idExpr->name + "'");
-                }
-            } else if (numberConst != nullptr) {
-                try {
-                    curScope->symbolTable.setIdValueDouble(id->name, EvaluateNumberConstant(numberConst));
-                    result.setValueString("Assign value");
-                } catch (std::runtime_error& e) {
-                    result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
-                }
-            } else if (boolConst != nullptr) {
-                try {
-                    curScope->symbolTable.setIdValueBool(id->name, EvaluateBoolConstant(boolConst));
-                    result.setValueString("Assign value");
-                } catch (std::runtime_error& e) {
-                    result.error = newError(EvalError::INVALID_VALUE_TYPE, e.what());
+                    return exprResult;
                 }
             } else {
-                result.error = newError(EvalError::INVALID_AST, "Invalid expression in assignment statement");
+                result.error = newError(EvalError::INVALID_OPERATION, "Invalid binary operation");
+            }
+        } else if (idExpr != nullptr) {
+            Scope* rhsIdScope;
+
+            if ((rhsIdScope = lookTopIdScope(idExpr->name))) { // check if id on right hand side is exist
+                ValueType::Type rhsIdType = rhsIdScope->symbolTable.getIdValueType(idExpr->name);
+
+                if (rhsIdType == ValueType::Number) {
+                    if (lhsIdType == ValueType::Number || lhsIdType == ValueType::Undefined) {
+                        lhsIdScope->symbolTable.setIdValueDouble(id->name, EvaluateIdDouble(rhsIdScope, idExpr));
+                        result.setValueString("Assign value");
+                    } else {
+                        result.error = newError(EvalError::INVALID_VALUE_TYPE, "Invalid RHS Value type");
+                    }
+                } else if (rhsIdType == ValueType::Bool) {
+                    if (lhsIdType == ValueType::Bool || lhsIdType == ValueType::Undefined) {
+                        lhsIdScope->symbolTable.setIdValueBool(id->name, EvaluateIdBool(rhsIdScope, idExpr));
+                        result.setValueString("Assign value");
+                    } else {
+                        result.error = newError(EvalError::INVALID_VALUE_TYPE, "Invalid RHS Value type");
+                    }
+                } else if (rhsIdType == ValueType::Undefined) {
+                    result.error = newError(EvalError::UNINITIALIZED_VAR,
+                                            "Use of uninitialized identifier '" + idExpr->name + "'");
+                } else {
+                    result.error = newError(EvalError::INVALID_VALUE_TYPE, "Invalid RHS Value type");
+                }
+            } else {
+                result.error = newError(EvalError::UNDECLARED_VAR,
+                                        "Use of undeclared identifier '" + idExpr->name + "'");
+            }
+        } else if (funcCallExpr != nullptr) {
+            const EvalResult& funcCallResult = EvaluateFuncCall(funcCallExpr);
+
+            if (!funcCallResult.isError()) {
+                switch (funcCallResult.getResultType()) {
+                    case ValueType::Number: {
+                        if (lhsIdType == ValueType::Number || lhsIdType == ValueType::Undefined) {
+                            lhsIdScope->symbolTable.setIdValueDouble(id->name, funcCallResult.getResultDouble());
+                            result.setValueString("Assign value");
+                        } else {
+                            result.error = newError(EvalError::INVALID_VALUE_TYPE, "Invalid RHS Value type");
+                        }
+                        break;
+                    }
+                    case ValueType::Bool: {
+                        if (lhsIdType == ValueType::Bool || lhsIdType == ValueType::Undefined) {
+                            lhsIdScope->symbolTable.setIdValueBool(id->name, funcCallResult.getResultBool());
+                            result.setValueString("Assign value");
+                        } else {
+                            result.error = newError(EvalError::INVALID_VALUE_TYPE, "Invalid RHS Value type");
+                        }
+                        break;
+                    }
+                    default: {
+                        result.error = newError(EvalError::INVALID_VALUE_TYPE, "Invalid RHS Value type");
+                        return result;
+                    }
+                }
+            } else {
+                return funcCallResult;
+            }
+        } else if (numberConst != nullptr) {
+            if (lhsIdType == ValueType::Number || lhsIdType == ValueType::Undefined) {
+                lhsIdScope->symbolTable.setIdValueDouble(id->name, EvaluateNumberConstant(numberConst));
+                result.setValueString("Assign value");
+            } else {
+                result.error = newError(EvalError::INVALID_VALUE_TYPE, "Invalid RHS Value type");
+            }
+        } else if (boolConst != nullptr) {
+            if (lhsIdType == ValueType::Bool || lhsIdType == ValueType::Undefined) {
+                lhsIdScope->symbolTable.setIdValueBool(id->name, EvaluateBoolConstant(boolConst));
+                result.setValueString("Assign value");
+            } else {
+                result.error = newError(EvalError::INVALID_VALUE_TYPE, "Invalid RHS Value type");
             }
         } else {
-            result.error = newError(EvalError::UNDECLARED_VAR,
-                                    "Assignment to undeclared variable '" + id->name + "'");
+            result.error = newError(EvalError::INVALID_AST, "Invalid expression on RHS");
         }
     } else {
-        result.error = newError(EvalError::INVALID_LVALUE, "Expression is not assignable");
+        result.error = newError(EvalError::UNDECLARED_VAR,
+                                "Can't assign to undeclared variable '" + id->name + "'");
     }
 
     return result;
@@ -312,7 +379,7 @@ EvalResult Evaluator::EvaluateFuncCall(FuncCallNode* funcCall) {
                         break;
                     }
                     default: {
-                        result.error = newError(EvalError::INVALID_VALUE_TYPE);
+                        result.error = newError(EvalError::INVALID_VALUE_TYPE, "Invalid RHS Value type");
                         closeScope();
                         return result;
                     }
@@ -330,7 +397,10 @@ EvalResult Evaluator::EvaluateFuncCall(FuncCallNode* funcCall) {
         Scope* oldOuterScope = topScope->outer;
         topScope->outer = globalScope;
 
+        bool oldFuncBodyEval = funcBodyEval;
+        funcBodyEval = true;
         result = EvaluateBlockStmt(func.body);
+        funcBodyEval = oldFuncBodyEval;
 
         if (!result.isError() && result.getResultType() != func.returnType) {
             result.error = newError(EvalError::INVALID_RETURN);
@@ -358,7 +428,8 @@ EvalResult Evaluator::EvaluateDeclFunc(DeclFuncNode* subtree) {
 
                     DeclFuncNode* declFuncNode = static_cast<DeclFuncNode*>(currentStatement);
                     result.error = newError(EvalError::FUNC_DEFINITION_IS_NOT_ALLOWED,
-                                            "Definition of function '" + declFuncNode->name + "' is not allowed here");
+                                            "Definition of function '" + declFuncNode->name +
+                                            "' is not allowed here");
                     return result;
                 } else if (currentStatement->type == NodeType::ReturnValue) {
                     ReturnValueNode* returnValueNode = static_cast<ReturnValueNode*>(currentStatement);
@@ -390,11 +461,32 @@ EvalResult Evaluator::EvaluateDeclVar(DeclVarNode* subtree) {
         std::string idName = subtree->id->name;
 
         if (!topScope->symbolTable.isIdExist(idName)) {
-            topScope->symbolTable.addNewIdentifier(idName);
-
             if (subtree->expr != nullptr) {
-                result = EvaluateAssignValue(subtree->id, subtree->expr);
+                const EvalResult& exprResult = Evaluate(subtree->expr);
+                if (exprResult.isError()) {
+                    return exprResult;
+                }
+
+                switch (exprResult.getResultType()) {
+                    case ValueType::Number: {
+                        topScope->symbolTable.addNewIdentifier(idName);
+                        topScope->symbolTable.setIdValueDouble(idName, exprResult.getResultDouble());
+                        break;
+                    }
+                    case ValueType::Bool: {
+                        topScope->symbolTable.addNewIdentifier(idName);
+                        topScope->symbolTable.setIdValueBool(idName, exprResult.getResultBool());
+                        break;
+                    }
+                    default: {
+                        result.error = newError(EvalError::INVALID_VALUE_TYPE, "Invalid RHS Value type");
+                        return result;
+                    }
+                }
+            } else {
+                topScope->symbolTable.addNewIdentifier(idName);
             }
+
             result.setValueString("Declare Variable");
         } else {
             result.error = newError(EvalError::VAR_REDEFINITION, "Redefinition of variable '" + idName + "'");
@@ -475,12 +567,22 @@ EvalResult Evaluator::EvaluateBlockStmt(BlockStmtNode* subtree) {
         }
 
         if (currentStatement->type == NodeType::ReturnValue) {
-            return currentResult;
+            if (funcBodyEval) {
+                return currentResult;
+            } else {
+                result.error = newError(EvalError::INVALID_OPERATION, "Return statement allowed only in functions");
+                return result;
+            }
         }
+
         stmtResults.emplace_back(currentResult);
     }
 
-    result.setBlockResult(stmtResults);
+    if (funcBodyEval) {
+        result.setVoidResult();
+    } else {
+        result.setBlockResult(stmtResults);
+    }
     return result;
 }
 
@@ -494,24 +596,6 @@ EvalResult Evaluator::EvaluateIfStmt(IfStmtNode* subtree) {
     }
 
     openScope();
-
-//    // check for not allowed statements
-//    for (const auto currentStatement : subtree->body->stmtList) {
-//        if (currentStatement->type == NodeType::ReturnValue) {
-//            result.error = newError(EvalError::INVALID_OPERATION, "Return statement allowed only in functions");
-//            closeScope();
-//            return result;
-//        }
-//    }
-//    if (subtree->elseBody) {
-//        for (const auto currentStatement : subtree->elseBody->stmtList) {
-//            if (currentStatement->type == NodeType::ReturnValue) {
-//                result.error = newError(EvalError::INVALID_OPERATION, "Return statement allowed only in functions");
-//                closeScope();
-//                return result;
-//            }
-//        }
-//    }
 
     if (conditionResult.getResultBool()) {
         result = EvaluateBlockStmt(subtree->body);
@@ -543,18 +627,10 @@ EvalResult Evaluator::EvaluateForLoopStmt(ForLoopNode* subtree) {
 
     std::vector<EvalResult> blockStmtResults;
 
-//    // check for not allowed statements
-//    for (const auto currentStatement : subtree->body->stmtList) {
-//        if (currentStatement->type == NodeType::ReturnValue) {
-//            result.error = newError(EvalError::INVALID_OPERATION, "Return statement allowed only in functions");
-//            closeScope();
-//            return result;
-//        }
-//    }
-
     EvalResult conditionResult;
     while (subtree->condition == nullptr ||
-           (!(conditionResult = EvaluateBoolExpr(subtree->condition)).isError() && conditionResult.getResultBool())) {
+           (!(conditionResult = EvaluateBoolExpr(subtree->condition)).isError() &&
+            conditionResult.getResultBool())) {
         EvalResult currentBlockResult = EvaluateBlockStmt(subtree->body);
         blockStmtResults.emplace_back(currentBlockResult);
 
@@ -586,8 +662,11 @@ EvalResult Evaluator::Evaluate(ASTNode* root) {
         if (node != nullptr) {
             if (node->binOpType == BinOpType::OperatorAssign) {
                 IdentifierNode* id = dynamic_cast<IdentifierNode*>(node->left);
-
-                result = EvaluateAssignValue(id, node->right);
+                if (id != nullptr) {
+                    result = EvaluateAssignValue(id, node->right);
+                } else {
+                    result.error = newError(EvalError::INVALID_LVALUE);
+                }
             } else if (node->binOpType == BinOpType::OperatorPlus ||
                        node->binOpType == BinOpType::OperatorMinus ||
                        node->binOpType == BinOpType::OperatorMul ||
