@@ -23,7 +23,8 @@ public:
         FUNC_DEFINITION_IS_NOT_ALLOWED,
         UNDECLARED_FUNC,
         NO_MATCHING_FUNC,
-        INVALID_RETURN
+        INVALID_RETURN,
+        BREAK_EVAL
     };
 
     const std::string& what() const;
