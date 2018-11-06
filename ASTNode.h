@@ -20,7 +20,7 @@ namespace NodeType {
         IfStmt,
         ForLoop,
         CompoundStmt,
-        ReturnValue,
+        ReturnStmt,
         BreakStmt
     };
 }
@@ -299,14 +299,14 @@ struct ForLoopNode : ASTNode {
     }
 };
 
-struct ReturnValueNode : ASTNode {
+struct ReturnStmtNode : ASTNode {
     ASTNode* expression;
 
-    ReturnValueNode() {
-        type = NodeType::ReturnValue;
+    ReturnStmtNode() {
+        type = NodeType::ReturnStmt;
     }
 
-    ~ReturnValueNode() {
+    ~ReturnStmtNode() {
         delete expression;
     }
 };
