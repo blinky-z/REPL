@@ -331,7 +331,7 @@ EvalResult Evaluator::EvaluateAssignValue(IdentifierNode* id, ASTNode* expr) {
     return result;
 }
 
-EvalResult Evaluator::EvaluateReturnStmt(ReturnValueNode* subtree) {
+EvalResult Evaluator::EvaluateReturnStmt(ReturnStmtNode* subtree) {
     EvalResult result;
 
     if (subtree->expression != nullptr) {
@@ -397,13 +397,22 @@ EvalResult Evaluator::EvaluateFuncCall(FuncCallNode* funcCall) {
         Scope* oldOuterScope = topScope->outer;
         topScope->outer = globalScope;
 
-        bool oldFuncBodyEval = funcBodyEval;
-        funcBodyEval = true;
+        bool oldFuncBodyEval = funcEval;
+        funcEval = true;
         result = EvaluateBlockStmt(func.body);
-        funcBodyEval = oldFuncBodyEval;
+        funcEval = oldFuncBodyEval;
 
-        if (!result.isError() && result.getResultType() != func.returnType) {
-            result.error = newError(EvalError::INVALID_RETURN);
+
+        if (!result.isError()) {
+            if (result.getResultType() ==
+                ValueType::Compound) { // function returned without return statement, so we have
+                // void function (not error) or int/bool function without return statement (error)
+                result.setVoidResult();
+            }
+
+            if (result.getResultType() != func.returnType) {
+                result.error = newError(EvalError::INVALID_RETURN);
+            }
         }
 
         topScope->outer = oldOuterScope;
@@ -423,6 +432,8 @@ EvalResult Evaluator::EvaluateDeclFunc(DeclFuncNode* subtree) {
     if (topScope == globalScope) { // func can be declared only in global scope
         if (!functions->symbolTable.isFuncExist(funcName)) {
             // check for not allowed statements in function body
+            // TODO: сейчас я не могу распозновать неправильные выражения внутри других инструкций
+            // например, если я встречу if statement, я не смотрю внутрь и не смотрю какие инструкции содержатся
             for (const auto& currentStatement : subtree->body->stmtList) {
                 if (currentStatement->type == NodeType::DeclFunc) {
 
@@ -431,12 +442,14 @@ EvalResult Evaluator::EvaluateDeclFunc(DeclFuncNode* subtree) {
                                             "Definition of function '" + declFuncNode->name +
                                             "' is not allowed here");
                     return result;
-                } else if (currentStatement->type == NodeType::ReturnValue) {
-                    ReturnValueNode* returnValueNode = static_cast<ReturnValueNode*>(currentStatement);
+                } else if (currentStatement->type == NodeType::ReturnStmt) {
+                    ReturnStmtNode* returnValueNode = static_cast<ReturnStmtNode*>(currentStatement);
                     if (subtree->returnType == ValueType::Void && returnValueNode->expression != nullptr) {
                         result.error = newError(EvalError::INVALID_RETURN, "Void function can't return values");
                         return result;
                     }
+                } else if (currentStatement->type == NodeType::BreakStmt) {
+                    result.error = newError(EvalError::INVALID_OPERATION, "Break statement allowed only in for loop");
                 }
             }
 
@@ -561,13 +574,34 @@ EvalResult Evaluator::EvaluateBlockStmt(BlockStmtNode* subtree) {
 
     std::vector<EvalResult> stmtResults;
     for (auto currentStatement : subtree->stmtList) {
-        const EvalResult& currentResult = Evaluate(currentStatement);
-        if (currentResult.isError()) {
-            return currentResult;
+        if (currentStatement->type == NodeType::BreakStmt) {
+            if (forLoopEval) {
+                result.setBlockResult(stmtResults);
+                result.error = newError(EvalError::BREAK_EVAL);
+            } else {
+                result.error = newError(EvalError::INVALID_OPERATION, "Break statement allowed only in for loop");
+            }
+            return result;
         }
 
-        if (currentStatement->type == NodeType::ReturnValue) {
-            if (funcBodyEval) {
+        const EvalResult& currentResult = Evaluate(currentStatement);
+        if (currentResult.isError()) {
+            if (currentResult.error.errorCode == EvalError::BREAK_EVAL) {
+                EvalResult interuptedResult = currentResult;
+                interuptedResult.error.errorCode = EvalError::null;
+
+                stmtResults.emplace_back(interuptedResult);
+
+                result.setBlockResult(stmtResults);
+                result.error = newError(EvalError::BREAK_EVAL);
+                return result;
+            } else {
+                return currentResult;
+            }
+        }
+
+        if (currentStatement->type == NodeType::ReturnStmt) {
+            if (funcEval) {
                 return currentResult;
             } else {
                 result.error = newError(EvalError::INVALID_OPERATION, "Return statement allowed only in functions");
@@ -578,11 +612,7 @@ EvalResult Evaluator::EvaluateBlockStmt(BlockStmtNode* subtree) {
         stmtResults.emplace_back(currentResult);
     }
 
-    if (funcBodyEval) {
-        result.setVoidResult();
-    } else {
-        result.setBlockResult(stmtResults);
-    }
+    result.setBlockResult(stmtResults);
     return result;
 }
 
@@ -591,8 +621,7 @@ EvalResult Evaluator::EvaluateIfStmt(IfStmtNode* subtree) {
 
     const EvalResult& conditionResult = EvaluateBoolExpr(subtree->condition);
     if (conditionResult.isError()) {
-        result = conditionResult;
-        return result;
+        return conditionResult;
     }
 
     openScope();
@@ -625,31 +654,48 @@ EvalResult Evaluator::EvaluateForLoopStmt(ForLoopNode* subtree) {
         }
     }
 
+    bool oldForLoopEval = forLoopEval;
+    forLoopEval = true;
+
     std::vector<EvalResult> blockStmtResults;
 
     EvalResult conditionResult;
-    while (subtree->condition == nullptr ||
-           (!(conditionResult = EvaluateBoolExpr(subtree->condition)).isError() &&
-            conditionResult.getResultBool())) {
-        EvalResult currentBlockResult = EvaluateBlockStmt(subtree->body);
+    while (subtree->condition == nullptr || (!(conditionResult = EvaluateBoolExpr(subtree->condition)).isError()
+                                             && conditionResult.getResultBool())) {
+        const EvalResult& currentBlockResult = EvaluateBlockStmt(subtree->body);
+        if (currentBlockResult.isError()) {
+            if (currentBlockResult.error.errorCode == EvalError::BREAK_EVAL) {
+                EvalResult interuptedResult = currentBlockResult;
+                interuptedResult.error.errorCode = EvalError::null;
+                blockStmtResults.emplace_back(interuptedResult);
+                break;
+            } else {
+                return currentBlockResult;
+            }
+        }
+
         blockStmtResults.emplace_back(currentBlockResult);
 
         if (subtree->inc != nullptr) {
             const EvalResult& increaseResult = Evaluate(subtree->inc);
             if (increaseResult.isError()) {
+                forLoopEval = oldForLoopEval;
                 closeScope();
                 return increaseResult;
             }
         }
     }
-    if (subtree->condition != nullptr && conditionResult.isError()) {
+
+    if (conditionResult.isError()) {
+        forLoopEval = oldForLoopEval;
         closeScope();
         return conditionResult;
     }
 
     result.setBlockResult(blockStmtResults);
-    closeScope();
 
+    forLoopEval = oldForLoopEval;
+    closeScope();
     return result;
 }
 
@@ -773,13 +819,21 @@ EvalResult Evaluator::Evaluate(ASTNode* root) {
         } else {
             result.error = newError(EvalError::INVALID_AST, "Invalid Function Call Node");
         }
-    } else if (root->type == NodeType::ReturnValue) {
-        ReturnValueNode* node = dynamic_cast<ReturnValueNode*>(root);
+    } else if (root->type == NodeType::ReturnStmt) {
+        ReturnStmtNode* node = dynamic_cast<ReturnStmtNode*>(root);
 
         if (node != nullptr) {
             result = EvaluateReturnStmt(node);
         } else {
             result.error = newError(EvalError::INVALID_AST, "Invalid Return Value Node");
+        }
+    } else if (root->type == NodeType::BreakStmt) {
+        BreakStmtNode* node = dynamic_cast<BreakStmtNode*>(root);
+
+        if (node != nullptr) {
+            result.error = newError(EvalError::INVALID_OPERATION, "Break statement allowed only in for loop");
+        } else {
+            result.error = newError(EvalError::INVALID_AST, "Invalid Break Statement Node");
         }
     } else {
         result.error = newError(EvalError::INVALID_AST);
