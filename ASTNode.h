@@ -232,6 +232,7 @@ struct BlockStmtNode : ASTNode {
 struct IfStmtNode : ASTNode {
     ASTNode* condition;
     BlockStmtNode* body;
+    std::vector<IfStmtNode*> elseIfStmts;
     BlockStmtNode* elseBody;
 
     IfStmtNode() {
