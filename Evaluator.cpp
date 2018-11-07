@@ -470,42 +470,38 @@ EvalResult Evaluator::EvaluateDeclFunc(DeclFuncNode* subtree) {
 EvalResult Evaluator::EvaluateDeclVar(DeclVarNode* subtree) {
     EvalResult result;
 
-    if (subtree->id != nullptr) {
-        std::string idName = subtree->id->name;
+    std::string idName = subtree->id->name;
 
-        if (!topScope->symbolTable.isIdExist(idName)) {
-            if (subtree->expr != nullptr) {
-                const EvalResult& exprResult = Evaluate(subtree->expr);
-                if (exprResult.isError()) {
-                    return exprResult;
-                }
-
-                switch (exprResult.getResultType()) {
-                    case ValueType::Number: {
-                        topScope->symbolTable.addNewIdentifier(idName);
-                        topScope->symbolTable.setIdValueDouble(idName, exprResult.getResultDouble());
-                        break;
-                    }
-                    case ValueType::Bool: {
-                        topScope->symbolTable.addNewIdentifier(idName);
-                        topScope->symbolTable.setIdValueBool(idName, exprResult.getResultBool());
-                        break;
-                    }
-                    default: {
-                        result.error = newError(EvalError::INVALID_VALUE_TYPE, "Invalid RHS Value type");
-                        return result;
-                    }
-                }
-            } else {
-                topScope->symbolTable.addNewIdentifier(idName);
+    if (!topScope->symbolTable.isIdExist(idName)) {
+        if (subtree->expr != nullptr) {
+            const EvalResult& exprResult = Evaluate(subtree->expr);
+            if (exprResult.isError()) {
+                return exprResult;
             }
 
-            result.setValueString("Declare Variable");
+            switch (exprResult.getResultType()) {
+                case ValueType::Number: {
+                    topScope->symbolTable.addNewIdentifier(idName);
+                    topScope->symbolTable.setIdValueDouble(idName, exprResult.getResultDouble());
+                    break;
+                }
+                case ValueType::Bool: {
+                    topScope->symbolTable.addNewIdentifier(idName);
+                    topScope->symbolTable.setIdValueBool(idName, exprResult.getResultBool());
+                    break;
+                }
+                default: {
+                    result.error = newError(EvalError::INVALID_VALUE_TYPE, "Invalid RHS Value type");
+                    return result;
+                }
+            }
         } else {
-            result.error = newError(EvalError::VAR_REDEFINITION, "Redefinition of variable '" + idName + "'");
+            topScope->symbolTable.addNewIdentifier(idName);
         }
+
+        result.setValueString("Declare Variable");
     } else {
-        result.error = newError(EvalError::INVALID_AST);
+        result.error = newError(EvalError::VAR_REDEFINITION, "Redefinition of variable '" + idName + "'");
     }
 
     return result;
@@ -628,12 +624,22 @@ EvalResult Evaluator::EvaluateIfStmt(IfStmtNode* subtree) {
 
     if (conditionResult.getResultBool()) {
         result = EvaluateBlockStmt(subtree->body);
-    } else {
-        if (subtree->elseBody) {
-            result = EvaluateBlockStmt(subtree->elseBody);
-        } else {
-            result.setBlockResult(std::vector<EvalResult>{});
+    } else if (subtree->elseIfStmts.size() != 0) {
+        for (const auto& currentElseIfStmt : subtree->elseIfStmts) {
+            const EvalResult& elseIfCondResult = EvaluateBoolExpr(currentElseIfStmt->condition);
+            if (elseIfCondResult.isError()) {
+                return conditionResult;
+            }
+
+            if (elseIfCondResult.getResultBool()) {
+                result = EvaluateBlockStmt(currentElseIfStmt->body);
+                break;
+            }
         }
+    } else if (subtree->elseBody) {
+        result = EvaluateBlockStmt(subtree->elseBody);
+    } else {
+        result.setVoidResult();
     }
 
     closeScope();
