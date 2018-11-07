@@ -312,6 +312,24 @@ BlockStmtNode* Parser::parseBlockStmt() {
     return createBlockStmtNode(stmtList);
 }
 
+IfStmtNode* Parser::parseElseIfStmt() {
+    expect("if");
+    expect("(");
+
+    bool oldParenthesesControl = parenthesesControl;
+    parenthesesControl = true;
+    ASTNode* condition = parseExpression();
+    parenthesesControl = oldParenthesesControl;
+
+    expect(")");
+
+    BlockStmtNode* body = parseBlockStmt();
+    std::vector<IfStmtNode*> elseIfStmts;
+    BlockStmtNode* elseBody = nullptr;
+
+    return createIfStmtNode(condition, body, elseIfStmts, elseBody);
+}
+
 IfStmtNode* Parser::parseIfStmt() {
     expect("if");
     expect("(");
@@ -324,13 +342,29 @@ IfStmtNode* Parser::parseIfStmt() {
     expect(")");
 
     BlockStmtNode* body = parseBlockStmt();
+    std::vector<IfStmtNode*> elseIfStmts;
     BlockStmtNode* elseBody = nullptr;
+
+    // parse else if statements
+    while (true) {
+        if (tokens.lookNextToken().Type == TokenType::ElseStmt) {
+            tokens.getNextToken();
+            if (tokens.lookNextToken().Type == TokenType::IfStmt) {
+                elseIfStmts.emplace_back(parseElseIfStmt());
+                continue;
+            }
+            tokens.returnToken();
+        }
+        break;
+    }
+
+    // parse else stmt
     if (tokens.lookNextToken().Type == TokenType::ElseStmt) {
         tokens.getNextToken();
         elseBody = parseBlockStmt();
     }
 
-    return createIfStmtNode(condition, body, elseBody);
+    return createIfStmtNode(condition, body, elseIfStmts, elseBody);
 }
 
 ASTNode* Parser::parseForLoopInit() {
@@ -542,10 +576,13 @@ BlockStmtNode* Parser::createBlockStmtNode(const std::vector<ASTNode*>& statemen
     return node;
 }
 
-IfStmtNode* Parser::createIfStmtNode(ASTNode* condition, BlockStmtNode* stmtList, BlockStmtNode* elseStmtList) {
+IfStmtNode*
+Parser::createIfStmtNode(ASTNode* condition, BlockStmtNode* stmtList, std::vector<IfStmtNode*> elseIfStmts,
+                         BlockStmtNode* elseStmtList) {
     IfStmtNode* node = new IfStmtNode;
     node->condition = condition;
     node->body = stmtList;
+    node->elseIfStmts = elseIfStmts;
     node->elseBody = elseStmtList;
 
     return node;
@@ -606,7 +643,7 @@ std::pair<std::queue<Token>, std::queue<ASTNode*>> Parser::convertToReversePolis
             while (!opStack.empty() && isOperator(opStack.top())) {
                 const Token& topOp = opStack.top();
                 if ((opPrecedence[curOp.Value] == opPrecedence[topOp.Value] && isOpLeftAssociative(topOp)) ||
-                        (opPrecedence[curOp.Value] < opPrecedence[topOp.Value])) {
+                    (opPrecedence[curOp.Value] < opPrecedence[topOp.Value])) {
                     expr.push(opStack.top());
                     opStack.pop();
                     continue;

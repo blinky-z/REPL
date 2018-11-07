@@ -38,7 +38,8 @@ private:
 
     BlockStmtNode* createBlockStmtNode(const std::vector<ASTNode*>& statements);
 
-    IfStmtNode* createIfStmtNode(ASTNode* condition, BlockStmtNode* stmtList, BlockStmtNode* elseStmtList);
+    IfStmtNode* createIfStmtNode(ASTNode* condition, BlockStmtNode* stmtList, std::vector<IfStmtNode*> elseIfStmts,
+                                 BlockStmtNode* elseStmtList);
 
     ForLoopNode* createForLoopNode(ASTNode* init, ASTNode* cond, ASTNode* inc, BlockStmtNode* stmtList);
 
@@ -71,6 +72,8 @@ private:
     BreakStmtNode* parseBreakStmt();
 
     IfStmtNode* parseIfStmt();
+
+    IfStmtNode* parseElseIfStmt();
 
     ASTNode* parseForLoopInit();
 

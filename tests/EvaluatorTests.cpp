@@ -925,11 +925,11 @@ TEST_CASE("Do not evaluate if statement (condition is false)", "[Evaluator]") {
     expressionHandler.handleExpression(expr1);
 
     EvalResult result = expressionHandler.handleExpression(expr2);
-    REQUIRE(result.getResultType() == ValueType::Compound);
-    REQUIRE(result.getResultBlock().empty());
+    REQUIRE(result.getResultType() == ValueType::Void);
 }
 
-TEST_CASE("Evaluate variable using inside block scope, outer scope is global", "[Evaluator]") {
+TEST_CASE("Use local variables but not outer scope variables with the same name, outer scope is global",
+          "[Evaluator]") {
     ExpressionHandler expressionHandler;
 
     std::string expr1 = "var a = 5";
@@ -941,14 +941,16 @@ TEST_CASE("Evaluate variable using inside block scope, outer scope is global", "
     expressionHandler.handleExpression(expr1);
 
     EvalResult result = expressionHandler.handleExpression(expr2);
-    REQUIRE(result.getResultType() == ValueType::Compound);
+
+    REQUIRE(!result.isError());
 
     const std::vector<EvalResult> blockResult = result.getResultBlock();
     REQUIRE(blockResult.size() == 2);
     REQUIRE(blockResult[1].getResultDouble() == 150);
 }
 
-TEST_CASE("Evaluate variables using inside block scope, outer scope is block scope", "[Evaluator]") {
+TEST_CASE("Use local variables but not outer scope variables with the same name, outer scope is block scope",
+          "[Evaluator]") {
     ExpressionHandler expressionHandler;
 
     std::string expr1 = "var a = true";
@@ -1712,8 +1714,8 @@ TEST_CASE("Assert functions can take function calls as parameters", "[Evaluator]
     ExpressionHandler expressionHandler;
 
     std::string expr1 = "func int mul(var a, var b) {"
-                       "return a * b\n"
-                       "}";
+                        "return a * b\n"
+                        "}";
 
     std::string expr2 = "func int add(var a, var b) {"
                         "return a + b\n"
@@ -1752,4 +1754,50 @@ TEST_CASE("Assert functions can return function calls", "[Evaluator]") {
     REQUIRE(!result.isError());
     REQUIRE(result.getResultType() == ValueType::Number);
     REQUIRE(result.getResultDouble() == 100);
+}
+
+TEST_CASE("Evaluate if-else if statement (else if condition is true)", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "var a = 5";
+    std::string expr2 = "if (a < 0) {"
+                        "a = -1\n"
+                        "} else if (a == 5) {"
+                        "a = 0\n"
+                        "} else {"
+                        "a = 1\n"
+                        "}";
+    std::string expr3 = "a";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+
+    EvalResult result = expressionHandler.handleExpression(expr3);
+    REQUIRE(result.getResultType() == ValueType::Number);
+    REQUIRE(result.getResultDouble() == 0);
+}
+
+TEST_CASE("Evaluate nested if statement inside another if statement", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "var a = 5";
+    std::string expr2 = "if (a < 0) {"
+                        "a = -1\n"
+                        "} else {"
+                        "   if (a == 0) {"
+                        "       a = 0\n"
+                        "   } else if (a == 5) {"
+                        "       a = 1\n"
+                        "   } else {"
+                        "       a == 2\n"
+                        "   }"
+                        "}";
+    std::string expr3 = "a";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+
+    EvalResult result = expressionHandler.handleExpression(expr3);
+    REQUIRE(result.getResultType() == ValueType::Number);
+    REQUIRE(result.getResultDouble() == 1);
 }
