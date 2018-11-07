@@ -1730,3 +1730,26 @@ TEST_CASE("Assert functions can take function calls as parameters", "[Evaluator]
     REQUIRE(result.getResultType() == ValueType::Number);
     REQUIRE(result.getResultDouble() == 3500);
 }
+
+TEST_CASE("Assert functions can return function calls", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func int mul(var a, var b) {"
+                        "return a * b\n"
+                        "}";
+
+    std::string expr2 = "func int add_mul(var a, var b) {"
+                        "return mul(a, b) + mul(a, b)\n"
+                        "}";
+
+    std::string expr3 = "add_mul(5, 10)";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+
+    EvalResult result = expressionHandler.handleExpression(expr3);
+
+    REQUIRE(!result.isError());
+    REQUIRE(result.getResultType() == ValueType::Number);
+    REQUIRE(result.getResultDouble() == 100);
+}
