@@ -186,7 +186,7 @@ std::vector<ASTNode*> Parser::parseFuncCallParams() {
            nextToken.Type != TokenType::eof && nextToken.Type != TokenType::NL) {
         ASTNode* arg = parseExpression();
         if (arg->type != NodeType::NumberValue && arg->type != NodeType::BoolValue && arg->type != NodeType::Id &&
-            arg->type != NodeType::BinOp) {
+            arg->type != NodeType::BinOp && arg->type != NodeType::FuncCall) {
             throw std::runtime_error("Invalid parameter");
         }
         if (arg->type == NodeType::BinOp) {

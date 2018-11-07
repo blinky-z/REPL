@@ -1707,3 +1707,26 @@ TEST_CASE("Assert that break statement is allowed only in for loops - use in fun
 
     REQUIRE(result.error.errorCode == EvalError::INVALID_OPERATION);
 }
+
+TEST_CASE("Assert functions can take function calls as parameters", "[Evaluator]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func int mul(var a, var b) {"
+                       "return a * b\n"
+                       "}";
+
+    std::string expr2 = "func int add(var a, var b) {"
+                        "return a + b\n"
+                        "}";
+
+    std::string expr3 = "mul(add(add(5, 10), add(10, 10)), 100)";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+
+    EvalResult result = expressionHandler.handleExpression(expr3);
+
+    REQUIRE(!result.isError());
+    REQUIRE(result.getResultType() == ValueType::Number);
+    REQUIRE(result.getResultDouble() == 3500);
+}
