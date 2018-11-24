@@ -132,10 +132,10 @@ const Token Lexer::tokenizeStringLiteral() {
         token.Type = TokenType::DeclareFunc;
         token.Value = "func";
     } else if (strLiteral == "bool") {
-        token.Type = TokenType::FuncReturnBool;
+        token.Type = TokenType::BoolType;
         token.Value = strLiteral;
     } else if (strLiteral == "int") {
-        token.Type = TokenType::FuncReturnInt;
+        token.Type = TokenType::IntType;
         token.Value = strLiteral;
     } else if (strLiteral == "void") {
         token.Type = TokenType::FuncReturnVoid;
