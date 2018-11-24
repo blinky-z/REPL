@@ -15,13 +15,14 @@ namespace NodeType {
         DeclFunc,
         FuncCall,
         BinOp,
-        NumberValue,
-        BoolValue,
+        ConstNumber,
+        ConstBool,
         IfStmt,
         ForLoop,
         CompoundStmt,
         ReturnStmt,
-        BreakStmt
+        BreakStmt,
+        ProgramTranslation
     };
 }
 
@@ -49,8 +50,8 @@ struct TypesStringNames {
         nodeTypeStringNames[NodeType::DeclVar] = "Var Declaration";
         nodeTypeStringNames[NodeType::Id] = "Identifier";
         nodeTypeStringNames[NodeType::BinOp] = "Binary Operation";
-        nodeTypeStringNames[NodeType::NumberValue] = "Number";
-        nodeTypeStringNames[NodeType::BoolValue] = "Bool";
+        nodeTypeStringNames[NodeType::ConstNumber] = "Number";
+        nodeTypeStringNames[NodeType::ConstBool] = "Bool";
         nodeTypeStringNames[NodeType::IfStmt] = "If Statement";
         nodeTypeStringNames[NodeType::ForLoop] = "For loop Statement";
         nodeTypeStringNames[NodeType::CompoundStmt] = "Compound Statement";
@@ -86,6 +87,14 @@ struct ASTNode {
     }
 };
 
+struct ProgramTranslationNode : ASTNode {
+    std::vector<ASTNode*> statements;
+
+    ProgramTranslationNode() {
+        type = NodeType::ProgramTranslation;
+    }
+};
+
 struct BinOpNode : ASTNode {
     BinOpType::ASTNodeBinOpType binOpType;
     ASTNode* left;
@@ -116,11 +125,11 @@ struct BinOpNode : ASTNode {
     }
 };
 
-struct NumberNode : ASTNode {
+struct ConstNumberNode : ASTNode {
     double value;
 
-    NumberNode() {
-        type = NodeType::NumberValue;
+    ConstNumberNode() {
+        type = NodeType::ConstNumber;
     }
 
     void print() override {
@@ -133,11 +142,11 @@ struct NumberNode : ASTNode {
     }
 };
 
-struct BoolNode : ASTNode {
+struct ConstBoolNode : ASTNode {
     bool value;
 
-    BoolNode() {
-        type = NodeType::BoolValue;
+    ConstBoolNode() {
+        type = NodeType::ConstBool;
     }
 
     void print() override {
@@ -152,9 +161,11 @@ struct BoolNode : ASTNode {
 
 struct IdentifierNode : ASTNode {
     std::string name;
+    ValueType::Type valueType;
 
     IdentifierNode() {
         type = NodeType::Id;
+        valueType = ValueType::Undefined;
     }
 
     void print() override {
@@ -318,18 +329,18 @@ struct BreakStmtNode : ASTNode {
     }
 };
 
-struct DeclFuncNode : ASTNode {
+struct FuncDeclNode : ASTNode {
     std::string name;
     ValueType::Type returnType;
     std::vector<IdentifierNode*> args;
     unsigned long argsSize;
     BlockStmtNode* body;
 
-    DeclFuncNode() {
+    FuncDeclNode() {
         type = NodeType::DeclFunc;
     }
 
-    ~DeclFuncNode() {
+    ~FuncDeclNode() {
         for (const auto currentId : args) {
             delete currentId;
         }
