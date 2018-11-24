@@ -18,9 +18,9 @@ class Parser {
 private:
     BinOpNode* createBinOpNode(BinOpType::ASTNodeBinOpType type, ASTNode* left, ASTNode* right);
 
-    NumberNode* createNumberNode(double value);
+    ConstNumberNode* createNumberNode(double value);
 
-    BoolNode* createBoolNode(bool value);
+    ConstBoolNode* createBoolNode(bool value);
 
     IdentifierNode* createIdentifierNode(const std::string& name);
 
@@ -30,7 +30,7 @@ private:
 
     FuncCallNode* createFuncCallNode(const std::string& name, const std::vector<ASTNode*>& args);
 
-    DeclFuncNode* createDeclFuncNode(const std::string& name,
+    FuncDeclNode* createDeclFuncNode(const std::string& name,
                                      ValueType::Type returnType, const std::vector<IdentifierNode*>& args,
                                      BlockStmtNode* body);
 
@@ -59,7 +59,7 @@ private:
 
     std::vector<IdentifierNode*> parseDeclFuncParams();
 
-    DeclFuncNode* parseDeclFunc();
+    FuncDeclNode* parseDeclFunc();
 
     std::vector<ASTNode*> parseFuncCallParams();
 
@@ -98,8 +98,14 @@ private:
     ASTNode* parseStatement();
 
     bool parenthesesControl;
+
+    void skipWhitespaces();
 public:
-    ASTNode* parse(const TokenContainer& tokenizedSourceData);
+    Parser() {
+        parenthesesControl = false;
+    }
+
+    ProgramTranslationNode* parse(const TokenContainer& sourceData);
 };
 
 #endif //BASHCOMPILER_PARSER_H
