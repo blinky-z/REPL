@@ -29,8 +29,8 @@ struct IdentifierTypeStringNames {
 
 struct Identifier {
     ValueType::Type Type;
-    double NumValue;
-    bool BoolValue;
+    double numValue;
+    bool boolValue;
 
     Identifier() {
         Type = ValueType::Undefined;
