@@ -50,9 +50,9 @@ private:
 
     Scope* lookTopIdScope(const std::string& idName);
 
-    Scope* topScope;
-
     Scope* globalScope;
+
+    Scope* topScope;
 
     Scope* functions;
 
@@ -65,14 +65,8 @@ private:
     bool functionBodyCheck;
     ValueType::Type functionReturnType;
 public:
-    SemanticAnalyzer() {
-        globalScope = new Scope(nullptr);
-        topScope = globalScope;
-        functions = globalScope;
-
-        forLoopCheck = false;
-        functionBodyCheck = false;
-    }
+    SemanticAnalyzer() : globalScope(new Scope(nullptr)), topScope(globalScope), functions(globalScope),
+                                     forLoopCheck(false), functionBodyCheck(false) {};
 
     SemanticAnalysisResult checkProgram(ProgramTranslationNode* root);
 };

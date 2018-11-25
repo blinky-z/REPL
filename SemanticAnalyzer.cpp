@@ -39,33 +39,23 @@ SemanticAnalysisResult SemanticAnalyzer::checkVarDecl(DeclVarNode* node) {
     }
 
     if (node->expr != nullptr) {
+        SemanticAnalysisResult checkResult = checkStatement(node->expr);
+        if (checkResult.isError()) {
+            return checkResult;
+        }
+
         switch (node->expr->type) {
             case NodeType::ConstNumber: {
-                SemanticAnalysisResult checkResult = checkStatement(node->expr);
-                if (checkResult.isError()) {
-                    return checkResult;
-                }
-
                 double value = 0;
                 topScope->symbolTable.addNewIdentifier(idName, value);
                 break;
             }
             case NodeType::ConstBool: {
-                SemanticAnalysisResult checkResult = checkStatement(node->expr);
-                if (checkResult.isError()) {
-                    return checkResult;
-                }
-
                 bool value = false;
                 topScope->symbolTable.addNewIdentifier(idName, value);
                 break;
             }
             case NodeType::BinOp: {
-                SemanticAnalysisResult checkResult = checkStatement(node->expr);
-                if (checkResult.isError()) {
-                    return checkResult;
-                }
-
                 BinOpNode* binExpr = static_cast<BinOpNode*>(node->expr);
                 if (binExpr->binOpType == BinOpType::OperatorPlus ||
                     binExpr->binOpType == BinOpType::OperatorMinus ||
@@ -87,11 +77,6 @@ SemanticAnalysisResult SemanticAnalyzer::checkVarDecl(DeclVarNode* node) {
                 break;
             }
             case NodeType::Id: {
-                SemanticAnalysisResult checkResult = checkStatement(node->expr);
-                if (checkResult.isError()) {
-                    return checkResult;
-                }
-
                 IdentifierNode* rhsId = static_cast<IdentifierNode*>(node->expr);
                 Scope* rhsIdScope = lookTopIdScope(rhsId->name);
 
@@ -105,11 +90,6 @@ SemanticAnalysisResult SemanticAnalyzer::checkVarDecl(DeclVarNode* node) {
                 break;
             }
             case NodeType::FuncCall: {
-                SemanticAnalysisResult checkResult = checkStatement(node->expr);
-                if (checkResult.isError()) {
-                    return checkResult;
-                }
-
                 FuncCallNode* funcCallNode = static_cast<FuncCallNode*>(node->expr);
                 const std::string& funcName = funcCallNode->name;
 
