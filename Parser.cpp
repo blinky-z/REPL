@@ -358,25 +358,20 @@ IfStmtNode* Parser::parseIfStmt() {
     std::vector<IfStmtNode*> elseIfStmts;
     BlockStmtNode* elseBody = nullptr;
 
-    skipWhitespaces();
-    if (tokens.lookNextToken().Type != TokenType::ElseStmt) {
-        tokens.returnToken();
-    } else {
-        // parse else if statements and else statement
-        while (true) {
-            skipWhitespaces();
-            if (tokens.lookNextToken().Type == TokenType::ElseStmt) {
-                tokens.getNextToken();
-                if (tokens.lookNextToken().Type == TokenType::IfStmt) {
-                    elseIfStmts.emplace_back(parseElseIfStmt());
-                } else {
-                    skipWhitespaces();
-                    elseBody = parseBlockStmt();
-                    break;
-                }
+    while (true) {
+        skipWhitespaces();
+        if (tokens.lookNextToken().Type == TokenType::ElseStmt) {
+            tokens.getNextToken();
+            if (tokens.lookNextToken().Type == TokenType::IfStmt) {
+                elseIfStmts.emplace_back(parseElseIfStmt());
             } else {
+                skipWhitespaces();
+                elseBody = parseBlockStmt();
                 break;
             }
+        } else {
+            tokens.returnToken(); // return ending if instruction newline that we skipped calling SkipWhitespaces()
+            break;
         }
     }
 
