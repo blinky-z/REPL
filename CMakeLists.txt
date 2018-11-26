@@ -5,6 +5,7 @@ project(Compiler)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
 
+add_subdirectory(sole)
 add_subdirectory(tests)
 add_executable(REPL
         repl.cpp
@@ -27,7 +28,6 @@ add_executable(Compiler
         Parser.cpp Parser.h
         TokenContainer.cpp TokenContainer.h
         SymbolTable.cpp SymbolTable.h
-        EvalResult.cpp EvalResult.h
         Function.h
         BashGenerator.cpp BashGenerator.h
         SemanticAnalysisResult.cpp SemanticAnalysisResult.h
