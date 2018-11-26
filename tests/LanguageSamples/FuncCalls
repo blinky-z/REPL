@@ -1,0 +1,46 @@
+func int add(var int m, var int n) {
+    return m + n
+}
+func int mul(var int m, var int n) {
+    return m * n
+}
+func bool isPositive(var int a) {
+    return a > 0
+}
+
+func void D() {}
+
+add(5, 6)
+var a = add(mul(mul(10, 8), mul(20, 4)), 10)
+var b = mul(10, 8) - add(1, 12)
+add(a, b) + mul(a, b) + add(a, b)
+var c = mul(5, 10) > add(5, 10)
+add(1, 0) == mul(1, 1)
+isPositive(-5)
+
+----
+
+function add {
+    local m=$1
+    local n=$2
+    echo $(($m + $n)); return
+}
+function mul {
+    local m=$1
+    local n=$2
+    echo $(($m * $n)); return
+}
+function isPositive {
+    local a=$1
+    echo $(($a > 0)); return
+}
+function D {
+    :
+}
+add 5 6 | tail -n1
+a=$(add $(mul $(mul 10 8 | tail -n1) $(mul 20 4 | tail -n1) | tail -n1) 10 | tail -n1)
+b=$(($(mul 10 8 | tail -n1) - $(add 1 12 | tail -n1)))
+echo $(($(add $a $b | tail -n1) + $(mul $a $b | tail -n1) + $(add $a $b | tail -n1)))
+c=$(($(mul 5 10 | tail -n1) > $(add 5 10 | tail -n1)))
+echo $(($(add 1 0 | tail -n1) == $(mul 1 1 | tail -n1)))
+isPositive $((0 - 5)) | tail -n1

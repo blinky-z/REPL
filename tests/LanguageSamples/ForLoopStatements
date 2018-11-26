@@ -1,0 +1,109 @@
+for (var i = 0; i < 10; i = i + 1) {
+    i
+}
+
+var i2 = -5
+for (var i1 = 0; ; i1 = i1 + 1) {
+    i2 = i2 + 2
+    i1
+    i2
+    if (i2 > i1) {
+        i1
+        i2
+        var i1 = 100
+        var i2 = 10
+        i1
+        i2
+        break
+    }
+}
+
+var i3 = 5
+for (; ; i3 = i3 - 1) {
+    if (i3 < 0) {
+        break
+    }
+}
+
+var i4 = 10
+for ( ; ; ) {
+    i4 = i4 / 2 - 1
+    i4
+    if (i4 < 0) {
+        break
+    }
+}
+
+var flag = true
+for (var i5 = 0; flag; i5 = i5 + 1) {
+    i5
+    if (i5 == 5) {
+        flag = false
+    }
+}
+
+var i6
+for (i6 = 10; i6 < 20; i6 = i6 + 1) {
+    for (var ii6 = i6; ii6 < i6 + 5; ii6 = ii6 + 1) {
+        ii6
+    }
+}
+
+----
+
+
+for ((i_af133edcc82e4b59b2fbb9e05aed4e3e=0; $(($i_af133edcc82e4b59b2fbb9e05aed4e3e < 10)); i_af133edcc82e4b59b2fbb9e05aed4e3e=$(($i_af133edcc82e4b59b2fbb9e05aed4e3e + 1)))) {
+    echo $i_af133edcc82e4b59b2fbb9e05aed4e3e
+}
+
+i2=$((0 - 5))
+for ((i1_b07287320840474c871fe2c3547e5151=0; ; i1_b07287320840474c871fe2c3547e5151=$(($i1_b07287320840474c871fe2c3547e5151 + 1)))) {
+    i2=$(($i2 + 2))
+    echo $i1_b07287320840474c871fe2c3547e5151
+    echo $i2
+    if (($i2 > $i1_b07287320840474c871fe2c3547e5151)); then {
+        echo $i1_b07287320840474c871fe2c3547e5151
+        echo $i2
+        i1_0cd937fe6a7a48d8ad9d18b269cd6883=100
+        i2_c2aa6bfaff9a4e00bf21415faf3d6d5a=10
+        echo $i1_0cd937fe6a7a48d8ad9d18b269cd6883
+        echo $i2_c2aa6bfaff9a4e00bf21415faf3d6d5a
+        break
+    }
+    fi
+}
+
+i3=5
+for ((; ; i3=$(($i3 - 1)))) {
+    if (($i3 < 0)); then {
+        break
+    }
+    fi
+}
+
+i4=10
+for ((; ; )) {
+    i4=$(($i4 / 2 - 1))
+    echo $i4
+    if (($i4 < 0)); then {
+        break
+    }
+    fi
+}
+
+flag=1
+for ((i5_81668d7ab7c44f4091fa89b195cd8716=0; $flag; i5_81668d7ab7c44f4091fa89b195cd8716=$(($i5_81668d7ab7c44f4091fa89b195cd8716 + 1)))) {
+    echo $i5_81668d7ab7c44f4091fa89b195cd8716
+    if (($i5_81668d7ab7c44f4091fa89b195cd8716 == 5)); then {
+        flag=0
+    }
+    fi
+}
+
+
+for ((i6=10; $(($i6 < 20)); i6=$(($i6 + 1)))) {
+    for ((ii6_71b11183ee1b460aa51e0c7452733dff=$i6; $(($ii6_71b11183ee1b460aa51e0c7452733dff < $i6 + 5)); ii6_71b11183ee1b460aa51e0c7452733dff=$(($ii6_71b11183ee1b460aa51e0c7452733dff + 1)))) {
+        echo $ii6_71b11183ee1b460aa51e0c7452733dff
+    }
+
+}

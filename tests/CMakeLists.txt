@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 project(LexerTests)
 project(EvaluatorTests)
 project(SemanticAnalyzerTests)
+project(BashGeneratorTests)
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -55,4 +56,22 @@ add_executable(LexerTests
 
         provide_catch_main.cpp
         LexerTests.cpp
+        )
+
+add_executable(BashGeneratorTests
+        #        src files
+        ../Token.h ../Identifier.h ../ASTNode.h
+        ../Lexer.cpp ../Lexer.h
+        ../Parser.cpp ../Parser.h
+        ../SymbolTable.h ../SymbolTable.cpp
+        ../TokenContainer.h ../TokenContainer.cpp
+        ../Function.h
+        ../SemanticAnalyzer.h ../SemanticAnalyzer.cpp
+        ../SemanticAnalysisResult.h ../SemanticAnalysisResult.cpp
+        ../BashGenerator.h ../BashGenerator.cpp
+        #        ------------------------
+        #        tests
+
+        provide_catch_main.cpp
+        BashGeneratorTests.cpp
         )
