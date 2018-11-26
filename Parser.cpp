@@ -255,10 +255,10 @@ std::vector<IdentifierNode*> Parser::parseDeclFuncParams() {
         expect("var");
 
         ValueType::Type paramType;
-        const Token& nextToken = tokens.getNextToken();
-        if (nextToken.Type == TokenType::IntType) {
+        const Token& paramTypeToken = tokens.getNextToken();
+        if (paramTypeToken.Type == TokenType::IntType) {
             paramType = ValueType::Number;
-        } else if (nextToken.Type == TokenType::BoolType) {
+        } else if (paramTypeToken.Type == TokenType::BoolType) {
             paramType = ValueType::Bool;
         } else {
             errorExpected("Parameter type");
@@ -276,7 +276,7 @@ std::vector<IdentifierNode*> Parser::parseDeclFuncParams() {
     return args;
 }
 
-FuncDeclNode* Parser::parseDeclFunc() {
+DeclFuncNode* Parser::parseDeclFunc() {
     expect("func");
 
     ValueType::Type returnType = parseDeclFuncReturnType();
@@ -310,6 +310,7 @@ BreakStmtNode* Parser::parseBreakStmt() {
 
 BlockStmtNode* Parser::parseBlockStmt() {
     expect("{");
+    skipWhitespaces();
 
     std::vector<ASTNode*> stmtList;
     Token nextToken;
@@ -318,6 +319,7 @@ BlockStmtNode* Parser::parseBlockStmt() {
         stmtList.emplace_back(parseStatement());
     }
 
+    skipWhitespaces();
     expect("}");
 
     return createBlockStmtNode(stmtList);
@@ -516,7 +518,7 @@ ProgramTranslationNode* Parser::parse(const TokenContainer& sourceData) {
     return ast;
 }
 
-BinOpNode* Parser::createBinOpNode(BinOpType::ASTNodeBinOpType type, ASTNode* left, ASTNode* right) {
+BinOpNode* Parser::createBinOpNode(BinOpType::Type type, ASTNode* left, ASTNode* right) {
     BinOpNode* node = new BinOpNode;
     node->binOpType = type;
     node->left = left;
@@ -567,11 +569,11 @@ FuncCallNode* Parser::createFuncCallNode(const std::string& name, const std::vec
     return node;
 }
 
-FuncDeclNode* Parser::createDeclFuncNode(const std::string& name,
+DeclFuncNode* Parser::createDeclFuncNode(const std::string& name,
                                          ValueType::Type returnType,
                                          const std::vector<IdentifierNode*>& args,
                                          BlockStmtNode* body) {
-    FuncDeclNode* node = new FuncDeclNode;
+    DeclFuncNode* node = new DeclFuncNode;
     node->name = name;
     node->returnType = returnType;
     node->args = args;

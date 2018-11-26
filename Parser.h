@@ -16,7 +16,7 @@
 
 class Parser {
 private:
-    BinOpNode* createBinOpNode(BinOpType::ASTNodeBinOpType type, ASTNode* left, ASTNode* right);
+    BinOpNode* createBinOpNode(BinOpType::Type type, ASTNode* left, ASTNode* right);
 
     ConstNumberNode* createNumberNode(double value);
 
@@ -30,7 +30,7 @@ private:
 
     FuncCallNode* createFuncCallNode(const std::string& name, const std::vector<ASTNode*>& args);
 
-    FuncDeclNode* createDeclFuncNode(const std::string& name,
+    DeclFuncNode* createDeclFuncNode(const std::string& name,
                                      ValueType::Type returnType, const std::vector<IdentifierNode*>& args,
                                      BlockStmtNode* body);
 
@@ -59,7 +59,7 @@ private:
 
     std::vector<IdentifierNode*> parseDeclFuncParams();
 
-    FuncDeclNode* parseDeclFunc();
+    DeclFuncNode* parseDeclFunc();
 
     std::vector<ASTNode*> parseFuncCallParams();
 
