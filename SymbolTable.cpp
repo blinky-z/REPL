@@ -51,7 +51,7 @@ bool SymbolTable::isFuncExist(const std::string& funcName) {
     return funcSymbolTable.find(funcName) != funcSymbolTable.end();
 }
 
-void SymbolTable::addNewFunc(FuncDeclNode* funcDecl) {
+void SymbolTable::addNewFunc(DeclFuncNode* funcDecl) {
     Function function;
     function.returnType = funcDecl->returnType;
     function.argsSize = funcDecl->argsSize;

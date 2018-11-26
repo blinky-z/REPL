@@ -27,7 +27,7 @@ namespace NodeType {
 }
 
 namespace BinOpType {
-    enum ASTNodeBinOpType {
+    enum Type {
         OperatorAssign,
         OperatorPlus,
         OperatorMinus,
@@ -93,10 +93,16 @@ struct ProgramTranslationNode : ASTNode {
     ProgramTranslationNode() {
         type = NodeType::ProgramTranslation;
     }
+
+    ~ProgramTranslationNode() {
+        for (const auto& currentStmt : statements) {
+            delete currentStmt;
+        }
+    }
 };
 
 struct BinOpNode : ASTNode {
-    BinOpType::ASTNodeBinOpType binOpType;
+    BinOpType::Type binOpType;
     ASTNode* left;
     ASTNode* right;
 
@@ -253,6 +259,9 @@ struct IfStmtNode : ASTNode {
     ~IfStmtNode() {
         delete condition;
         delete body;
+        for (const auto& currentElseIfStmt : elseIfStmts) {
+            delete currentElseIfStmt;
+        }
         delete elseBody;
     }
 
@@ -329,22 +338,22 @@ struct BreakStmtNode : ASTNode {
     }
 };
 
-struct FuncDeclNode : ASTNode {
+struct DeclFuncNode : ASTNode {
     std::string name;
     ValueType::Type returnType;
     std::vector<IdentifierNode*> args;
     unsigned long argsSize;
     BlockStmtNode* body;
 
-    FuncDeclNode() {
+    DeclFuncNode() {
         type = NodeType::DeclFunc;
     }
 
-    ~FuncDeclNode() {
+    ~DeclFuncNode() {
         for (const auto currentId : args) {
             delete currentId;
         }
-//        delete body;
+//        delete body;  // не могу удалить, потому что тело используется также в таблице символов
     }
 
     void print() override {
@@ -362,8 +371,8 @@ struct FuncCallNode : ASTNode {
     }
 
     ~FuncCallNode() {
-        for (const auto currentId : args) {
-            delete currentId;
+        for (const auto& currentArg : args) {
+            delete currentArg;
         }
     }
 

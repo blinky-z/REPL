@@ -32,7 +32,7 @@ public:
 
     bool isFuncExist(const std::string& funcName);
 
-    void addNewFunc(FuncDeclNode* funcDecl);
+    void addNewFunc(DeclFuncNode* funcDecl);
 
     Function getFunc(const std::string& funcName) const;
 
