@@ -28,7 +28,7 @@ private:
 
     SemanticAnalysisResult checkId(IdentifierNode* node);
 
-    SemanticAnalysisResult checkFuncDecl(FuncDeclNode* node);
+    SemanticAnalysisResult checkFuncDecl(DeclFuncNode* node);
 
     SemanticAnalysisResult checkFuncCall(FuncCallNode* node);
 
@@ -67,6 +67,10 @@ private:
 public:
     SemanticAnalyzer() : globalScope(new Scope(nullptr)), topScope(globalScope), functions(globalScope),
                                      forLoopCheck(false), functionBodyCheck(false) {};
+
+    ~SemanticAnalyzer() {
+        delete topScope;
+    }
 
     SemanticAnalysisResult checkProgram(ProgramTranslationNode* root);
 };

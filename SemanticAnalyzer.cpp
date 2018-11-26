@@ -123,7 +123,7 @@ SemanticAnalysisResult SemanticAnalyzer::checkVarDecl(DeclVarNode* node) {
     return SemanticAnalysisResult();
 }
 
-SemanticAnalysisResult SemanticAnalyzer::checkFuncDecl(FuncDeclNode* node) {
+SemanticAnalysisResult SemanticAnalyzer::checkFuncDecl(DeclFuncNode* node) {
     if (topScope != globalScope) {
         return newError(SemanticAnalysisResult::FUNC_DEFINITION_IS_NOT_ALLOWED);
     }
@@ -456,7 +456,9 @@ SemanticAnalysisResult SemanticAnalyzer::checkBoolExpr(ASTNode* node) {
 
         FuncCallNode* funcCall = static_cast<FuncCallNode*>(node);
 
-        if (functions->symbolTable.getFuncValueType(funcCall->name) != ValueType::Bool) {
+        if (functions->symbolTable.getFuncValueType(funcCall->name) == ValueType::Void) {
+            return newError(SemanticAnalysisResult::INVALID_VALUE_TYPE);
+        } else if (functions->symbolTable.getFuncValueType(funcCall->name) != ValueType::Bool) {
             return newError(SemanticAnalysisResult::INCOMPATIBLE_OPERAND_TYPES);
         }
     } else if (node->type == NodeType::BinOp) {
@@ -588,7 +590,7 @@ SemanticAnalysisResult SemanticAnalyzer::checkForLoop(ForLoopNode* node) {
     }
 
     if (node->condition != nullptr) {
-        SemanticAnalysisResult condCheckResult = checkStatement(node->condition);
+        SemanticAnalysisResult condCheckResult = checkBoolExpr(node->condition);
         if (condCheckResult.isError()) {
             closeScope();
             return condCheckResult;
@@ -667,7 +669,7 @@ SemanticAnalysisResult SemanticAnalyzer::checkStatement(ASTNode* node) {
             checkResult = newError(SemanticAnalysisResult::INVALID_AST, "Invalid Identifier Node");
         }
     } else if (node->type == NodeType::DeclFunc) {
-        FuncDeclNode* funcDecl = dynamic_cast<FuncDeclNode*>(node);
+        DeclFuncNode* funcDecl = dynamic_cast<DeclFuncNode*>(node);
 
         if (funcDecl != nullptr) {
             checkResult = checkFuncDecl(funcDecl);
