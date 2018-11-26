@@ -100,8 +100,12 @@ ASTNode* Parser::parseExpression() {
                         break;
                     }
                     case TokenType::Assign: {
-                        operationNode = createBinOpNode(BinOpType::OperatorAssign, operand1, operand2);
-                        nodeStack.push(operationNode);
+                        if (operand1->type == NodeType::Id) {
+                            operationNode = createBinOpNode(BinOpType::OperatorAssign, operand1, operand2);
+                            nodeStack.push(operationNode);
+                        } else {
+                            errorExpected("Identifier on the left side of assign operator");
+                        }
                         break;
                     }
                     default: {
@@ -181,11 +185,9 @@ std::string Parser::parseFuncName() {
 std::vector<ASTNode*> Parser::parseFuncCallParams() {
     std::vector<ASTNode*> args;
 
-    Token nextToken;
-    while ((nextToken = tokens.lookNextToken()).Type != TokenType::ROUND_BRACKET_END &&
-           nextToken.Type != TokenType::eof && nextToken.Type != TokenType::NL) {
+    while (tokens.lookNextToken().Type != TokenType::ROUND_BRACKET_END) {
         ASTNode* arg = parseExpression();
-        if (arg->type != NodeType::NumberValue && arg->type != NodeType::BoolValue && arg->type != NodeType::Id &&
+        if (arg->type != NodeType::ConstNumber && arg->type != NodeType::ConstBool && arg->type != NodeType::Id &&
             arg->type != NodeType::BinOp && arg->type != NodeType::FuncCall) {
             throw std::runtime_error("Invalid parameter");
         }
@@ -209,7 +211,6 @@ std::vector<ASTNode*> Parser::parseFuncCallParams() {
             expect(",");
         }
     }
-
 
     return args;
 }
@@ -252,7 +253,20 @@ std::vector<IdentifierNode*> Parser::parseDeclFuncParams() {
     while ((nextToken = tokens.lookNextToken()).Type != TokenType::ROUND_BRACKET_END &&
            nextToken.Type != TokenType::eof && nextToken.Type != TokenType::NL) {
         expect("var");
+
+        ValueType::Type paramType;
+        const Token& paramTypeToken = tokens.getNextToken();
+        if (paramTypeToken.Type == TokenType::IntType) {
+            paramType = ValueType::Number;
+        } else if (paramTypeToken.Type == TokenType::BoolType) {
+            paramType = ValueType::Bool;
+        } else {
+            errorExpected("Parameter type");
+            throw;
+        }
+
         IdentifierNode* id = parseIdentifier();
+        id->valueType = paramType;
         args.emplace_back(id);
         if (tokens.lookNextToken().Type != TokenType::ROUND_BRACKET_END) {
             expect(",");
@@ -271,6 +285,7 @@ DeclFuncNode* Parser::parseDeclFunc() {
     expect("(");
     const std::vector<IdentifierNode*>& args = parseDeclFuncParams();
     expect(")");
+    skipWhitespaces();
 
     BlockStmtNode* body = parseBlockStmt();
 
@@ -295,18 +310,16 @@ BreakStmtNode* Parser::parseBreakStmt() {
 
 BlockStmtNode* Parser::parseBlockStmt() {
     expect("{");
+    skipWhitespaces();
 
     std::vector<ASTNode*> stmtList;
     Token nextToken;
     while ((nextToken = tokens.lookNextToken()).Type != TokenType::CURLY_BRACKET_END &&
            nextToken.Type != TokenType::eof) {
         stmtList.emplace_back(parseStatement());
-
-        if (tokens.lookNextToken().Type != TokenType::CURLY_BRACKET_END) {
-            expect("\n");
-        }
     }
 
+    skipWhitespaces();
     expect("}");
 
     return createBlockStmtNode(stmtList);
@@ -322,6 +335,7 @@ IfStmtNode* Parser::parseElseIfStmt() {
     parenthesesControl = oldParenthesesControl;
 
     expect(")");
+    skipWhitespaces();
 
     BlockStmtNode* body = parseBlockStmt();
     std::vector<IfStmtNode*> elseIfStmts;
@@ -340,28 +354,27 @@ IfStmtNode* Parser::parseIfStmt() {
     parenthesesControl = oldParenthesesControl;
 
     expect(")");
+    skipWhitespaces();
 
     BlockStmtNode* body = parseBlockStmt();
     std::vector<IfStmtNode*> elseIfStmts;
     BlockStmtNode* elseBody = nullptr;
 
-    // parse else if statements
     while (true) {
+        skipWhitespaces();
         if (tokens.lookNextToken().Type == TokenType::ElseStmt) {
             tokens.getNextToken();
             if (tokens.lookNextToken().Type == TokenType::IfStmt) {
                 elseIfStmts.emplace_back(parseElseIfStmt());
-                continue;
+            } else {
+                skipWhitespaces();
+                elseBody = parseBlockStmt();
+                break;
             }
-            tokens.returnToken();
+        } else {
+            tokens.returnToken(); // return ending if instruction newline that we skipped calling SkipWhitespaces()
+            break;
         }
-        break;
-    }
-
-    // parse else stmt
-    if (tokens.lookNextToken().Type == TokenType::ElseStmt) {
-        tokens.getNextToken();
-        elseBody = parseBlockStmt();
     }
 
     return createIfStmtNode(condition, body, elseIfStmts, elseBody);
@@ -432,6 +445,7 @@ ForLoopNode* Parser::parseForLoop() {
     }
 
     expect(")");
+    skipWhitespaces();
 
     BlockStmtNode* body = parseBlockStmt();
 
@@ -482,21 +496,29 @@ ASTNode* Parser::parseStatement() {
         }
     }
 
+    if (tokens.lookNextToken().Type != TokenType::CURLY_BRACKET_END) {
+        expect("\n");
+    }
+    skipWhitespaces();
+
     return parseResult;
 }
 
-ASTNode* Parser::parse(const TokenContainer& tokenizedSourceData) {
-    tokens = tokenizedSourceData;
-    parenthesesControl = false;
+ProgramTranslationNode* Parser::parse(const TokenContainer& sourceData) {
+    tokens = sourceData;
 
-    ASTNode* ast = parseStatement();
+    ProgramTranslationNode* ast = new ProgramTranslationNode();
 
-    expect("EOF");
+    skipWhitespaces();
+    while (tokens.lookNextToken().Type != TokenType::eof) {
+        ASTNode* currentStatement = parseStatement();
+        ast->statements.emplace_back(currentStatement);
+    }
 
     return ast;
 }
 
-BinOpNode* Parser::createBinOpNode(BinOpType::ASTNodeBinOpType type, ASTNode* left, ASTNode* right) {
+BinOpNode* Parser::createBinOpNode(BinOpType::Type type, ASTNode* left, ASTNode* right) {
     BinOpNode* node = new BinOpNode;
     node->binOpType = type;
     node->left = left;
@@ -505,15 +527,15 @@ BinOpNode* Parser::createBinOpNode(BinOpType::ASTNodeBinOpType type, ASTNode* le
     return node;
 }
 
-NumberNode* Parser::createNumberNode(double value) {
-    NumberNode* node = new NumberNode;
+ConstNumberNode* Parser::createNumberNode(double value) {
+    ConstNumberNode* node = new ConstNumberNode;
     node->value = value;
 
     return node;
 }
 
-BoolNode* Parser::createBoolNode(bool value) {
-    BoolNode* node = new BoolNode;
+ConstBoolNode* Parser::createBoolNode(bool value) {
+    ConstBoolNode* node = new ConstBoolNode;
     node->value = value;
 
     return node;
@@ -733,4 +755,10 @@ void Parser::errorExpected(const std::string& expected) {
     std::string errMsg = "Expected " + expected + "\n";
 
     throw std::runtime_error(errMsg);
+}
+
+void Parser::skipWhitespaces() {
+    while (tokens.lookNextToken().Type == TokenType::NL) {
+        tokens.getNextToken();
+    }
 }

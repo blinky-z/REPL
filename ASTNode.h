@@ -15,18 +15,19 @@ namespace NodeType {
         DeclFunc,
         FuncCall,
         BinOp,
-        NumberValue,
-        BoolValue,
+        ConstNumber,
+        ConstBool,
         IfStmt,
         ForLoop,
         CompoundStmt,
         ReturnStmt,
-        BreakStmt
+        BreakStmt,
+        ProgramTranslation
     };
 }
 
 namespace BinOpType {
-    enum ASTNodeBinOpType {
+    enum Type {
         OperatorAssign,
         OperatorPlus,
         OperatorMinus,
@@ -49,8 +50,8 @@ struct TypesStringNames {
         nodeTypeStringNames[NodeType::DeclVar] = "Var Declaration";
         nodeTypeStringNames[NodeType::Id] = "Identifier";
         nodeTypeStringNames[NodeType::BinOp] = "Binary Operation";
-        nodeTypeStringNames[NodeType::NumberValue] = "Number";
-        nodeTypeStringNames[NodeType::BoolValue] = "Bool";
+        nodeTypeStringNames[NodeType::ConstNumber] = "Number";
+        nodeTypeStringNames[NodeType::ConstBool] = "Bool";
         nodeTypeStringNames[NodeType::IfStmt] = "If Statement";
         nodeTypeStringNames[NodeType::ForLoop] = "For loop Statement";
         nodeTypeStringNames[NodeType::CompoundStmt] = "Compound Statement";
@@ -86,8 +87,22 @@ struct ASTNode {
     }
 };
 
+struct ProgramTranslationNode : ASTNode {
+    std::vector<ASTNode*> statements;
+
+    ProgramTranslationNode() {
+        type = NodeType::ProgramTranslation;
+    }
+
+    ~ProgramTranslationNode() {
+        for (const auto& currentStmt : statements) {
+            delete currentStmt;
+        }
+    }
+};
+
 struct BinOpNode : ASTNode {
-    BinOpType::ASTNodeBinOpType binOpType;
+    BinOpType::Type binOpType;
     ASTNode* left;
     ASTNode* right;
 
@@ -116,11 +131,11 @@ struct BinOpNode : ASTNode {
     }
 };
 
-struct NumberNode : ASTNode {
+struct ConstNumberNode : ASTNode {
     double value;
 
-    NumberNode() {
-        type = NodeType::NumberValue;
+    ConstNumberNode() {
+        type = NodeType::ConstNumber;
     }
 
     void print() override {
@@ -133,11 +148,11 @@ struct NumberNode : ASTNode {
     }
 };
 
-struct BoolNode : ASTNode {
+struct ConstBoolNode : ASTNode {
     bool value;
 
-    BoolNode() {
-        type = NodeType::BoolValue;
+    ConstBoolNode() {
+        type = NodeType::ConstBool;
     }
 
     void print() override {
@@ -152,9 +167,11 @@ struct BoolNode : ASTNode {
 
 struct IdentifierNode : ASTNode {
     std::string name;
+    ValueType::Type valueType;
 
     IdentifierNode() {
         type = NodeType::Id;
+        valueType = ValueType::Undefined;
     }
 
     void print() override {
@@ -242,6 +259,9 @@ struct IfStmtNode : ASTNode {
     ~IfStmtNode() {
         delete condition;
         delete body;
+        for (const auto& currentElseIfStmt : elseIfStmts) {
+            delete currentElseIfStmt;
+        }
         delete elseBody;
     }
 
@@ -333,7 +353,7 @@ struct DeclFuncNode : ASTNode {
         for (const auto currentId : args) {
             delete currentId;
         }
-//        delete body;
+//        delete body;  // не могу удалить, потому что тело используется также в таблице символов
     }
 
     void print() override {
@@ -351,8 +371,8 @@ struct FuncCallNode : ASTNode {
     }
 
     ~FuncCallNode() {
-        for (const auto currentId : args) {
-            delete currentId;
+        for (const auto& currentArg : args) {
+            delete currentArg;
         }
     }
 

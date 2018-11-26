@@ -14,23 +14,29 @@ private:
 public:
     bool isIdExist(const std::string& identifierName) const;
 
-    void addNewIdentifier(const std::string& identifierName);
+    void addNewIdentifier(const std::string& name);
+
+    void addNewIdentifier(const std::string& name, bool value);
+
+    void addNewIdentifier(const std::string& name, double value);
 
     void setIdValueDouble(const std::string& identifierName, double value);
 
-    double getIdValueDouble(const std::string& identifierName) const;
-
     void setIdValueBool(const std::string& identifierName, bool value);
+
+    double getIdValueDouble(const std::string& identifierName) const;
 
     bool getIdValueBool(const std::string& identifierName) const;
 
     ValueType::Type getIdValueType(const std::string& identifierName) const;
 
+    bool isFuncExist(const std::string& funcName);
+
     void addNewFunc(DeclFuncNode* funcDecl);
 
-    Function getFunc(const std::string funcName) const;
+    Function getFunc(const std::string& funcName) const;
 
-    bool isFuncExist(const std::string funcName);
+    ValueType::Type getFuncValueType(const std::string& funcName) const;
 };
 
 

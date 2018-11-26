@@ -1,0 +1,111 @@
+var b
+if (true) {
+    var a = true || false
+    if (a) {
+        b = 10
+    }
+}
+b = 25
+
+if (true) {
+    var a = 50
+    if (4 * 5 == 20) {
+        var b = 60
+        var a = a + 70
+        a
+    }
+    if (false) {}
+    a
+}
+
+func bool isPositive(var int a) {
+    return a > 0
+}
+
+var a = -5
+if (isPositive(b) && isPositive(a)) {
+
+}
+
+if (isPositive(a)) {
+
+} else {
+    a = -1 * a
+}
+
+var d = isPositive(a)
+var c = 100
+
+func void D(var int a, var int b, var int c) {
+    if (isPositive(a)) {
+        a = -1 * a
+    } else if (isPositive(b) && true) {
+        b = -1 * b
+    } else {
+        c = 0
+    }
+}
+
+D(a, b, c)
+
+----
+
+
+if ((1)); then {
+    a_441fafa531ac4d1390356441f73bdbca=$((1 || 0))
+    if (($a_441fafa531ac4d1390356441f73bdbca)); then {
+        b=10
+    }
+    fi
+}
+fi
+b=25
+if ((1)); then {
+    a_9691d7ebfead41a6a1fd672dc1d5530b=50
+    if ((4 * 5 == 20)); then {
+        b_96a38a7a552045d98423c50ab7063882=60
+        a_3a6fb4e1478c49d184736fe0e5a8b80a=$(($a_9691d7ebfead41a6a1fd672dc1d5530b + 70))
+        echo $a_3a6fb4e1478c49d184736fe0e5a8b80a
+    }
+    fi
+    if ((0)); then {
+        :
+    }
+    fi
+    echo $a_9691d7ebfead41a6a1fd672dc1d5530b
+}
+fi
+function isPositive {
+    local a=$1
+    echo $(($a > 0)); return
+}
+a=$((0 - 5))
+if (($(isPositive $b | tail -n1) && $(isPositive $a | tail -n1))); then {
+    :
+}
+fi
+if (($(isPositive $a | tail -n1))); then {
+    :
+}
+else {
+    a=$(((0 - 1) * $a))
+}
+fi
+d=$(isPositive $a | tail -n1)
+c=100
+function D {
+    local a=$1
+    local b=$2
+    local c=$3
+    if (($(isPositive $a | tail -n1))); then {
+        a=$(((0 - 1) * $a))
+    }
+    elif (($(isPositive $a | tail -n1))); then {
+        b=$(((0 - 1) * $b))
+    }
+    else {
+        c=0
+    }
+    fi
+}
+D $a $b $c | tail -n1
