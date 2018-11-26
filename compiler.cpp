@@ -16,7 +16,10 @@ std::string readProgram(const std::string fileName) {
     return input;
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char* argv[]) {
+    if (argc != 2) {
+        throw std::runtime_error("Source code file required");
+    }
     Lexer lexer;
     Parser parser;
     SemanticAnalyzer semanticAnalyzer;
@@ -30,7 +33,7 @@ int main(int argc, char** argv) {
     ProgramTranslationNode* ast = parser.parse(tokens);
     const SemanticAnalysisResult& checkResult = semanticAnalyzer.checkProgram(ast);
     if (checkResult.isError()) {
-        throw std::runtime_error(checkResult.what().c_str());
+        throw std::runtime_error(checkResult.what());
     }
     std::string bashCode = bashGenerator.generate(ast);
 
