@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
     }
     Lexer lexer;
     Parser parser;
-    SemanticAnalyzer semanticAnalyzer;
+    SemanticAnalyzer semanticAnalyzer(1);
     BashGenerator bashGenerator;
 
     std::string source = readProgram(argv[1]);
