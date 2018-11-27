@@ -7,7 +7,7 @@
 #include <cmath>
 #include <algorithm>
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsequence-point"
+# pragma GCC diagnostic warning "-Wsequence-point"
 #include "sole/sole.hpp"
 #pragma GCC diagnostic pop
 
