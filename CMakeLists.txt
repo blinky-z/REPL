@@ -16,7 +16,6 @@ add_executable(REPL
         TokenContainer.cpp TokenContainer.h
         SymbolTable.cpp SymbolTable.h
         EvalResult.cpp EvalResult.h
-        Function.h
         SemanticAnalysisResult.cpp SemanticAnalysisResult.h
         SemanticAnalyzer.cpp SemanticAnalyzer.h
         )
@@ -28,7 +27,6 @@ add_executable(Compiler
         Parser.cpp Parser.h
         TokenContainer.cpp TokenContainer.h
         SymbolTable.cpp SymbolTable.h
-        Function.h
         BashGenerator.cpp BashGenerator.h
         SemanticAnalysisResult.cpp SemanticAnalysisResult.h
         SemanticAnalyzer.cpp SemanticAnalyzer.h

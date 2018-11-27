@@ -10,16 +10,52 @@ func int mul(var int m, var int n) {
     return m * n
 }
 
+var i = true
+print(i)
+
 for (var i = 10; isPositive(i); i = i - 1) {
-    i
-    if (i == 5 && isPositive(i)) {
-        for (var ii = i; ii < 100; ii = add(ii, i)) {
-            if (true) {
-                var ii = false
-                ii
-            }
-            ii
+    print(i)
+    if (i == 5) {
+        for (var i = i; i < 100; i = add(i, 1)) {
+            print(i)
         }
+    }
+}
+
+func void D() {}
+
+var e = mul(5, 10) > add(5, 10)
+var f = add(1, 0) == mul(1, 1)
+var g = isPositive(-5)
+var b = add(mul(mul(10, 8), mul(20, 4)), 10)
+
+print(add(1, 0) == mul(1, 1))
+print(f)
+
+func int min(var int a, var int b) {
+    if (a < b) {
+        return a
+    } else if (a == b) {
+        return a
+    } else {
+        return b
+    }
+}
+
+var a = 10
+print(min(a, -10))
+
+var cnt = 0
+for ( ; ; ) {
+    cnt = cnt + 1
+    print(cnt)
+}
+
+var flag = true
+for (var i2 = 0; flag; i2 = add(i2, 1)) {
+    print(i2)
+    if (i2 == 5) {
+        flag = false
     }
 }
 
@@ -39,19 +75,56 @@ function mul {
     local n=$2
     echo $(($m * $n)); return
 }
-for ((i_fdc61b5a68bd421bb4835831d2a17508=10; $(isPositive $i_fdc61b5a68bd421bb4835831d2a17508 | tail -n1); i_fdc61b5a68bd421bb4835831d2a17508=$(($i_fdc61b5a68bd421bb4835831d2a17508 - 1)))) {
-    echo $i_fdc61b5a68bd421bb4835831d2a17508
-    if (($i_fdc61b5a68bd421bb4835831d2a17508 == 5 && $(isPositive $i_fdc61b5a68bd421bb4835831d2a17508 | tail -n1))); then {
-        for ((ii_308d4956215b4ebeb109195f312cc59d=$i_fdc61b5a68bd421bb4835831d2a17508; $(($ii_308d4956215b4ebeb109195f312cc59d < 100)); ii_308d4956215b4ebeb109195f312cc59d=$(add $ii_308d4956215b4ebeb109195f312cc59d $i_fdc61b5a68bd421bb4835831d2a17508 | tail -n1))) {
-            if ((1)); then {
-                ii_8b963651c47d4768a7dd64514e301f3b=0
-                echo $ii_8b963651c47d4768a7dd64514e301f3b
-            }
-            fi
-            echo $ii_308d4956215b4ebeb109195f312cc59d
+i=1
+echo $i
+for ((i_5cf086e8b762411984f5865fac627fef=10; $(isPositive $i_5cf086e8b762411984f5865fac627fef | tail -n1); i_5cf086e8b762411984f5865fac627fef=$(($i_5cf086e8b762411984f5865fac627fef - 1)))) {
+    echo $i_5cf086e8b762411984f5865fac627fef
+    if (($i_5cf086e8b762411984f5865fac627fef == 5)); then {
+        for ((i_370e615b1f1c46e79c9005252db8a2e5=$i_5cf086e8b762411984f5865fac627fef; $(($i_370e615b1f1c46e79c9005252db8a2e5 < 100)); i_370e615b1f1c46e79c9005252db8a2e5=$(add $i_370e615b1f1c46e79c9005252db8a2e5 1 | tail -n1))) {
+            echo $i_370e615b1f1c46e79c9005252db8a2e5
         }
 
     }
     fi
 }
 
+function D {
+    :
+}
+
+e=$(($(mul 5 10 | tail -n1) > $(add 5 10 | tail -n1)))
+f=$(($(add 1 0 | tail -n1) == $(mul 1 1 | tail -n1)))
+g=$(isPositive $((0 - 5)) | tail -n1)
+b=$(add $(mul $(mul 10 8 | tail -n1) $(mul 20 4 | tail -n1) | tail -n1) 10 | tail -n1)
+echo $(($(add 1 0 | tail -n1) == $(mul 1 1 | tail -n1)))
+echo $f
+function min {
+    local a=$1
+    local b=$2
+    if (($a < $b)); then {
+        echo $a; return
+    }
+    elif (($a < $b)); then {
+        echo $a; return
+    }
+    else {
+        echo $b; return
+    }
+    fi
+}
+a=10
+echo $(min $a $((0 - 10)) | tail -n1)
+cnt=0
+for ((; ; )) {
+    cnt=$(($cnt + 1))
+    echo $cnt
+}
+
+flag=1
+for ((i2_810b3cbda1bc4e56a7018b395f7a9906=0; $flag; i2_810b3cbda1bc4e56a7018b395f7a9906=$(add $i2_810b3cbda1bc4e56a7018b395f7a9906 1 | tail -n1))) {
+    echo $i2_810b3cbda1bc4e56a7018b395f7a9906
+    if (($i2_810b3cbda1bc4e56a7018b395f7a9906 == 5)); then {
+        flag=0
+    }
+    fi
+}

@@ -52,24 +52,13 @@ bool SymbolTable::isFuncExist(const std::string& funcName) {
 }
 
 void SymbolTable::addNewFunc(DeclFuncNode* funcDecl) {
-    Function function;
-    function.returnType = funcDecl->returnType;
-    function.argsSize = funcDecl->argsSize;
-
-    for (const auto& currentId : funcDecl->args) {
-        Identifier id;
-        id.Type = currentId->valueType;
-        function.args.emplace_back(std::make_pair(currentId->name, id));
-    }
-    function.body = funcDecl->body; // TODO: сделать копирование контента тела, а не копирование указателей
-
-    funcSymbolTable.emplace(funcDecl->name, function);
+    funcSymbolTable.emplace(funcDecl->name, funcDecl);
 }
 
-Function SymbolTable::getFunc(const std::string& funcName) const {
+DeclFuncNode* SymbolTable::getFunc(const std::string& funcName) const {
     return funcSymbolTable.at(funcName);
 }
 
 ValueType::Type SymbolTable::getFuncValueType(const std::string& funcName) const {
-    return funcSymbolTable.at(funcName).returnType;
+    return funcSymbolTable.at(funcName)->returnType;
 }

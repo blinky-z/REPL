@@ -283,7 +283,7 @@ struct IfStmtNode : ASTNode {
 struct ForLoopNode : ASTNode {
     ASTNode* init;
     ASTNode* condition;
-    ASTNode* inc;
+    BinOpNode* inc;
     BlockStmtNode* body;
 
     ForLoopNode() {
@@ -338,6 +338,26 @@ struct BreakStmtNode : ASTNode {
     }
 };
 
+struct FuncCallNode : ASTNode {
+    std::string name;
+    std::vector<ASTNode*> args;
+    unsigned long argsSize;
+
+    FuncCallNode() {
+        type = NodeType::FuncCall;
+    }
+
+    ~FuncCallNode() {
+        for (const auto& currentArg : args) {
+            delete currentArg;
+        }
+    }
+
+    void print() override {
+
+    }
+};
+
 struct DeclFuncNode : ASTNode {
     std::string name;
     ValueType::Type returnType;
@@ -353,27 +373,7 @@ struct DeclFuncNode : ASTNode {
         for (const auto currentId : args) {
             delete currentId;
         }
-//        delete body;  // не могу удалить, потому что тело используется также в таблице символов
-    }
-
-    void print() override {
-
-    }
-};
-
-struct FuncCallNode : ASTNode {
-    std::string name;
-    std::vector<ASTNode*> args;
-    unsigned long argsSize;
-
-    FuncCallNode() {
-        type = NodeType::FuncCall;
-    }
-
-    ~FuncCallNode() {
-        for (const auto& currentArg : args) {
-            delete currentArg;
-        }
+        delete body;
     }
 
     void print() override {

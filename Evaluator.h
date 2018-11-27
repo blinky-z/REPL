@@ -45,19 +45,15 @@ private:
 
     bool EvaluateIdBool(Scope* scope, IdentifierNode* id);
 
-    double EvaluateNumberConstant(NumberNode* num);
+    double EvaluateNumberConstant(ConstNumberNode* num);
 
-    bool EvaluateBoolConstant(BoolNode* num);
-
-    EvalError newError(EvalError::Error err);
-
-    EvalError newError(EvalError::Error err, const std::string errMessage);
+    bool EvaluateBoolConstant(ConstBoolNode* num);
 
     Scope* lookTopIdScope(const std::string& idName);
 
-    Scope* topScope;
-
     Scope* globalScope;
+
+    Scope* topScope;
 
     Scope* functions;
 
@@ -65,22 +61,31 @@ private:
 
     void closeScope();
 
-    bool funcEval;
+    bool breakForLoop;
 
-    bool forLoopEval;
+    bool funcReturn;
 public:
-    Evaluator() {
-        globalScope = new Scope(nullptr);
-        topScope = globalScope;
-        functions = new Scope(nullptr);
-        
-        funcEval = false;
-        forLoopEval = false;
-    }
+    Evaluator() : globalScope(new Scope(nullptr)), topScope(globalScope), functions(globalScope),
+                  breakForLoop(false), funcReturn(false) {
+        DeclFuncNode* funcPrint = new DeclFuncNode;
+        funcPrint->name = "print";
+        IdentifierNode* idArg = new IdentifierNode;
+        idArg->name = "val";
+        funcPrint->argsSize = 1;
+        funcPrint->args.emplace_back(idArg);
+        funcPrint->body = new BlockStmtNode;
+        ReturnStmtNode* returnStmt = new ReturnStmtNode;
+        IdentifierNode* idReturn = new IdentifierNode;
+        idReturn->name = "val";
+        returnStmt->expression = idReturn;
+        funcPrint->body->stmtList.emplace_back(returnStmt);
+
+        functions->symbolTable.addNewFunc(funcPrint);
+    };
 
     ~Evaluator() {
-        delete functions;
-        delete topScope;
+        delete functions->symbolTable.getFunc("print");
+        delete globalScope;
     }
 
     EvalResult Evaluate(ASTNode* root);

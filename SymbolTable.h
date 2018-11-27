@@ -4,13 +4,12 @@
 #include <unordered_map>
 #include "ASTNode.h"
 #include "Identifier.h"
-#include "Function.h"
 
 class SymbolTable {
 private:
     std::unordered_map<std::string, Identifier> symbolTable;
 
-    std::unordered_map<std::string, Function> funcSymbolTable;
+    std::unordered_map<std::string, DeclFuncNode*> funcSymbolTable;
 public:
     bool isIdExist(const std::string& identifierName) const;
 
@@ -34,7 +33,7 @@ public:
 
     void addNewFunc(DeclFuncNode* funcDecl);
 
-    Function getFunc(const std::string& funcName) const;
+    DeclFuncNode* getFunc(const std::string& funcName) const;
 
     ValueType::Type getFuncValueType(const std::string& funcName) const;
 };

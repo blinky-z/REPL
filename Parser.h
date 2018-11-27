@@ -41,7 +41,7 @@ private:
     IfStmtNode* createIfStmtNode(ASTNode* condition, BlockStmtNode* stmtList, std::vector<IfStmtNode*> elseIfStmts,
                                  BlockStmtNode* elseStmtList);
 
-    ForLoopNode* createForLoopNode(ASTNode* init, ASTNode* cond, ASTNode* inc, BlockStmtNode* stmtList);
+    ForLoopNode* createForLoopNode(ASTNode* init, ASTNode* cond, BinOpNode* inc, BlockStmtNode* stmtList);
 
     double getNumTokenValue(const Token& numToken);
 

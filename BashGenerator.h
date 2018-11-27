@@ -37,6 +37,8 @@ private:
 
     std::string generateId(IdentifierNode* node);
 
+    std::string generateReservedFuncCall(FuncCallNode* node);
+
     std::string generateFuncCall(FuncCallNode* node);
 
     std::string generateDeclVar(DeclVarNode* node);
@@ -61,9 +63,13 @@ private:
 
     std::string generateStatement(ASTNode* node);
 
+    void addTabs(std::string& result);
+
     int tabCount;
 
     bool blockScope;
+
+    bool isFuncReserved(const std::string& funcName);
 public:
     std::string generate(ProgramTranslationNode* root);
 

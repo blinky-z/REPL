@@ -1,8 +1,10 @@
+#include <iostream>
 #include "Lexer.h"
 #include "Parser.h"
 #include "Evaluator.h"
 #include "EvalResult.h"
-#include <iostream>
+#include "SemanticAnalyzer.h"
+#include "SemanticAnalysisResult.h"
 
 bool isInputForLoop(const std::string& input) {
     return input.find("for") != std::string::npos;
@@ -68,27 +70,26 @@ std::string readCompoundStatement(const std::string& input) {
 void printResult(const EvalResult& result, int tabCount = 0) {
     ValueType::Type resultType = result.getResultType();
 
-    if (!result.isError()) {
-        if (resultType == ValueType::Number) {
-            std::cout << result.getResultDouble() << std::endl;
-        } else if (resultType == ValueType::Bool) {
-            std::cout << (result.getResultBool() ? "true" : "false") << std::endl;
-        } else if (resultType == ValueType::Compound) {
-            for (const auto& currentResult : result.getResultBlock()) {
-                printResult(currentResult, tabCount);
-            }
-        } else if (resultType == ValueType::String) {
-            std::cout << result.getResultString() << std::endl;
+    if (resultType == ValueType::Number) {
+        std::cout << result.getResultDouble() << std::endl;
+    } else if (resultType == ValueType::Bool) {
+        std::cout << (result.getResultBool() ? "true" : "false") << std::endl;
+    } else if (resultType == ValueType::Compound) {
+        for (const auto& currentResult : result.getResultBlock()) {
+            printResult(currentResult, tabCount);
         }
-    } else {
-        throw std::runtime_error(result.error.what());
+    } else if (resultType == ValueType::String) {
+        std::cout << result.getResultString() << std::endl;
     }
 }
 
 int main() {
     Lexer lexer;
     Parser parser;
+    SemanticAnalyzer semanticAnalyzer(0);
     Evaluator evaluator;
+
+    std::vector<ProgramTranslationNode*> nodes;
 
     while (true) {
         std::string input;
@@ -104,16 +105,25 @@ int main() {
                 countEndBrackets(input);
                 input = readCompoundStatement(input);
             }
+            input.push_back('\n');
             input.push_back(EOF);
 
             const TokenContainer& tokens = lexer.tokenize(input);
-            ASTNode* root = parser.parse(tokens);
-            EvalResult result = evaluator.Evaluate(root);
+            ProgramTranslationNode* root = parser.parse(tokens);
+            SemanticAnalysisResult checkResult = semanticAnalyzer.checkProgram(root);
+            if (checkResult.isError()) {
+                std::cerr << checkResult.what() << std::endl;
+            } else {
+                EvalResult result = evaluator.Evaluate(root->statements[0]);
+                printResult(result);
+            }
 
-            printResult(result);
-
-            delete root;
+            nodes.emplace_back(root);
         }
+    }
+
+    for (const auto& currentNode : nodes) {
+        delete currentNode;
     }
 
     return 0;

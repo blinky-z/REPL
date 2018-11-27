@@ -44,7 +44,7 @@ const TokenContainer Lexer::tokenize(const std::string& src) {
                     lastOp.Type == TokenType::Sub || lastOp.Type == TokenType::Mul ||
                     lastOp.Type == TokenType::Div || lastOp.Type == TokenType::Equal ||
                     lastOp.Type == TokenType::LESS || lastOp.Type == TokenType::GREATER ||
-                    lastOp.Type == TokenType::ROUND_BRACKET_START) {
+                    lastOp.Type == TokenType::ROUND_BRACKET_START || lastOp.Type == TokenType::Comma) {
                     token.Type = TokenType::UnaryMinus;
                     token.Value = "u-";
                 } else {
