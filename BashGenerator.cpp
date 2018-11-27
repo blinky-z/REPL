@@ -13,26 +13,11 @@ std::string BashGenerator::generate(ProgramTranslationNode* root) {
 std::string BashGenerator::generateStatement(ASTNode* node) {
     std::string result;
 
-    for (int i = 0; i < tabCount; i++) {
-        result += "    ";
-    }
+    addTabs(result);
 
-    if (node->type == NodeType::ConstNumber) {
-        ConstNumberNode* constNumber = static_cast<ConstNumberNode*>(node);
-        result += "echo" + generateConstNumber(constNumber);
-    } else if (node->type == NodeType::ConstBool) {
-        ConstBoolNode* constBool = static_cast<ConstBoolNode*>(node);
-        result += "echo" + generateConstBool(constBool);
-    } else if (node->type == NodeType::Id) {
-        IdentifierNode* id = static_cast<IdentifierNode*>(node);
-        result += "echo $" + generateId(id);
-    } else if (node->type == NodeType::BinOp) {
+    if (node->type == NodeType::BinOp) {
         BinOpNode* binOp = static_cast<BinOpNode*>(node);
-        if (binOp->binOpType == BinOpType::OperatorAssign) {
-            result += generateBinaryExprAssign(binOp);
-        } else {
-            result += "echo $" + generateBinaryExprMath(binOp);
-        }
+        result += generateBinaryExprAssign(binOp);
     } else if (node->type == NodeType::DeclVar) {
         DeclVarNode* declVar = static_cast<DeclVarNode*>(node);
         result += generateDeclVar(declVar);
@@ -59,11 +44,34 @@ std::string BashGenerator::generateStatement(ASTNode* node) {
     return result;
 }
 
+std::string BashGenerator::generateGetValue(ASTNode* node) {
+    std::string result;
+
+    if (node->type == NodeType::ConstNumber) {
+        ConstNumberNode* constNumber = static_cast<ConstNumberNode*>(node);
+        result = generateConstNumber(constNumber);
+    } else if (node->type == NodeType::ConstBool) {
+        ConstBoolNode* constBool = static_cast<ConstBoolNode*>(node);
+        result = generateConstBool(constBool);
+    } else if (node->type == NodeType::Id) {
+        IdentifierNode* id = static_cast<IdentifierNode*>(node);
+        result = "$" + generateId(id) + "";
+    } else if (node->type == NodeType::BinOp) {
+        BinOpNode* binOp = static_cast<BinOpNode*>(node);
+        result = "$" + generateBinaryExprMath(binOp);
+    } else if (node->type == NodeType::FuncCall) {
+        FuncCallNode* funcCall = static_cast<FuncCallNode*>(node);
+        result = "$(" + generateFuncCall(funcCall) + ")";
+    }
+
+    return result;
+}
+
 std::string BashGenerator::generateBinaryExprAssign(BinOpNode* node) {
     std::string result;
     IdentifierNode* id = static_cast<IdentifierNode*>(node->left);
-    result = generateId(id) + "=";
-    result += generateGetValue(node->right);
+
+    result = generateId(id) + "=" + generateGetValue(node->right);
 
     return result;
 }
@@ -93,6 +101,8 @@ std::string BashGenerator::generateDeclVar(DeclVarNode* node) {
     const std::string& idName = node->id->name;
 
     std::string rhsExpr;
+
+    // since assignment operator is right-associative first generate rhs expression
     if (node->expr != nullptr) {
         rhsExpr = generateGetValue(node->expr);
     }
@@ -180,30 +190,21 @@ std::string BashGenerator::generateBinaryExprMath(BinOpNode* node) {
     return result;
 }
 
-std::string BashGenerator::generateGetValue(ASTNode* node) {
+std::string BashGenerator::generateReservedFuncCall(FuncCallNode* node) {
     std::string result;
 
-    if (node->type == NodeType::ConstNumber) {
-        ConstNumberNode* constNumber = static_cast<ConstNumberNode*>(node);
-        result = generateConstNumber(constNumber);
-    } else if (node->type == NodeType::ConstBool) {
-        ConstBoolNode* constBool = static_cast<ConstBoolNode*>(node);
-        result = generateConstBool(constBool);
-    } else if (node->type == NodeType::Id) {
-        IdentifierNode* id = static_cast<IdentifierNode*>(node);
-        result = "$" + generateId(id) + "";
-    } else if (node->type == NodeType::BinOp) {
-        BinOpNode* binOp = static_cast<BinOpNode*>(node);
-        result = "$" + generateBinaryExprMath(binOp);
-    } else if (node->type == NodeType::FuncCall) {
-        FuncCallNode* funcCall = static_cast<FuncCallNode*>(node);
-        result = "$(" + generateFuncCall(funcCall) + ")";
+    if (node->name == "print") {
+        result = "echo " + generateGetValue(node->args[0]);
     }
 
     return result;
 }
 
 std::string BashGenerator::generateFuncCall(FuncCallNode* node) {
+    if (isFuncReserved(node->name)) {
+        return generateReservedFuncCall(node);
+    }
+
     std::string result = node->name;
 
     for (const auto& currentArg : node->args) {
@@ -216,9 +217,12 @@ std::string BashGenerator::generateFuncCall(FuncCallNode* node) {
 }
 
 std::string BashGenerator::generateReturnStmt(ReturnStmtNode* node) {
-    std::string result = "echo ";
-    result += generateGetValue(node->expression);
-    result += "; return";
+    std::string result;
+    if (node->expression != nullptr) {
+        result = "echo " + generateGetValue(node->expression) + "; return";
+    } else {
+        result = "return";
+    }
 
     return result;
 }
@@ -232,9 +236,7 @@ std::string BashGenerator::generateDeclFunc(DeclFuncNode* node) {
     for (unsigned long currentParamNum = 0; currentParamNum < node->args.size(); currentParamNum++) {
         const std::string& idName = node->args[currentParamNum]->name;
         topScope->uuid.emplace(idName, idName);
-        for (int i = 0; i < tabCount; i++) {
-            result += "    ";
-        }
+        addTabs(result);
         result += "local " + idName + "=$" + std::to_string(currentParamNum + 1) + "\n";
     }
 
@@ -248,17 +250,13 @@ std::string BashGenerator::generateDeclFunc(DeclFuncNode* node) {
     closeScope();
 
     if (node->body->stmtList.empty()) {
-        for (int i = 0; i < tabCount; i++) {
-            result += "    ";
-        }
+        addTabs(result);
         result += ":\n";
     }
 
     tabCount--;
 
-    for (int i = 0; i < tabCount; i++) {
-        result += "    ";
-    }
+    addTabs(result);
     result += "}";
     return result;
 }
@@ -270,7 +268,6 @@ std::string BashGenerator::generateBreakStmt() {
 std::string BashGenerator::generateIfStmt(IfStmtNode* node) {
     bool oldBlockScope = blockScope;
     blockScope = true;
-
     openScope();
 
     std::string result = "if ";
@@ -300,15 +297,11 @@ std::string BashGenerator::generateIfStmt(IfStmtNode* node) {
     }
 
     if (node->elseBody != nullptr) {
-        for (int i = 0; i < tabCount; i++) {
-            result += "    ";
-        }
+        addTabs(result);
         result += "else ";
         result += generateBlockStmt(node->elseBody);
     }
-    for (int i = 0; i < tabCount; i++) {
-        result += "    ";
-    }
+    addTabs(result);
     result += "fi";
 
     closeScope();
@@ -326,17 +319,13 @@ std::string BashGenerator::generateBlockStmt(BlockStmtNode* node) {
     }
 
     if (node->stmtList.empty()) {
-        for (int i = 0; i < tabCount; i++) {
-            result += "    ";
-        }
+        addTabs(result);
         result += ":\n";
     }
 
     tabCount--;
 
-    for (int i = 0; i < tabCount; i++) {
-        result += "    ";
-    }
+    addTabs(result);
     result += "}\n";
     return result;
 }
@@ -430,4 +419,14 @@ std::string BashGenerator::lookTopId(const std::string& id) {
     topScope = oldTopScope;
 
     return idUuid;
+}
+
+void BashGenerator::addTabs(std::string& result) {
+    for (int i = 0; i < tabCount; i++) {
+        result += "    ";
+    }
+}
+
+bool BashGenerator::isFuncReserved(const std::string& funcName) {
+    return funcName == "print";
 }
