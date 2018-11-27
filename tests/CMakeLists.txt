@@ -15,7 +15,6 @@ add_executable(EvaluatorTests
         ../SymbolTable.h ../SymbolTable.cpp
         ../TokenContainer.h ../TokenContainer.cpp
         ../EvalResult.cpp ../EvalResult.h
-        ../Function.h
         ../SemanticAnalyzer.h ../SemanticAnalyzer.cpp
         ../SemanticAnalysisResult.h ../SemanticAnalysisResult.cpp
 #        ------------------------
@@ -35,7 +34,6 @@ add_executable(SemanticAnalyzerTests
         ../Parser.cpp ../Parser.h
         ../SymbolTable.h ../SymbolTable.cpp
         ../TokenContainer.h ../TokenContainer.cpp
-        ../Function.h
         ../SemanticAnalyzer.h ../SemanticAnalyzer.cpp
         ../SemanticAnalysisResult.h ../SemanticAnalysisResult.cpp
         #        ------------------------
@@ -65,7 +63,6 @@ add_executable(BashGeneratorTests
         ../Parser.cpp ../Parser.h
         ../SymbolTable.h ../SymbolTable.cpp
         ../TokenContainer.h ../TokenContainer.cpp
-        ../Function.h
         ../SemanticAnalyzer.h ../SemanticAnalyzer.cpp
         ../SemanticAnalysisResult.h ../SemanticAnalysisResult.cpp
         ../BashGenerator.h ../BashGenerator.cpp
