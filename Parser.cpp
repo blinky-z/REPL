@@ -281,6 +281,9 @@ DeclFuncNode* Parser::parseDeclFunc() {
 
     ValueType::Type returnType = parseDeclFuncReturnType();
     const std::string& funcName = parseFuncName();
+    if (funcName == "print") {
+        throw std::runtime_error("Can not overwrite built-in 'print' function");
+    }
 
     expect("(");
     const std::vector<IdentifierNode*>& args = parseDeclFuncParams();
@@ -372,7 +375,9 @@ IfStmtNode* Parser::parseIfStmt() {
                 break;
             }
         } else {
-            tokens.returnToken(); // return ending if instruction newline that we skipped calling SkipWhitespaces()
+            if (tokens.lookNextToken().Type != TokenType::CURLY_BRACKET_END) {
+                tokens.returnToken(); // return ending if instruction newline that we skipped calling SkipWhitespaces()
+            }
             break;
         }
     }
@@ -399,11 +404,6 @@ ASTNode* Parser::parseForLoopInit() {
             init = parseExpression();
             break;
         }
-        case TokenType::SEMICOLON: {
-            tokens.returnToken();
-            init = nullptr;
-            break;
-        }
         default: {
             errorExpected("Variable declaration/assignment or empty initialization");
             throw;
@@ -419,7 +419,7 @@ ForLoopNode* Parser::parseForLoop() {
 
     ASTNode* init;
     ASTNode* condition;
-    ASTNode* inc;
+    BinOpNode* inc;
 
     if (tokens.lookNextToken().Type != TokenType::SEMICOLON) {
         init = parseForLoopInit();
@@ -438,7 +438,14 @@ ForLoopNode* Parser::parseForLoop() {
     if (tokens.lookNextToken().Type != TokenType::ROUND_BRACKET_END) {
         bool oldParenthesesControl = parenthesesControl;
         parenthesesControl = true;
-        inc = parseExpression();
+
+        BinOpNode* incExpr = dynamic_cast<BinOpNode*>(parseExpression());
+        if (incExpr == nullptr || incExpr->binOpType != BinOpType::OperatorAssign) {
+            errorExpected("For increment assignment expression");
+        }
+
+        inc = incExpr;
+
         parenthesesControl = oldParenthesesControl;
     } else {
         inc = nullptr;
@@ -610,7 +617,7 @@ Parser::createIfStmtNode(ASTNode* condition, BlockStmtNode* stmtList, std::vecto
     return node;
 }
 
-ForLoopNode* Parser::createForLoopNode(ASTNode* init, ASTNode* cond, ASTNode* inc, BlockStmtNode* stmtList) {
+ForLoopNode* Parser::createForLoopNode(ASTNode* init, ASTNode* cond, BinOpNode* inc, BlockStmtNode* stmtList) {
     ForLoopNode* node = new ForLoopNode;
     node->init = init;
     node->condition = cond;
