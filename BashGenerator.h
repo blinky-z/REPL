@@ -6,10 +6,8 @@
 #include <map>
 #include <cmath>
 #include <algorithm>
-#pragma GCC diagnostic push
-# pragma GCC diagnostic warning "-Wsequence-point"
+
 #include "sole/sole.hpp"
-#pragma GCC diagnostic pop
 
 class BashGenerator {
 private:

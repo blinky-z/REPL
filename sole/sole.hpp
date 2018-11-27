@@ -838,11 +838,13 @@ namespace run
 
         while( epoch() == then );
         then = epoch();
-
+#pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wsequence-point"
         unsigned c = 0;
         while( epoch() == then ) c = ( fn(), ++c );
 
         std::cout << (c) << " uuids/sec" << std::endl;
+#pragma GCC diagnostic pop
     }
 
     template<typename FN>
