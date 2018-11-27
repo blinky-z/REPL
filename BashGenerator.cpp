@@ -374,7 +374,7 @@ std::string BashGenerator::generateForLoop(ForLoopNode* node) {
 }
 
 int BashGenerator::getOperatorPrecedence(BinOpNode* node) {
-    static std::unordered_map<BinOpType::Type, int> opPrecedence = {
+    static std::map<BinOpType::Type, int> opPrecedence = {
             std::pair<BinOpType::Type, int>(BinOpType::OperatorMul, 6),
             std::pair<BinOpType::Type, int>(BinOpType::OperatorDiv, 6),
             std::pair<BinOpType::Type, int>(BinOpType::OperatorMinus, 5),
