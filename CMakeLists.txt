@@ -29,4 +29,5 @@ add_executable(Compiler
         BashGenerator.cpp BashGenerator.h
         SemanticAnalysisResult.cpp SemanticAnalysisResult.h
         SemanticAnalyzer.cpp SemanticAnalyzer.h
+        sole/sole.hpp
         )
