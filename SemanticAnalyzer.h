@@ -32,6 +32,8 @@ private:
 
     SemanticAnalysisResult checkFuncCall(FuncCallNode* node);
 
+    SemanticAnalysisResult checkReservedFuncCall(FuncCallNode* node);
+
     SemanticAnalysisResult checkBreakStmt();
 
     SemanticAnalysisResult checkReturnStmt(ReturnStmtNode* node);
@@ -63,13 +65,29 @@ private:
     bool forLoopCheck;
 
     bool functionBodyCheck;
+
+    bool operationCheck;
+
+    bool isFuncReserved(const std::string& funcName);
+
     ValueType::Type functionReturnType;
 public:
-    SemanticAnalyzer() : globalScope(new Scope(nullptr)), topScope(globalScope), functions(globalScope),
-                                     forLoopCheck(false), functionBodyCheck(false) {};
+    SemanticAnalyzer(int checkMode) : globalScope(new Scope(nullptr)), topScope(globalScope), functions(globalScope),
+                                      forLoopCheck(false), functionBodyCheck(false) {
+        operationCheck = checkMode == 0;
+
+        DeclFuncNode* printFunc = new DeclFuncNode;
+        printFunc->name = "print";
+        printFunc->returnType = ValueType::Void;
+        printFunc->argsSize = 1;
+        printFunc->body = nullptr;
+
+        functions->symbolTable.addNewFunc(printFunc);
+    };
 
     ~SemanticAnalyzer() {
-        delete topScope;
+        delete functions->symbolTable.getFunc("print");
+        delete globalScope;
     }
 
     SemanticAnalysisResult checkProgram(ProgramTranslationNode* root);

@@ -39,7 +39,10 @@ SemanticAnalysisResult SemanticAnalyzer::checkVarDecl(DeclVarNode* node) {
     }
 
     if (node->expr != nullptr) {
+        bool oldOperationCheck = operationCheck;
+        operationCheck = true;
         SemanticAnalysisResult checkResult = checkStatement(node->expr);
+        operationCheck = oldOperationCheck;
         if (checkResult.isError()) {
             return checkResult;
         }
@@ -151,7 +154,6 @@ SemanticAnalysisResult SemanticAnalyzer::checkFuncDecl(DeclFuncNode* node) {
 
     bool oldFunctionBodyCheck = functionBodyCheck;
     functionBodyCheck = true;
-    ValueType::Type oldFunctionReturnType = functionReturnType;
     functionReturnType = node->returnType;
 
     for (ASTNode* currentStatement : node->body->stmtList) {
@@ -170,13 +172,76 @@ SemanticAnalysisResult SemanticAnalyzer::checkFuncDecl(DeclFuncNode* node) {
     }
 
     functionBodyCheck = oldFunctionBodyCheck;
-    functionReturnType = oldFunctionReturnType;
     topScope->outer = oldOuterScope;
     closeScope();
 
-    functions->symbolTable.addNewFunc(node);
+    if (!checkResult.isError()) {
+        functions->symbolTable.addNewFunc(node);
+    }
 
     return checkResult;
+}
+
+SemanticAnalysisResult SemanticAnalyzer::checkReservedFuncCall(FuncCallNode* node) {
+    if (node->name == "print") {
+        const std::string funcName = node->name;
+        DeclFuncNode* func = functions->symbolTable.getFunc(funcName);
+        if (func->argsSize != node->argsSize) {
+            return newError(SemanticAnalysisResult::NO_MATCHING_FUNC);
+        }
+
+        for (const auto& callParam : node->args) {
+            bool oldOperationCheck = operationCheck;
+            operationCheck = true;
+            SemanticAnalysisResult checkCallParamResult = checkStatement(callParam);
+            operationCheck = oldOperationCheck;
+            if (checkCallParamResult.isError()) {
+                return checkCallParamResult;
+            }
+
+            ValueType::Type callParamType;
+
+            if (callParam->type == NodeType::ConstNumber) {
+                callParamType = ValueType::Number;
+            } else if (callParam->type == NodeType::ConstBool) {
+                callParamType = ValueType::Bool;
+            } else if (callParam->type == NodeType::Id) {
+                IdentifierNode* id = static_cast<IdentifierNode*>(callParam);
+                Scope* idScope = lookTopIdScope(id->name);
+
+                callParamType = idScope->symbolTable.getIdValueType(id->name);
+            } else if (callParam->type == NodeType::FuncCall) {
+                FuncCallNode* funcCallNode = static_cast<FuncCallNode*>(callParam);
+
+                ValueType::Type funcValueType = functions->symbolTable.getFuncValueType(funcCallNode->name);
+                if (funcValueType == ValueType::Void) {
+                    return newError(SemanticAnalysisResult::INVALID_VALUE_TYPE,
+                                    "Can not use void function call as function parameter");
+                }
+                callParamType = funcValueType;
+            } else if (callParam->type == NodeType::BinOp) {
+                BinOpNode* binOpNode = static_cast<BinOpNode*>(callParam);
+
+                if (binOpNode->binOpType == BinOpType::OperatorPlus ||
+                    binOpNode->binOpType == BinOpType::OperatorMinus ||
+                    binOpNode->binOpType == BinOpType::OperatorMul ||
+                    binOpNode->binOpType == BinOpType::OperatorDiv) {
+                    callParamType = ValueType::Number;
+                } else {
+                    callParamType = ValueType::Bool;
+                }
+            } else {
+                return newError(SemanticAnalysisResult::INVALID_VALUE_TYPE, "Invalid function call parameter");
+            }
+
+            if (callParamType != ValueType::Number && callParamType != ValueType::Bool) {
+                return newError(SemanticAnalysisResult::INVALID_VALUE_TYPE,
+                                "Print function can take only number or bool argument");
+            }
+        }
+    }
+
+    return SemanticAnalysisResult();
 }
 
 SemanticAnalysisResult SemanticAnalyzer::checkFuncCall(FuncCallNode* node) {
@@ -186,20 +251,26 @@ SemanticAnalysisResult SemanticAnalyzer::checkFuncCall(FuncCallNode* node) {
         return newError(SemanticAnalysisResult::UNDECLARED_FUNC,
                         "Use of undeclared function '" + funcName + "'");
     }
+    if (isFuncReserved(funcName)) {
+        return checkReservedFuncCall(node);
+    }
 
-    const Function& func = functions->symbolTable.getFunc(funcName);
-    if (func.args.size() != node->argsSize) {
+    DeclFuncNode* func = functions->symbolTable.getFunc(funcName);
+    if (func->argsSize != node->argsSize) {
         return newError(SemanticAnalysisResult::NO_MATCHING_FUNC);
     }
 
     for (unsigned long currentCallParamNum = 0; currentCallParamNum != node->argsSize; currentCallParamNum++) {
         ASTNode* callParam = node->args[currentCallParamNum];
+        bool oldOperationCheck = operationCheck;
+        operationCheck = true;
         SemanticAnalysisResult checkCallParamResult = checkStatement(callParam);
+        operationCheck = oldOperationCheck;
         if (checkCallParamResult.isError()) {
             return checkCallParamResult;
         }
 
-        ValueType::Type funcParamType = func.args[currentCallParamNum].second.Type;
+        ValueType::Type funcParamType = func->args[currentCallParamNum]->valueType;
         ValueType::Type callParamType;
 
         if (callParam->type == NodeType::ConstNumber) {
@@ -232,7 +303,7 @@ SemanticAnalysisResult SemanticAnalyzer::checkFuncCall(FuncCallNode* node) {
                 callParamType = ValueType::Bool;
             }
         } else {
-            return newError(SemanticAnalysisResult::INVALID_AST, "Invalid function call parameter");
+            return newError(SemanticAnalysisResult::INVALID_VALUE_TYPE, "Invalid function call parameter");
         }
 
         if (callParamType != funcParamType) {
@@ -279,7 +350,10 @@ SemanticAnalysisResult SemanticAnalyzer::checkAssignExpr(BinOpNode* node) {
         return newError(SemanticAnalysisResult::UNDECLARED_VAR, "Use of undeclared variable '" + idName + "'");
     }
 
+    bool oldOperationCheck = operationCheck;
+    operationCheck = true;
     SemanticAnalysisResult exprCheckResult = checkStatement(node->right);
+    operationCheck = oldOperationCheck;
     if (exprCheckResult.isError()) {
         return exprCheckResult;
     }
@@ -333,84 +407,96 @@ SemanticAnalysisResult SemanticAnalyzer::checkAssignExpr(BinOpNode* node) {
 }
 
 SemanticAnalysisResult SemanticAnalyzer::checkNumberExpr(ASTNode* node) {
+    bool oldOperationCheck = operationCheck;
+    operationCheck = true;
+    SemanticAnalysisResult checkResult;
+
     if (node->type == NodeType::ConstNumber) {
-        SemanticAnalysisResult checkResult = checkStatement(node);
-        if (checkResult.isError()) {
-            return checkResult;
-        }
-
-        return SemanticAnalysisResult();
+        checkResult = checkStatement(node);
     } else if (node->type == NodeType::ConstBool) {
-        SemanticAnalysisResult checkResult = checkStatement(node);
-        if (checkResult.isError()) {
-            return checkResult;
-        }
+        checkResult = checkStatement(node);
 
-        return newError(SemanticAnalysisResult::INCOMPATIBLE_OPERAND_TYPES);
+        if (!checkResult.isError()) {
+            checkResult = newError(SemanticAnalysisResult::INCOMPATIBLE_OPERAND_TYPES);
+        }
     } else if (node->type == NodeType::Id) {
-        SemanticAnalysisResult checkResult = checkStatement(node);
-        if (checkResult.isError()) {
-            return checkResult;
-        }
+        checkResult = checkStatement(node);
 
-        IdentifierNode* id = static_cast<IdentifierNode*>(node);
-        Scope* idScope = lookTopIdScope(id->name);
-        if (idScope->symbolTable.getIdValueType(id->name) != ValueType::Number) {
-            return newError(SemanticAnalysisResult::INCOMPATIBLE_OPERAND_TYPES);
+        if (!checkResult.isError()) {
+            IdentifierNode* id = static_cast<IdentifierNode*>(node);
+            Scope* idScope = lookTopIdScope(id->name);
+            if (idScope->symbolTable.getIdValueType(id->name) != ValueType::Number) {
+                checkResult = newError(SemanticAnalysisResult::INCOMPATIBLE_OPERAND_TYPES);
+            }
         }
     } else if (node->type == NodeType::FuncCall) {
-        SemanticAnalysisResult checkResult = checkStatement(node);
-        if (checkResult.isError()) {
-            return checkResult;
-        }
+        checkResult = checkStatement(node);
 
-        FuncCallNode* funcCall = static_cast<FuncCallNode*>(node);
+        if (!checkResult.isError()) {
+            FuncCallNode* funcCall = static_cast<FuncCallNode*>(node);
 
-        if (functions->symbolTable.getFuncValueType(funcCall->name) != ValueType::Number) {
-            return newError(SemanticAnalysisResult::INCOMPATIBLE_OPERAND_TYPES);
+            if (functions->symbolTable.getFuncValueType(funcCall->name) == ValueType::Void) {
+                checkResult = newError(SemanticAnalysisResult::INVALID_VALUE_TYPE);
+            } else if (functions->symbolTable.getFuncValueType(funcCall->name) != ValueType::Number) {
+                checkResult = newError(SemanticAnalysisResult::INCOMPATIBLE_OPERAND_TYPES);
+            }
         }
     } else if (node->type == NodeType::BinOp) {
         BinOpNode* binOp = dynamic_cast<BinOpNode*>(node);
 
         if (binOp != nullptr) {
-            SemanticAnalysisResult leftCheckResult = checkNumberExpr(binOp->left);
-            if (leftCheckResult.isError()) {
-                return leftCheckResult;
-            }
+            if (binOp->binOpType != BinOpType::OperatorPlus && binOp->binOpType != BinOpType::OperatorMinus &&
+                binOp->binOpType != BinOpType::OperatorMul && binOp->binOpType != BinOpType::OperatorDiv) {
+                checkResult = newError(SemanticAnalysisResult::INCOMPATIBLE_OPERAND_TYPES);
+            } else {
+                SemanticAnalysisResult leftCheckResult = checkNumberExpr(binOp->left);
+                if (leftCheckResult.isError()) {
+                    return leftCheckResult;
+                }
 
-            SemanticAnalysisResult rightCheckResult = checkNumberExpr(binOp->right);
-            if (rightCheckResult.isError()) {
-                return rightCheckResult;
+                SemanticAnalysisResult rightCheckResult = checkNumberExpr(binOp->right);
+                if (rightCheckResult.isError()) {
+                    return rightCheckResult;
+                }
             }
         } else {
-            return newError(SemanticAnalysisResult::INVALID_AST, "Invalid Binary Operation Node");
+            checkResult = newError(SemanticAnalysisResult::INVALID_AST, "Invalid Binary Operation Node");
         }
     } else {
         return newError(SemanticAnalysisResult::INVALID_AST);
     }
 
-    return SemanticAnalysisResult();
+    operationCheck = oldOperationCheck;
+    return checkResult;
 }
 
 SemanticAnalysisResult SemanticAnalyzer::checkBoolExprComparison(BinOpNode* node) {
     SemanticAnalysisResult checkResult;
+    bool oldOperationCheck = operationCheck;
+    operationCheck = true;
 
     const SemanticAnalysisResult& leftOperandCheck = checkStatement(node->left);
     if (leftOperandCheck.isError()) {
+        operationCheck = oldOperationCheck;
         return leftOperandCheck;
     }
 
     const SemanticAnalysisResult& rightOperandCheck = checkStatement(node->right);
     if (rightOperandCheck.isError()) {
+        operationCheck = oldOperationCheck;
         return rightOperandCheck;
     }
 
     if (node->binOpType == BinOpType::OperatorEqual) {
         // operands should be the same types, both int or bool
-        if (checkNumberExpr(node->left).isError() != checkNumberExpr(node->right).isError()) {
-            checkResult = newError(SemanticAnalysisResult::INCOMPATIBLE_OPERAND_TYPES);
-        } else if (checkBoolExpr(node->left).isError() != checkBoolExpr(node->right).isError()) {
-            checkResult = newError(SemanticAnalysisResult::INCOMPATIBLE_OPERAND_TYPES);
+        if (!checkNumberExpr(node->left).isError()) {
+            if (checkNumberExpr(node->right).isError()) {
+                checkResult = newError(SemanticAnalysisResult::INCOMPATIBLE_OPERAND_TYPES);
+            }
+        } else if (!checkBoolExpr(node->left).isError()) {
+            if (checkBoolExpr(node->right).isError()) {
+                checkResult = newError(SemanticAnalysisResult::INCOMPATIBLE_OPERAND_TYPES);
+            }
         }
     } else {
         // check less than and greater than operators
@@ -419,47 +505,46 @@ SemanticAnalysisResult SemanticAnalyzer::checkBoolExprComparison(BinOpNode* node
         }
     }
 
+    operationCheck = oldOperationCheck;
     return checkResult;
 }
 
 SemanticAnalysisResult SemanticAnalyzer::checkBoolExpr(ASTNode* node) {
+    bool oldOperationCheck = operationCheck;
+    operationCheck = true;
+
+    SemanticAnalysisResult checkResult;
+
     if (node->type == NodeType::ConstBool) {
-        SemanticAnalysisResult checkResult = checkStatement(node);
-        if (checkResult.isError()) {
-            return checkResult;
-        }
-
-        return SemanticAnalysisResult();
+        checkResult = checkStatement(node);
     } else if (node->type == NodeType::ConstNumber) {
-        SemanticAnalysisResult checkResult = checkStatement(node);
-        if (checkResult.isError()) {
-            return checkResult;
-        }
+        checkResult = checkStatement(node);
 
-        return newError(SemanticAnalysisResult::INCOMPATIBLE_OPERAND_TYPES);
+        if (!checkResult.isError()) {
+            checkResult = newError(SemanticAnalysisResult::INCOMPATIBLE_OPERAND_TYPES);
+
+        }
     } else if (node->type == NodeType::Id) {
-        SemanticAnalysisResult checkResult = checkStatement(node);
-        if (checkResult.isError()) {
-            return checkResult;
-        }
+        checkResult = checkStatement(node);
 
-        IdentifierNode* id = static_cast<IdentifierNode*>(node);
-        Scope* idScope = lookTopIdScope(id->name);
-        if (idScope->symbolTable.getIdValueType(id->name) != ValueType::Bool) {
-            return newError(SemanticAnalysisResult::INCOMPATIBLE_OPERAND_TYPES);
+        if (!checkResult.isError()) {
+            IdentifierNode* id = static_cast<IdentifierNode*>(node);
+            Scope* idScope = lookTopIdScope(id->name);
+            if (idScope->symbolTable.getIdValueType(id->name) != ValueType::Bool) {
+                checkResult = newError(SemanticAnalysisResult::INCOMPATIBLE_OPERAND_TYPES);
+            }
         }
     } else if (node->type == NodeType::FuncCall) {
-        SemanticAnalysisResult checkResult = checkStatement(node);
-        if (checkResult.isError()) {
-            return checkResult;
-        }
+        checkResult = checkStatement(node);
 
-        FuncCallNode* funcCall = static_cast<FuncCallNode*>(node);
+        if (!checkResult.isError()) {
+            FuncCallNode* funcCall = static_cast<FuncCallNode*>(node);
 
-        if (functions->symbolTable.getFuncValueType(funcCall->name) == ValueType::Void) {
-            return newError(SemanticAnalysisResult::INVALID_VALUE_TYPE);
-        } else if (functions->symbolTable.getFuncValueType(funcCall->name) != ValueType::Bool) {
-            return newError(SemanticAnalysisResult::INCOMPATIBLE_OPERAND_TYPES);
+            if (functions->symbolTable.getFuncValueType(funcCall->name) == ValueType::Void) {
+                checkResult = newError(SemanticAnalysisResult::INVALID_VALUE_TYPE);
+            } else if (functions->symbolTable.getFuncValueType(funcCall->name) != ValueType::Bool) {
+                checkResult = newError(SemanticAnalysisResult::INCOMPATIBLE_OPERAND_TYPES);
+            }
         }
     } else if (node->type == NodeType::BinOp) {
         BinOpNode* binOp = dynamic_cast<BinOpNode*>(node);
@@ -467,11 +552,9 @@ SemanticAnalysisResult SemanticAnalyzer::checkBoolExpr(ASTNode* node) {
         if (binOp != nullptr) {
             if (binOp->binOpType == BinOpType::OperatorEqual || binOp->binOpType == BinOpType::OperatorGreater ||
                 binOp->binOpType == BinOpType::OperatorLess) {
-                SemanticAnalysisResult checkResult = checkBoolExprComparison(binOp);
-                if (checkResult.isError()) {
-                    return checkResult;
-                }
-            } else {
+                checkResult = checkBoolExprComparison(binOp);
+            } else if (binOp->binOpType == BinOpType::OperatorBoolOR ||
+                       binOp->binOpType == BinOpType::OperatorBoolAND) {
                 SemanticAnalysisResult leftCheckResult = checkBoolExpr(binOp->left);
                 if (leftCheckResult.isError()) {
                     return leftCheckResult;
@@ -481,6 +564,8 @@ SemanticAnalysisResult SemanticAnalyzer::checkBoolExpr(ASTNode* node) {
                 if (rightCheckResult.isError()) {
                     return rightCheckResult;
                 }
+            } else {
+                checkResult = newError(SemanticAnalysisResult::INCOMPATIBLE_OPERAND_TYPES);
             }
         } else {
             return newError(SemanticAnalysisResult::INVALID_AST, "Invalid Binary Operation Node");
@@ -489,7 +574,8 @@ SemanticAnalysisResult SemanticAnalyzer::checkBoolExpr(ASTNode* node) {
         return newError(SemanticAnalysisResult::INVALID_AST);
     }
 
-    return SemanticAnalysisResult();
+    operationCheck = oldOperationCheck;
+    return checkResult;
 }
 
 SemanticAnalysisResult SemanticAnalyzer::checkBreakStmt() {
@@ -502,6 +588,9 @@ SemanticAnalysisResult SemanticAnalyzer::checkBreakStmt() {
 
 SemanticAnalysisResult SemanticAnalyzer::checkReturnStmt(ReturnStmtNode* node) {
     SemanticAnalysisResult checkResult;
+
+    bool oldOperationCheck = operationCheck;
+    operationCheck = true;
 
     if (functionBodyCheck) {
         if (functionReturnType == ValueType::Void) {
@@ -521,6 +610,7 @@ SemanticAnalysisResult SemanticAnalyzer::checkReturnStmt(ReturnStmtNode* node) {
                                "Using of Return stmt is allowed only in functions");
     }
 
+    operationCheck = oldOperationCheck;
     return checkResult;
 }
 
@@ -536,7 +626,10 @@ SemanticAnalysisResult SemanticAnalyzer::checkBlockStmt(BlockStmtNode* node) {
 }
 
 SemanticAnalysisResult SemanticAnalyzer::checkIfStmt(IfStmtNode* node) {
+    bool oldOperationCheck = operationCheck;
+    operationCheck = true;
     SemanticAnalysisResult condCheckResult = checkBoolExpr(node->condition);
+    operationCheck = oldOperationCheck;
     if (condCheckResult.isError()) {
         return condCheckResult;
     }
@@ -551,7 +644,10 @@ SemanticAnalysisResult SemanticAnalyzer::checkIfStmt(IfStmtNode* node) {
 
     if (!node->elseIfStmts.empty()) {
         for (const auto& currentElseIfStmt : node->elseIfStmts) {
+            oldOperationCheck = operationCheck;
+            operationCheck = true;
             condCheckResult = checkBoolExpr(currentElseIfStmt->condition);
+            operationCheck = oldOperationCheck;
             if (condCheckResult.isError()) {
                 closeScope();
                 return condCheckResult;
@@ -590,7 +686,10 @@ SemanticAnalysisResult SemanticAnalyzer::checkForLoop(ForLoopNode* node) {
     }
 
     if (node->condition != nullptr) {
+        bool oldOperationCheck = operationCheck;
+        operationCheck = true;
         SemanticAnalysisResult condCheckResult = checkBoolExpr(node->condition);
+        operationCheck = oldOperationCheck;
         if (condCheckResult.isError()) {
             closeScope();
             return condCheckResult;
@@ -598,7 +697,7 @@ SemanticAnalysisResult SemanticAnalyzer::checkForLoop(ForLoopNode* node) {
     }
 
     if (node->inc != nullptr) {
-        SemanticAnalysisResult incStmtCheckResult = checkStatement(node->inc);
+        SemanticAnalysisResult incStmtCheckResult = checkAssignExpr(node->inc);
         if (incStmtCheckResult.isError()) {
             closeScope();
             return incStmtCheckResult;
@@ -628,12 +727,20 @@ SemanticAnalysisResult SemanticAnalyzer::checkStatement(ASTNode* node) {
                 binOpNode->binOpType == BinOpType::OperatorMul ||
                 binOpNode->binOpType == BinOpType::OperatorDiv) {
                 checkResult = checkNumberExpr(binOpNode);
+                if (!operationCheck) {
+                    checkResult = newError(SemanticAnalysisResult::INVALID_OPERATION,
+                                           "Number expression evaluated but not used");
+                }
             } else if (binOpNode->binOpType == BinOpType::OperatorBoolAND ||
                        binOpNode->binOpType == BinOpType::OperatorBoolOR ||
                        binOpNode->binOpType == BinOpType::OperatorEqual ||
                        binOpNode->binOpType == BinOpType::OperatorLess ||
                        binOpNode->binOpType == BinOpType::OperatorGreater) {
                 checkResult = checkBoolExpr(binOpNode);
+                if (!operationCheck) {
+                    checkResult = newError(SemanticAnalysisResult::INVALID_OPERATION,
+                                           "Bool expression evaluated but not used");
+                }
             } else if (binOpNode->binOpType == BinOpType::OperatorAssign) {
                 checkResult = checkAssignExpr(binOpNode);
             }
@@ -653,18 +760,25 @@ SemanticAnalysisResult SemanticAnalyzer::checkStatement(ASTNode* node) {
 
         if (numberValue == nullptr) {
             checkResult = newError(SemanticAnalysisResult::INVALID_AST, "Invalid Number Const Node");
+        } else if (!operationCheck) {
+            checkResult = newError(SemanticAnalysisResult::INVALID_OPERATION, "Const number evaluated but not used");
         }
     } else if (node->type == NodeType::ConstBool) {
         ConstBoolNode* boolValue = dynamic_cast<ConstBoolNode*>(node);
 
         if (boolValue == nullptr) {
             checkResult = newError(SemanticAnalysisResult::INVALID_AST, "Invalid Bool Const Node");
+        } else if (!operationCheck) {
+            checkResult = newError(SemanticAnalysisResult::INVALID_OPERATION, "Const bool evaluated but not used");
         }
     } else if (node->type == NodeType::Id) {
         IdentifierNode* id = dynamic_cast<IdentifierNode*>(node);
 
         if (id != nullptr) {
             checkResult = checkId(id);
+            if (!checkResult.isError() && !operationCheck) {
+                checkResult = newError(SemanticAnalysisResult::INVALID_OPERATION, "Identifier evaluated but not used");
+            }
         } else {
             checkResult = newError(SemanticAnalysisResult::INVALID_AST, "Invalid Identifier Node");
         }
@@ -681,6 +795,10 @@ SemanticAnalysisResult SemanticAnalyzer::checkStatement(ASTNode* node) {
 
         if (funcCall != nullptr) {
             checkResult = checkFuncCall(funcCall);
+            if (!checkResult.isError() && !operationCheck && !isFuncReserved(funcCall->name)) {
+                checkResult = newError(SemanticAnalysisResult::INVALID_OPERATION,
+                                       "Function call evaluated but not used");
+            }
         } else {
             checkResult = newError(SemanticAnalysisResult::INVALID_AST, "Invalid Function Call Node");
         }
@@ -732,4 +850,8 @@ SemanticAnalysisResult SemanticAnalyzer::checkProgram(ProgramTranslationNode* ro
     }
 
     return SemanticAnalysisResult();
+}
+
+bool SemanticAnalyzer::isFuncReserved(const std::string& funcName) {
+    return funcName == "print";
 }
