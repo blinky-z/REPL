@@ -748,3 +748,26 @@ TEST_CASE("Tokenize simple for statement", "[Lexer]") {
 
     matchTokens(tokens, properTokens);
 }
+
+TEST_CASE("Tokenize passing value along with unary minus after comma", "[Lexer]") {
+    std::string expr = "print(min(10, -10))";
+    expr.push_back(EOF);
+
+    const TokenContainer& data = LexerTestsLexer.tokenize(expr);
+    const std::vector<Token>& tokens = data.getTokens();
+
+    std::vector<Token> properTokens;
+    properTokens.emplace_back(Token{TokenType::FuncCall, "print"});
+    properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_START, "("});
+    properTokens.emplace_back(Token{TokenType::FuncCall, "min"});
+    properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_START, "("});
+    properTokens.emplace_back(Token{TokenType::Number, "10"});
+    properTokens.emplace_back(Token{TokenType::Comma, ","});
+    properTokens.emplace_back(Token{TokenType::UnaryMinus, "u-"});
+    properTokens.emplace_back(Token{TokenType::Number, "10"});
+    properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_END, ")"});
+    properTokens.emplace_back(Token{TokenType::ROUND_BRACKET_END, ")"});
+    properTokens.emplace_back(Token{TokenType::eof, "EOF"});
+
+    matchTokens(tokens, properTokens);
+}

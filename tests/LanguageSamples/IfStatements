@@ -12,10 +12,8 @@ if (true) {
     if (4 * 5 == 20) {
         var b = 60
         var a = a + 70
-        a
     }
     if (false) {}
-    a
 }
 
 func bool isPositive(var int a) {
@@ -46,14 +44,12 @@ func void D(var int a, var int b, var int c) {
     }
 }
 
-D(a, b, c)
-
 ----
 
 
 if ((1)); then {
-    a_441fafa531ac4d1390356441f73bdbca=$((1 || 0))
-    if (($a_441fafa531ac4d1390356441f73bdbca)); then {
+    a_7d3fd6e063904df1a8e745594b44a418=$((1 || 0))
+    if (($a_7d3fd6e063904df1a8e745594b44a418)); then {
         b=10
     }
     fi
@@ -61,18 +57,16 @@ if ((1)); then {
 fi
 b=25
 if ((1)); then {
-    a_9691d7ebfead41a6a1fd672dc1d5530b=50
+    a_96b49f7d193849f8bcca656b88ab61a8=50
     if ((4 * 5 == 20)); then {
-        b_96a38a7a552045d98423c50ab7063882=60
-        a_3a6fb4e1478c49d184736fe0e5a8b80a=$(($a_9691d7ebfead41a6a1fd672dc1d5530b + 70))
-        echo $a_3a6fb4e1478c49d184736fe0e5a8b80a
+        b_353e95785ad84fa08275a6a66e2b4fcc=60
+        a_c577fce23b0f4c8e85f7868b60f68002=$(($a_96b49f7d193849f8bcca656b88ab61a8 + 70))
     }
     fi
     if ((0)); then {
         :
     }
     fi
-    echo $a_9691d7ebfead41a6a1fd672dc1d5530b
 }
 fi
 function isPositive {
@@ -108,4 +102,3 @@ function D {
     }
     fi
 }
-D $a $b $c | tail -n1

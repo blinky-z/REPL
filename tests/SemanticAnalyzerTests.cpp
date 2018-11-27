@@ -14,7 +14,9 @@ private:
 
     static Parser parser;
 
-    SemanticAnalyzer semanticAnalyzer;
+    SemanticAnalyzer semanticAnalyzer = SemanticAnalyzer(0);
+
+    std::vector<ProgramTranslationNode*> nodes;
 public:
     SemanticAnalysisResult handleExpression(const std::string src) {
         std::string expr = src;
@@ -27,9 +29,15 @@ public:
 
         const SemanticAnalysisResult& analysisResult = semanticAnalyzer.checkProgram(root);
 
-        delete root;
+        nodes.emplace_back(root);
 
         return analysisResult;
+    }
+
+    ~ExpressionHandler() {
+        for (const auto& currentStmt : nodes) {
+            delete currentStmt;
+        }
     }
 };
 
@@ -39,7 +47,7 @@ Parser ExpressionHandler::parser = Parser();
 TEST_CASE("Addition Expression Evaluation", "[SemanticAnalyzer]") {
     ExpressionHandler expressionHandler;
 
-    std::string expr = "200 + 2 + 4 + 5";
+    std::string expr = "var a = 200 + 2 + 4 + 5";
 
     const SemanticAnalysisResult& result = expressionHandler.handleExpression(expr);
     REQUIRE(!result.isError());
@@ -535,60 +543,6 @@ TEST_CASE("Declare if statement", "[SemanticAnalyzer]") {
     REQUIRE(!result.isError());
 }
 
-TEST_CASE("Declare if-else functions call statement (condition is true)", "[SemanticAnalyzer]") {
-    ExpressionHandler expressionHandler;
-
-    // TODO: обновление спеки языка: в функциях использовать можно только те переменные, которые были объявлены заранее
-
-    std::string expr1 = "func int add() {"
-                        "return a + b\n"
-                        "}";
-    std::string expr2 = "func int mul() {"
-                        "return a * b\n"
-                        "}";
-    std::string expr3 = "var a = 5";
-    std::string expr4 = "var b = 10";
-    std::string expr5 = "if (1 == 1) {"
-                        "add()\n"
-                        "} else {"
-                        "mul()\n"
-                        "}";
-
-    expressionHandler.handleExpression(expr1);
-    expressionHandler.handleExpression(expr2);
-    expressionHandler.handleExpression(expr3);
-    expressionHandler.handleExpression(expr4);
-
-    const SemanticAnalysisResult& result = expressionHandler.handleExpression(expr5);
-    REQUIRE(!result.isError());
-}
-
-TEST_CASE("Evaluate if-else functions call statement", "[SemanticAnalyzer]") {
-    ExpressionHandler expressionHandler;
-
-    std::string expr1 = "func int add() {"
-                        "return a + b\n"
-                        "}";
-    std::string expr2 = "func int mul() {"
-                        "return a * b\n"
-                        "}";
-    std::string expr3 = "var a = 5";
-    std::string expr4 = "var b = 10";
-    std::string expr5 = "if (true && false) {"
-                        "add()\n"
-                        "} else {"
-                        "mul()\n"
-                        "}";
-
-    expressionHandler.handleExpression(expr1);
-    expressionHandler.handleExpression(expr2);
-    expressionHandler.handleExpression(expr3);
-    expressionHandler.handleExpression(expr4);
-
-    const SemanticAnalysisResult& result = expressionHandler.handleExpression(expr5);
-    REQUIRE(!result.isError());
-}
-
 TEST_CASE("Can use local variables but not outer scope variables with the same name, outer scope is global",
           "[SemanticAnalyzer]") {
     ExpressionHandler expressionHandler;
@@ -881,10 +835,10 @@ TEST_CASE("Use variable declared in global scope in function", "[SemanticAnalyze
 TEST_CASE("Pass incompatible param type to function", "[SemanticAnalyzer]") {
     ExpressionHandler expressionHandler;
 
-    std::string expr1 = "func int print(var int a) {"
+    std::string expr1 = "func int getInt(var int a) {"
                         "return a\n"
                         "}";
-    std::string expr2 = "print(true)";
+    std::string expr2 = "getInt(true)";
 
     expressionHandler.handleExpression(expr1);
 
@@ -896,10 +850,10 @@ TEST_CASE("Pass incompatible param type to function", "[SemanticAnalyzer]") {
 TEST_CASE("Pass rvalue to function [0]. Pass number expr", "[SemanticAnalyzer]") {
     ExpressionHandler expressionHandler;
 
-    std::string expr1 = "func int print(var int a) {"
+    std::string expr1 = "func int getInt(var int a) {"
                         "return a\n"
                         "}";
-    std::string expr2 = "print(5 * 100)";
+    std::string expr2 = "getInt(5 * 100)";
 
     expressionHandler.handleExpression(expr1);
 
@@ -910,10 +864,10 @@ TEST_CASE("Pass rvalue to function [0]. Pass number expr", "[SemanticAnalyzer]")
 TEST_CASE("Pass rvalue to function [1]. Pass bool expr", "[SemanticAnalyzer]") {
     ExpressionHandler expressionHandler;
 
-    std::string expr1 = "func bool print(var bool a) {"
+    std::string expr1 = "func bool getInt(var bool a) {"
                         "return a\n"
                         "}";
-    std::string expr2 = "print(true || false)";
+    std::string expr2 = "getInt(true || false)";
 
     expressionHandler.handleExpression(expr1);
 
@@ -954,9 +908,9 @@ TEST_CASE("Assert that function declaration allowed only in global scope [1]. De
     ExpressionHandler expressionHandler;
 
     std::string expr = "func void add() {"
-                        "func void mul() {"
-                        "}\n"
-                        "}";
+                       "func void mul() {"
+                       "}\n"
+                       "}";
 
     const SemanticAnalysisResult& result = expressionHandler.handleExpression(expr);
     REQUIRE(result.errorCode == SemanticAnalysisResult::FUNC_DEFINITION_IS_NOT_ALLOWED);
@@ -965,12 +919,12 @@ TEST_CASE("Assert that function declaration allowed only in global scope [1]. De
 TEST_CASE("Call function in if statement", "[SemanticAnalyzer]") {
     ExpressionHandler expressionHandler;
 
-    std::string expr1 = "func int print(var int a) {"
+    std::string expr1 = "func int getInt(var int a) {"
                         "return a\n"
                         "}";
     std::string expr2 = "if (true) {"
                         "var a = 50\n"
-                        "print(a)\n"
+                        "getInt(a)\n"
                         "}";
 
     expressionHandler.handleExpression(expr1);
@@ -982,11 +936,11 @@ TEST_CASE("Call function in if statement", "[SemanticAnalyzer]") {
 TEST_CASE("Call function in for statement", "[SemanticAnalyzer]") {
     ExpressionHandler expressionHandler;
 
-    std::string expr1 = "func int print(var int a) {"
+    std::string expr1 = "func int getInt(var int a) {"
                         "return a\n"
                         "}";
     std::string expr2 = "for (var i = 0; i < 10; i = i + 1) {"
-                        "print(i)\n"
+                        "getInt(i)\n"
                         "}";
 
     expressionHandler.handleExpression(expr1);
@@ -1126,4 +1080,55 @@ TEST_CASE("Assert functions can return function calls", "[SemanticAnalyzer]") {
 
     const SemanticAnalysisResult& result = expressionHandler.handleExpression(expr2);
     REQUIRE(!result.isError());
+}
+
+TEST_CASE("Assert print function can take number expr", "[SemanticAnalyzer]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "var a = 5";
+    std::string expr2 = "func int getInt() { return 500 }";
+    std::string expr3 = "print(500 * a + getInt())";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+
+    const SemanticAnalysisResult& result = expressionHandler.handleExpression(expr3);
+    REQUIRE(!result.isError());
+}
+
+TEST_CASE("Assert print function can take bool expr", "[SemanticAnalyzer]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "var a = true";
+    std::string expr2 = "func bool getBool() { return false }";
+    std::string expr3 = "print(a || getBool())";
+
+    expressionHandler.handleExpression(expr1);
+    expressionHandler.handleExpression(expr2);
+
+    const SemanticAnalysisResult& result = expressionHandler.handleExpression(expr3);
+    REQUIRE(!result.isError());
+}
+
+TEST_CASE("Assert print function can not take void function call", "[SemanticAnalyzer]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr1 = "func void getVoid() {return}";
+    std::string expr2 = "print(getVoid())";
+
+    expressionHandler.handleExpression(expr1);
+
+    const SemanticAnalysisResult& result = expressionHandler.handleExpression(expr2);
+    REQUIRE(result.isError());
+    REQUIRE(result.errorCode == SemanticAnalysisResult::INVALID_VALUE_TYPE);
+}
+
+TEST_CASE("Assert print function can not take as parameter itself", "[SemanticAnalyzer]") {
+    ExpressionHandler expressionHandler;
+
+    std::string expr = "print(print(5))";
+
+    const SemanticAnalysisResult& result = expressionHandler.handleExpression(expr);
+    REQUIRE(result.isError());
+    REQUIRE(result.errorCode == SemanticAnalysisResult::INVALID_VALUE_TYPE);
 }

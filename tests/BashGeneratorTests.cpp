@@ -77,7 +77,7 @@ private:
 
     static Parser parser;
 
-    SemanticAnalyzer semanticAnalyzer;
+    SemanticAnalyzer semanticAnalyzer = SemanticAnalyzer(1);
 
     static BashGenerator bashGenerator;
 public:
@@ -88,6 +88,10 @@ public:
 
         const TokenContainer& tokens = lexer.tokenize(input);
         ProgramTranslationNode* root = parser.parse(tokens);
+        SemanticAnalysisResult checkResult = semanticAnalyzer.checkProgram(root);
+        if (checkResult.isError()) {
+            throw std::runtime_error(checkResult.what());
+        }
         const std::string& bashCode = bashGenerator.generate(root);
 
         delete root;

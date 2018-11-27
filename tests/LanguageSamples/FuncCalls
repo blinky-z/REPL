@@ -10,13 +10,26 @@ func bool isPositive(var int a) {
 
 func void D() {}
 
-add(5, 6)
-var a = add(mul(mul(10, 8), mul(20, 4)), 10)
-var b = mul(10, 8) - add(1, 12)
-add(a, b) + mul(a, b) + add(a, b)
-var c = mul(5, 10) > add(5, 10)
-add(1, 0) == mul(1, 1)
-isPositive(-5)
+func void F() {
+    return
+}
+
+var a = add(5, 6)
+var b = add(mul(mul(10, 8), mul(20, 4)), 10)
+var c = mul(10, 8) - add(1, 12)
+var d = add(a, b) + mul(a, b) + add(a, b)
+var e = mul(5, 10) > add(5, 10)
+var f = add(1, 0) == mul(1, 1)
+var g = isPositive(-5)
+
+func int getInt() {
+    return 500
+}
+
+var k = getInt()
+print(a)
+
+print(getInt())
 
 ----
 
@@ -37,10 +50,22 @@ function isPositive {
 function D {
     :
 }
-add 5 6 | tail -n1
-a=$(add $(mul $(mul 10 8 | tail -n1) $(mul 20 4 | tail -n1) | tail -n1) 10 | tail -n1)
-b=$(($(mul 10 8 | tail -n1) - $(add 1 12 | tail -n1)))
-echo $(($(add $a $b | tail -n1) + $(mul $a $b | tail -n1) + $(add $a $b | tail -n1)))
-c=$(($(mul 5 10 | tail -n1) > $(add 5 10 | tail -n1)))
-echo $(($(add 1 0 | tail -n1) == $(mul 1 1 | tail -n1)))
-isPositive $((0 - 5)) | tail -n1
+
+function F {
+    return
+}
+
+a=$(add 5 6 | tail -n1)
+b=$(add $(mul $(mul 10 8 | tail -n1) $(mul 20 4 | tail -n1) | tail -n1) 10 | tail -n1)
+c=$(($(mul 10 8 | tail -n1) - $(add 1 12 | tail -n1)))
+d=$(($(add $a $b | tail -n1) + $(mul $a $b | tail -n1) + $(add $a $b | tail -n1)))
+e=$(($(mul 5 10 | tail -n1) > $(add 5 10 | tail -n1)))
+f=$(($(add 1 0 | tail -n1) == $(mul 1 1 | tail -n1)))
+g=$(isPositive $((0 - 5)) | tail -n1)
+
+function getInt {
+    echo 500; return
+}
+k=$(getInt | tail -n1)
+echo $a
+echo $(getInt | tail -n1)
