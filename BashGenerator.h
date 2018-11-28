@@ -6,7 +6,6 @@
 #include <map>
 #include <cmath>
 #include <algorithm>
-
 #include "sole/sole.hpp"
 
 class BashGenerator {
