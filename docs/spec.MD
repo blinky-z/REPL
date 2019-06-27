@@ -247,13 +247,13 @@ func <func_type> <function_name>(<params>) {
 ### 6.4.1 Параметрами функций могут являться только переменные:
 
 ```
-func add(var int a, var int b) {}
+func int add(var int a, var int b) {}
 ```
 ```
-func add(5, 6) {} <- Ошибка!
+func int add(5, 6) {} <- Ошибка!
 ```
 ```
-func add(mul(), var b) {} <- Ошибка!
+func int add(mul(), var b) {} <- Ошибка!
 ```
 
 ### 6.4.2 Аргументы в функции передаются по значению
@@ -262,18 +262,20 @@ func add(mul(), var b) {} <- Ошибка!
 
 ```
 func add(var int a, var int b) {
-    return a + b;
+    return a + b
 }
 ```
 
 **Недопустимо:**
 ```
 func add(var a, var b) {
-    return a + b;
+    return a + b
 }
 ```
 
-### 6.4.4 Тип переменной параметра задается при объявлении переменной, а не при первой инициализацииь
+### 6.4.4 Допустимые типы:
+* int
+* bool
 
 ### 6.5 Return инструкция
 

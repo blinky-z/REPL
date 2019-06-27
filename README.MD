@@ -16,21 +16,11 @@ git clone https://github.com/blinky-z/REPL.git .
 
 ## Быстрый старт
 
-Объявление переменной:
-```
-var a;
-```
-
-Назначение переменной:
+Объявление и назначение переменной:
 ```
 var a
-a = 5
-```
-
-Объявление и назначение переменной в одном выражении:
-```
-var a = 2.2;
-var b = a;
+var b = 6
+a = 4
 ```
 
 Вычисление математических выражений:
@@ -39,6 +29,55 @@ var b = a;
 (1 + 2) * -7.5
 var a = 6 / 3
 a + 3
+```
+
+Булевы выражения:
+```
+var a = 5 < 10
+a == true
+var b = (10 == 10) && true
+```
+
+Функции:
+```
+func int add(var int a, var int b) {
+    return a + b
+}
+
+var a = add(5, 6)
+a // 11
+```
+
+```
+func bool isGreater(var int l, var int r) {
+    return l > r
+}
+
+isGreater(5, 0) // true
+```
+
+```
+func bool boolOr(var bool a, var bool b) {
+    return a || b
+}
+
+boolAnd(true, false) // true
+```
+
+Параметры передаются в функции по значению:
+```
+func void assign(var int a, var int newVal) {
+    a = newVal
+}
+
+var a = 8
+assign(a, 5)
+a // 8
+```
+
+Built-in функции:
+```
+print(5) // 5
 ```
 
 ### Подробное описание работы REPL'а
