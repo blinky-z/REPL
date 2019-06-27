@@ -66,13 +66,24 @@ boolOr(true, false) // true
 
 Параметры передаются в функции по значению:
 ```
-func void assign(var int a, var int newVal) {
+func void assignLocal(var int a, var int newVal) {
     a = newVal
 }
 
 var a = 8
 assign(a, 5)
 a // 8
+```
+
+Видимость функций - глобальная, поэтому они имеют доступ к переменным вне параметров (если вы компилируете программу, сначала требуется объявить переменную):
+```
+func void assignGlobalA() {
+    a = 5
+}
+
+var a
+assignGlobalA()
+print(a) // 5
 ```
 
 Built-in функции:

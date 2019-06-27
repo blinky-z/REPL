@@ -298,8 +298,6 @@ if (c) {
 func int getInt(var int a, var int b, var bool c) {
 if (c) {
     return a
-} else {
-    ...
 }
 ```
 
