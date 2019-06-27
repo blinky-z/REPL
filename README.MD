@@ -61,7 +61,7 @@ func bool boolOr(var bool a, var bool b) {
     return a || b
 }
 
-boolAnd(true, false) // true
+boolOr(true, false) // true
 ```
 
 Параметры передаются в функции по значению:
